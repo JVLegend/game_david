@@ -9,6 +9,13 @@ final class GameManager {
 
     private init() {}
 
+    // MARK: - Safe mutation helper
+    private func mutate(_ block: (inout PlayerData) -> Void) {
+        guard var p = playerData else { return }
+        block(&p)
+        playerData = p
+    }
+
     // MARK: - Computed Stats
     func computedStats() -> CharacterStats {
         guard let player = playerData else { return CharacterStats.baseStats(level: 1) }
@@ -47,57 +54,63 @@ final class GameManager {
 
     // MARK: - Gold / Ruby
     func addGold(_ amount: Int) {
-        playerData?.gold += amount
-        playerData?.totalGoldEarned += amount
+        mutate { p in
+            p.gold += amount
+            p.totalGoldEarned += amount
+        }
         save()
     }
 
     func spendGold(_ amount: Int) -> Bool {
         guard let player = playerData, player.gold >= amount else { return false }
-        playerData?.gold -= amount
+        mutate { p in p.gold -= amount }
         save()
         return true
     }
 
     func addRubies(_ amount: Int) {
-        playerData?.rubies += amount
+        mutate { p in p.rubies += amount }
         save()
     }
 
     // MARK: - Equipment
+    @discardableResult
     func equipItem(_ itemId: String) -> String? {
         guard let item = EquipmentDatabase.shared.item(withId: itemId) else { return nil }
+        guard playerData != nil else { return nil }
 
         let slot = item.slot
-        let previousItemId = playerData?.equippedItems[slot]
+        let previousItemId = playerData!.equippedItems[slot]
 
-        // If two-hand weapon, also clear offHand
-        if slot == .twoHand {
-            if let offHandId = playerData?.equippedItems[.offHand] {
-                playerData?.equippedItems.removeValue(forKey: .offHand)
-                playerData?.inventory.append(offHandId)
+        mutate { p in
+            // If two-hand weapon, also clear offHand and mainHand
+            if slot == .twoHand {
+                if let offHandId = p.equippedItems[.offHand] {
+                    p.equippedItems.removeValue(forKey: .offHand)
+                    p.inventory.append(offHandId)
+                }
+                if let mainHandId = p.equippedItems[.mainHand] {
+                    p.equippedItems.removeValue(forKey: .mainHand)
+                    p.inventory.append(mainHandId)
+                }
             }
-            if let mainHandId = playerData?.equippedItems[.mainHand] {
-                playerData?.equippedItems.removeValue(forKey: .mainHand)
-                playerData?.inventory.append(mainHandId)
+            // If equipping mainHand or offHand, clear twoHand
+            if (slot == .mainHand || slot == .offHand),
+               let twoHandId = p.equippedItems[.twoHand] {
+                p.equippedItems.removeValue(forKey: .twoHand)
+                p.inventory.append(twoHandId)
+            }
+
+            p.equippedItems[slot] = itemId
+            if let idx = p.inventory.firstIndex(of: itemId) {
+                p.inventory.remove(at: idx)
+            }
+            if let prevId = previousItemId {
+                p.inventory.append(prevId)
             }
         }
 
-        // If equipping mainHand or offHand, clear twoHand
-        if (slot == .mainHand || slot == .offHand),
-           let twoHandId = playerData?.equippedItems[.twoHand] {
-            playerData?.equippedItems.removeValue(forKey: .twoHand)
-            playerData?.inventory.append(twoHandId)
-        }
-
-        playerData?.equippedItems[slot] = itemId
-        playerData?.inventory.removeAll { $0 == itemId }
-
-        if let prevId = previousItemId {
-            playerData?.inventory.append(prevId)
-        }
-
-        playerData?.powerScore = powerScore
+        mutate { p in p.powerScore = self.powerScore }
         save()
         return previousItemId
     }
@@ -109,10 +122,14 @@ final class GameManager {
               count > 0,
               let food = FoodDatabase.shared.food(for: foodType) else { return nil }
 
-        let currentCount = playerData?.foodInventory[foodType] ?? 1
-        playerData?.foodInventory[foodType] = currentCount - 1
-        if playerData?.foodInventory[foodType] == 0 {
-            playerData?.foodInventory.removeValue(forKey: foodType)
+        mutate { p in
+            let current = p.foodInventory[foodType] ?? 1
+            let newCount = current - 1
+            if newCount <= 0 {
+                p.foodInventory.removeValue(forKey: foodType)
+            } else {
+                p.foodInventory[foodType] = newCount
+            }
         }
         return food
     }
@@ -120,7 +137,10 @@ final class GameManager {
     func buyFood(_ foodType: FoodType) -> Bool {
         guard let food = FoodDatabase.shared.food(for: foodType) else { return false }
         guard spendGold(food.price) else { return false }
-        playerData?.foodInventory[foodType, default: 0] += 1
+        mutate { p in
+            let current = p.foodInventory[foodType] ?? 0
+            p.foodInventory[foodType] = current + 1
+        }
         save()
         return true
     }
@@ -132,7 +152,7 @@ final class GameManager {
         guard player.highestMapCompleted >= character.requiredMap else { return false }
         guard spendGold(character.price) else { return false }
 
-        playerData?.unlockedCharacters.append(character)
+        mutate { p in p.unlockedCharacters.append(character) }
         save()
         return true
     }
@@ -140,38 +160,38 @@ final class GameManager {
     func selectCharacter(_ character: PlayableCharacter) -> Bool {
         guard let player = playerData,
               player.unlockedCharacters.contains(character) else { return false }
-        playerData?.activeCharacter = character
+        mutate { p in p.activeCharacter = character }
         save()
         return true
     }
 
     // MARK: - Battle Results
     func completeBattle(mapId: Int, battleId: Int, stars: Int, goldEarned: Int, xpEarned: Int, enemiesKilled: Int) {
-        playerData?.setStars(mapId: mapId, battleId: battleId, stars: stars)
-        addGold(goldEarned)
-        playerData?.totalEnemiesKilled += enemiesKilled
-
-        if let leveledUp = playerData?.addExperience(xpEarned), leveledUp {
-            // Could notify UI of level up
+        mutate { p in
+            p.setStars(mapId: mapId, battleId: battleId, stars: stars)
+            p.totalEnemiesKilled += enemiesKilled
+            _ = p.addExperience(xpEarned)
         }
+        addGold(goldEarned)
 
         // Check if map is completed (all 4 battles done)
         if let map = EnemyDatabase.shared.map(withId: mapId) {
             let allCompleted = map.battles.allSatisfy { battle in
                 (playerData?.starsForBattle(mapId: mapId, battleId: battle.battleId) ?? 0) > 0
             }
-            if allCompleted && mapId > (playerData?.highestMapCompleted ?? 0) {
-                playerData?.highestMapCompleted = mapId
+            if allCompleted, let current = playerData?.highestMapCompleted, mapId > current {
+                mutate { p in p.highestMapCompleted = mapId }
             }
         }
 
-        playerData?.powerScore = powerScore
+        let ps = powerScore
+        mutate { p in p.powerScore = ps }
         save()
     }
 
     // MARK: - Save
     func save() {
-        playerData?.lastSaved = Date()
+        mutate { p in p.lastSaved = Date() }
         guard let data = playerData else { return }
 
         // Save locally
@@ -192,10 +212,18 @@ final class GameManager {
         if let existing = loadLocal(userId: userId) {
             playerData = existing
         } else {
-            playerData = PlayerData.newPlayer(userId: userId, displayName: displayName, language: language)
-            // Give starter weapon
-            playerData?.inventory.append("weapon_01")
-            _ = equipItem("weapon_01")
+            var newPlayer = PlayerData.newPlayer(userId: userId, displayName: displayName, language: language)
+            newPlayer.inventory.append("weapon_01")
+            // Equip starter weapon directly on the local copy
+            if let item = EquipmentDatabase.shared.item(withId: "weapon_01") {
+                newPlayer.equippedItems[item.slot] = "weapon_01"
+                if let idx = newPlayer.inventory.firstIndex(of: "weapon_01") {
+                    newPlayer.inventory.remove(at: idx)
+                }
+            }
+            playerData = newPlayer
+            let ps = powerScore
+            mutate { p in p.powerScore = ps }
         }
         save()
     }

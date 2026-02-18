@@ -37,8 +37,16 @@ class GameViewController: UIViewController {
         print("[APP] Scene presented")
     }
 
+    override var shouldAutorotate: Bool {
+        return true
+    }
+
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         return .landscape
+    }
+
+    override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
+        return .landscapeRight
     }
 
     override var prefersStatusBarHidden: Bool {

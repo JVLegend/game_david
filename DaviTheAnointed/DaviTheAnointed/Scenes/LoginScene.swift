@@ -89,28 +89,19 @@ class LoginScene: SKScene {
     }
 
     private func loginWithDevMode() {
-        print("[DEV] loginWithDevMode started")
         let language = LocalizationManager.shared.language
-        print("[DEV] language: \(language)")
-        do {
-            GameManager.shared.initializePlayer(
-                userId: "dev_player_001",
-                displayName: "Dev Player",
-                language: language
-            )
-            print("[DEV] initializePlayer OK, playerData: \(String(describing: GameManager.shared.playerData))")
-        }
-        print("[DEV] transitioning to main menu")
+        GameManager.shared.initializePlayer(
+            userId: "dev_player_001",
+            displayName: "Dev Player",
+            language: language
+        )
         transitionToMainMenu()
     }
 
     private func transitionToMainMenu() {
-        print("[DEV] creating MainMenuScene size=\(self.size)")
         let menuScene = MainMenuScene(size: self.size)
         menuScene.scaleMode = .aspectFill
-        print("[DEV] presenting scene")
         let transition = SKTransition.fade(withDuration: 0.5)
         self.view?.presentScene(menuScene, transition: transition)
-        print("[DEV] presentScene called")
     }
 }

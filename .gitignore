@@ -1,0 +1,41 @@
+# macOS
+.DS_Store
+*.swp
+*~
+
+# Xcode
+DaviTheAnointed/*.xcuserdata/
+DaviTheAnointed/**/*.xcuserdata/
+*.xcuserdata/
+DerivedData/
+build/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+xcuserdata/
+
+# Firebase
+GoogleService-Info.plist
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Generated
+*.o
+*.d
+
+# Sprites (large files tracked separately)
+# sprites/ - keep tracked for now

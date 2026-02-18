@@ -5,6 +5,14 @@ class BattleScene: SKScene {
     var mapId: Int = 1
     var battleId: Int = 1
 
+    // World width (wider than screen for scrolling)
+    private let worldWidth: CGFloat = 1792  // 2x tela landscape
+
+    // Camera
+    private var gameCamera: SKCameraNode!
+    // HUD layer (fixo na câmera)
+    private var hudLayer: SKNode!
+
     // State
     private var battleState: BattleState = .idle
     private var currentEnemyIndex = 0
@@ -45,9 +53,33 @@ class BattleScene: SKScene {
 
     override func didMove(to view: SKView) {
         backgroundColor = SKColor(red: 0.3, green: 0.5, blue: 0.35, alpha: 1)
+        setupCamera()
         setupBattle()
         setupHUD()
         startBattle()
+    }
+
+    // MARK: - Camera
+    private func setupCamera() {
+        gameCamera = SKCameraNode()
+        gameCamera.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        addChild(gameCamera)
+        camera = gameCamera
+
+        // HUD layer é filho da câmera — fica fixo na tela
+        hudLayer = SKNode()
+        hudLayer.zPosition = 20
+        gameCamera.addChild(hudLayer)
+    }
+
+    private func updateCamera() {
+        guard let player = playerNode else { return }
+        let halfW = size.width / 2
+        let targetX = max(halfW, min(worldWidth - halfW, player.position.x))
+        // Suaviza o movimento da câmera
+        let lerpFactor: CGFloat = 0.08
+        let newX = gameCamera.position.x + (targetX - gameCamera.position.x) * lerpFactor
+        gameCamera.position = CGPoint(x: newX, y: size.height / 2)
     }
 
     // MARK: - Setup
@@ -78,26 +110,30 @@ class BattleScene: SKScene {
     }
 
     private func setupHUD() {
-        // Background placeholder
-        let bgNode = SKSpriteNode(color: SKColor(red: 0.25, green: 0.45, blue: 0.3, alpha: 1), size: self.size)
-        bgNode.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        // === MUNDO (rola com câmera) ===
+
+        // Background do mundo — mais largo que a tela
+        let bgNode = SKSpriteNode(color: SKColor(red: 0.25, green: 0.45, blue: 0.3, alpha: 1),
+                                   size: CGSize(width: worldWidth, height: size.height))
+        bgNode.position = CGPoint(x: worldWidth / 2, y: size.height / 2)
         bgNode.zPosition = -10
         addChild(bgNode)
 
-        // Ground
-        let ground = SKShapeNode(rectOf: CGSize(width: size.width, height: size.height * 0.25))
+        // Chão que se estende pelo mundo inteiro
+        let ground = SKShapeNode(rectOf: CGSize(width: worldWidth, height: size.height * 0.28))
         ground.fillColor = SKColor(red: 0.35, green: 0.25, blue: 0.15, alpha: 1)
-        ground.position = CGPoint(x: size.width / 2, y: size.height * 0.125)
+        ground.strokeColor = .clear
+        ground.position = CGPoint(x: worldWidth / 2, y: size.height * 0.14)
         ground.zPosition = -5
         addChild(ground)
 
-        // Player
-        playerNode = SKSpriteNode(color: SKColor(red: 0.3, green: 0.5, blue: 0.8, alpha: 1), size: CGSize(width: 40, height: 70))
-        playerNode.position = CGPoint(x: 100, y: size.height * 0.3)
+        // Player — começa no início do mundo
+        playerNode = SKSpriteNode(color: SKColor(red: 0.3, green: 0.5, blue: 0.8, alpha: 1),
+                                   size: CGSize(width: 40, height: 70))
+        playerNode.position = CGPoint(x: 100, y: size.height * 0.33)
         playerNode.zPosition = 5
         addChild(playerNode)
 
-        // Player label
         let playerLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
         playerLabel.text = GameManager.shared.playerData?.activeCharacter == .davi ?
             loc.localize("character.davi") : loc.localize("character.bigJ")
@@ -106,47 +142,20 @@ class BattleScene: SKScene {
         playerLabel.position = CGPoint(x: 0, y: 42)
         playerNode.addChild(playerLabel)
 
-        // Enemy (hidden until spawned)
+        // Enemy — está mais à frente no mundo
         enemyNode = SKSpriteNode(color: .red, size: CGSize(width: 40, height: 70))
-        enemyNode.position = CGPoint(x: size.width - 150, y: size.height * 0.3)
+        enemyNode.position = CGPoint(x: worldWidth * 0.6, y: size.height * 0.33)
         enemyNode.zPosition = 5
         enemyNode.isHidden = true
         addChild(enemyNode)
 
-        // Enemy name
         enemyNameLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
         enemyNameLabel.fontSize = 12
         enemyNameLabel.fontColor = .white
         enemyNameLabel.position = CGPoint(x: 0, y: 50)
         enemyNode.addChild(enemyNameLabel)
 
-        // Player HP Bar
-        let hpBarWidth: CGFloat = 200
-        let hpBarHeight: CGFloat = 12
-
-        playerHPBar = SKShapeNode(rectOf: CGSize(width: hpBarWidth, height: hpBarHeight), cornerRadius: 3)
-        playerHPBar.fillColor = SKColor(white: 0.2, alpha: 0.8)
-        playerHPBar.strokeColor = SKColor(white: 0.5, alpha: 1)
-        playerHPBar.position = CGPoint(x: size.width / 2, y: size.height * 0.12)
-        playerHPBar.zPosition = 20
-        addChild(playerHPBar)
-
-        playerHPFill = SKShapeNode(rectOf: CGSize(width: hpBarWidth - 4, height: hpBarHeight - 4), cornerRadius: 2)
-        playerHPFill.fillColor = SKColor(red: 0.2, green: 0.8, blue: 0.2, alpha: 1)
-        playerHPFill.strokeColor = .clear
-        playerHPFill.zPosition = 21
-        playerHPBar.addChild(playerHPFill)
-
-        // HP text
-        let hpText = SKLabelNode(fontNamed: "AvenirNext-Bold")
-        hpText.name = "hp_text"
-        hpText.fontSize = 9
-        hpText.fontColor = .white
-        hpText.verticalAlignmentMode = .center
-        hpText.zPosition = 22
-        playerHPBar.addChild(hpText)
-
-        // Enemy HP Bar
+        // HP bar do inimigo — fica no mundo, sobre o inimigo
         enemyHPBar = SKShapeNode(rectOf: CGSize(width: 80, height: 8), cornerRadius: 2)
         enemyHPBar.fillColor = SKColor(white: 0.2, alpha: 0.8)
         enemyHPBar.strokeColor = SKColor(white: 0.5, alpha: 1)
@@ -160,30 +169,56 @@ class BattleScene: SKScene {
         enemyHPFill.zPosition = 21
         enemyHPBar.addChild(enemyHPFill)
 
-        // Gold counter (top left)
+        // === HUD FIXO (filho da câmera, não rola) ===
+
+        // Player HP Bar — centralizado na parte inferior do HUD
+        let hpBarWidth: CGFloat = 200
+        let hpBarHeight: CGFloat = 12
+
+        playerHPBar = SKShapeNode(rectOf: CGSize(width: hpBarWidth, height: hpBarHeight), cornerRadius: 3)
+        playerHPBar.fillColor = SKColor(white: 0.2, alpha: 0.8)
+        playerHPBar.strokeColor = SKColor(white: 0.5, alpha: 1)
+        // posição relativa à câmera (centro = 0,0), então y negativo = parte de baixo
+        playerHPBar.position = CGPoint(x: 0, y: -(size.height / 2) + size.height * 0.12)
+        playerHPBar.zPosition = 20
+        hudLayer.addChild(playerHPBar)
+
+        playerHPFill = SKShapeNode(rectOf: CGSize(width: hpBarWidth - 4, height: hpBarHeight - 4), cornerRadius: 2)
+        playerHPFill.fillColor = SKColor(red: 0.2, green: 0.8, blue: 0.2, alpha: 1)
+        playerHPFill.strokeColor = .clear
+        playerHPFill.zPosition = 21
+        playerHPBar.addChild(playerHPFill)
+
+        let hpText = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        hpText.name = "hp_text"
+        hpText.fontSize = 9
+        hpText.fontColor = .white
+        hpText.verticalAlignmentMode = .center
+        hpText.zPosition = 22
+        playerHPBar.addChild(hpText)
+
+        // Gold (topo esquerdo da HUD)
         goldLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
-        goldLabel.text = "0"
-        goldLabel.fontSize = 16
+        goldLabel.text = "0 🪙"
+        goldLabel.fontSize = 15
         goldLabel.fontColor = SKColor(red: 1, green: 0.85, blue: 0.2, alpha: 1)
         goldLabel.horizontalAlignmentMode = .left
-        goldLabel.position = CGPoint(x: 20, y: size.height - 30)
+        goldLabel.position = CGPoint(x: -(size.width / 2) + 16, y: (size.height / 2) - 28)
         goldLabel.zPosition = 30
-        addChild(goldLabel)
+        hudLayer.addChild(goldLabel)
 
-        // Stats panel (bottom left)
+        // Stats panel e progress bar também no HUD
         setupStatsPanel()
-
-        // Progress bar (top center)
         setupProgressBar()
-
-        // Food buttons (bottom right)
         setupFoodButtons()
     }
 
     private func setupStatsPanel() {
         statsPanel = SKNode()
-        statsPanel.position = CGPoint(x: 10, y: size.height * 0.25)
+        // posição relativa à câmera: canto inferior esquerdo
+        statsPanel.position = CGPoint(x: -(size.width / 2) + 8, y: -(size.height / 2) + 8)
         statsPanel.zPosition = 30
+        hudLayer.addChild(statsPanel)
 
         let panelBg = SKShapeNode(rectOf: CGSize(width: 140, height: 120), cornerRadius: 6)
         panelBg.fillColor = SKColor(white: 0.1, alpha: 0.85)
@@ -211,14 +246,14 @@ class BattleScene: SKScene {
             label.position = CGPoint(x: 8, y: 110 - CGFloat(i) * 15)
             statsPanel.addChild(label)
         }
-
-        addChild(statsPanel)
     }
 
     private func setupProgressBar() {
         progressBar = SKNode()
-        progressBar.position = CGPoint(x: size.width / 2, y: size.height - 20)
+        // topo centro da HUD
+        progressBar.position = CGPoint(x: 0, y: (size.height / 2) - 20)
         progressBar.zPosition = 30
+        hudLayer.addChild(progressBar)
 
         let totalEnemies = enemyQueue.count
         let spacing: CGFloat = 30
@@ -231,13 +266,12 @@ class BattleScene: SKScene {
             icon.name = "progress_\(i)"
             progressBar.addChild(icon)
         }
-
-        addChild(progressBar)
     }
 
     private func setupFoodButtons() {
-        let startX = size.width - 60
-        let startY: CGFloat = size.height * 0.3
+        // canto direito da HUD, posição relativa à câmera
+        let startX: CGFloat = (size.width / 2) - 60
+        let startY: CGFloat = size.height * 0.1
 
         for (index, foodSlot) in foodSlots.enumerated() {
             guard let food = FoodDatabase.shared.food(for: foodSlot.0) else { continue }
@@ -269,7 +303,7 @@ class BattleScene: SKScene {
             countLabel.name = "food_count_\(index)"
             btn.addChild(countLabel)
 
-            addChild(btn)
+            hudLayer.addChild(btn)
             foodButtons.append(btn)
         }
     }
@@ -279,8 +313,11 @@ class BattleScene: SKScene {
         battleState = .running
         spawnNextEnemy()
 
-        // Run player towards enemy
-        let moveAction = SKAction.moveTo(x: enemyNode.position.x - 80, duration: 1.5)
+        // Player corre até perto do inimigo
+        let targetX = enemyNode.position.x - 90
+        let dist = abs(targetX - playerNode.position.x)
+        let duration = TimeInterval(dist / 200)   // 200 pts/seg
+        let moveAction = SKAction.moveTo(x: targetX, duration: duration)
         let startFighting = SKAction.run { [weak self] in
             self?.battleState = .fighting
         }
@@ -298,7 +335,9 @@ class BattleScene: SKScene {
         enemyCurrentHP = enemy.hp
         enemyMaxHP = enemy.hp
 
-        // Update enemy visual
+        // Posiciona o inimigo à frente do player no mundo (avança 400pts por inimigo)
+        let enemyX = 100 + CGFloat(currentEnemyIndex + 1) * 450
+        enemyNode.position = CGPoint(x: enemyX, y: size.height * 0.33)
         enemyNode.isHidden = false
         enemyNode.color = enemy.isBoss ? SKColor(red: 0.6, green: 0.1, blue: 0.1, alpha: 1) :
             (enemy.isSubBoss ? SKColor(red: 0.5, green: 0.3, blue: 0.1, alpha: 1) : .red)
@@ -317,6 +356,9 @@ class BattleScene: SKScene {
 
     // MARK: - Update Loop
     override func update(_ currentTime: TimeInterval) {
+        // Câmera sempre segue o player
+        updateCamera()
+
         guard battleState == .fighting else { return }
 
         let dt = lastUpdateTime == 0 ? 0 : currentTime - lastUpdateTime
@@ -441,16 +483,25 @@ class BattleScene: SKScene {
 
         currentEnemyIndex += 1
 
-        // Delay before next enemy
-        let delay = SKAction.wait(forDuration: 1.0)
-        let nextAction = SKAction.run { [weak self] in
-            if let self = self, self.currentEnemyIndex < self.enemyQueue.count {
-                self.spawnNextEnemy()
+        // Player anda até o próximo inimigo (ou para o fim do mundo se não houver mais)
+        let delay = SKAction.wait(forDuration: 0.5)
+        let walkAndSpawn = SKAction.run { [weak self] in
+            guard let self = self else { return }
+            if self.currentEnemyIndex < self.enemyQueue.count {
+                // Calcula posição do próximo inimigo
+                let nextEnemyX = 100 + CGFloat(self.currentEnemyIndex + 1) * 450
+                let targetX = nextEnemyX - 90
+                let dist = abs(targetX - self.playerNode.position.x)
+                let duration = TimeInterval(dist / 250)
+                let walk = SKAction.moveTo(x: targetX, duration: duration)
+                let spawn = SKAction.run { [weak self] in self?.spawnNextEnemy() }
+                let fight = SKAction.run { [weak self] in self?.battleState = .fighting }
+                self.playerNode.run(SKAction.sequence([walk, spawn, fight]))
             } else {
-                self?.victory()
+                self.victory()
             }
         }
-        run(SKAction.sequence([delay, nextAction]))
+        run(SKAction.sequence([delay, walkAndSpawn]))
     }
 
     // MARK: - Victory / Defeat
@@ -487,10 +538,10 @@ class BattleScene: SKScene {
             SKColor(red: 1, green: 0.85, blue: 0.2, alpha: 1) :
             SKColor(red: 0.8, green: 0.2, blue: 0.2, alpha: 1)
         overlay.lineWidth = 3
-        overlay.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        overlay.position = CGPoint(x: 0, y: 0)   // centro da câmera
         overlay.zPosition = 100
         overlay.name = "overlay"
-        addChild(overlay)
+        hudLayer.addChild(overlay)
 
         let titleLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
         titleLabel.text = victory ? loc.localize("hud.victory") : loc.localize("hud.defeat")

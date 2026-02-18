@@ -12,100 +12,141 @@ class MainMenuScene: SKScene {
     private func setupUI() {
         guard let player = GameManager.shared.playerData else { return }
 
-        // Title
+        // Background decorativo
+        let bgRect = SKShapeNode(rectOf: CGSize(width: size.width, height: size.height))
+        bgRect.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        bgRect.fillColor = SKColor(red: 0.15, green: 0.10, blue: 0.08, alpha: 1)
+        bgRect.strokeColor = .clear
+        bgRect.zPosition = -10
+        addChild(bgRect)
+
+        // === COLUNA ESQUERDA: título + stats do player ===
+        let leftX: CGFloat = size.width * 0.22
+
         let title = SKLabelNode(fontNamed: "AvenirNext-Bold")
         title.text = loc.localize("login.title")
-        title.fontSize = 32
+        title.fontSize = 26
         title.fontColor = SKColor(red: 1, green: 0.85, blue: 0.4, alpha: 1)
-        title.position = CGPoint(x: size.width / 2, y: size.height - 50)
+        title.horizontalAlignmentMode = .center
+        title.position = CGPoint(x: leftX, y: size.height - 38)
         addChild(title)
 
-        // Player info bar
-        let infoBar = SKNode()
-        infoBar.position = CGPoint(x: size.width / 2, y: size.height - 85)
+        // Stats do jogador (nivel, gold, rubies) em linha horizontal no topo
+        let statsY = size.height - 22
+        let statSpacing: CGFloat = (size.width * 0.44) / 3
 
-        let levelLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
-        levelLabel.text = "\(loc.localize("hud.level")) \(player.level)"
-        levelLabel.fontSize = 14
-        levelLabel.fontColor = .white
-        levelLabel.horizontalAlignmentMode = .left
-        levelLabel.position = CGPoint(x: -300, y: 0)
-        infoBar.addChild(levelLabel)
+        let statItems: [(String, SKColor)] = [
+            ("\(loc.localize("hud.level")) \(player.level)", .white),
+            ("🪙 \(player.gold)", SKColor(red: 1, green: 0.85, blue: 0.2, alpha: 1)),
+            ("💎 \(player.rubies)", SKColor(red: 1, green: 0.4, blue: 0.4, alpha: 1)),
+        ]
+        for (i, stat) in statItems.enumerated() {
+            let lbl = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+            lbl.text = stat.0
+            lbl.fontSize = 12
+            lbl.fontColor = stat.1
+            lbl.horizontalAlignmentMode = .center
+            lbl.position = CGPoint(x: leftX - statSpacing + CGFloat(i) * statSpacing, y: statsY)
+            addChild(lbl)
+        }
 
-        let goldLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
-        goldLabel.text = "\(loc.localize("hud.gold")): \(player.gold)"
-        goldLabel.fontSize = 14
-        goldLabel.fontColor = SKColor(red: 1, green: 0.85, blue: 0.2, alpha: 1)
-        goldLabel.horizontalAlignmentMode = .left
-        goldLabel.position = CGPoint(x: -100, y: 0)
-        infoBar.addChild(goldLabel)
+        // Power Score
+        let psLabel = SKLabelNode(fontNamed: "AvenirNext-Regular")
+        psLabel.text = "PS: \(player.powerScore)"
+        psLabel.fontSize = 11
+        psLabel.fontColor = SKColor(white: 0.6, alpha: 1)
+        psLabel.horizontalAlignmentMode = .center
+        psLabel.position = CGPoint(x: leftX, y: size.height - 52)
+        addChild(psLabel)
 
-        let rubyLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
-        rubyLabel.text = "\(loc.localize("hud.rubies")): \(player.rubies)"
-        rubyLabel.fontSize = 14
-        rubyLabel.fontColor = SKColor(red: 1, green: 0.3, blue: 0.3, alpha: 1)
-        rubyLabel.horizontalAlignmentMode = .left
-        rubyLabel.position = CGPoint(x: 100, y: 0)
-        infoBar.addChild(rubyLabel)
+        // Divider vertical
+        let divider = SKShapeNode()
+        let divPath = CGMutablePath()
+        divPath.move(to: CGPoint(x: size.width * 0.44, y: 10))
+        divPath.addLine(to: CGPoint(x: size.width * 0.44, y: size.height - 10))
+        let div = SKShapeNode(path: divPath)
+        div.strokeColor = SKColor(white: 0.3, alpha: 0.6)
+        div.lineWidth = 1
+        addChild(div)
+        _ = divider
 
-        addChild(infoBar)
+        // === COLUNA DIREITA: botões do menu ===
+        let rightX: CGFloat = size.width * 0.72
 
-        // Menu buttons
-        let buttons: [(String, String)] = [
-            ("menu.continue", "btn_continue"),
+        // Botão principal (Iniciar/Continuar Jornada) com destaque
+        let isNewPlayer = player.highestMapCompleted == 0 &&
+            player.mapStars.isEmpty
+        let mainBtnKey = isNewPlayer ? "menu.start" : "menu.continue"
+        let mainBtn = createMenuButton(
+            text: loc.localize(mainBtnKey),
+            position: CGPoint(x: rightX, y: size.height * 0.75),
+            name: "btn_continue",
+            highlight: true
+        )
+        addChild(mainBtn)
+
+        // Outros botões
+        let otherButtons: [(String, String)] = [
             ("menu.inventory", "btn_inventory"),
             ("menu.shop", "btn_shop"),
-            ("menu.ranking", "btn_ranking"),
-            ("menu.challenges", "btn_challenges"),
             ("menu.settings", "btn_settings"),
         ]
+        let startY = size.height * 0.55
+        let spacing: CGFloat = 46
 
-        let startY = size.height * 0.65
-        let spacing: CGFloat = 55
-
-        for (index, button) in buttons.enumerated() {
+        for (index, button) in otherButtons.enumerated() {
             let y = startY - CGFloat(index) * spacing
             let btn = createMenuButton(
                 text: loc.localize(button.0),
-                position: CGPoint(x: size.width / 2, y: y),
-                name: button.1
+                position: CGPoint(x: rightX, y: y),
+                name: button.1,
+                highlight: false
             )
             addChild(btn)
         }
 
-        // Locked buttons (PvP, Clans - need Map 3)
+        // PvP e Clans (desbloqueiam no mapa 3)
         if player.highestMapCompleted >= 3 {
             let pvpBtn = createMenuButton(
                 text: loc.localize("menu.pvp"),
-                position: CGPoint(x: size.width / 2 - 200, y: size.height * 0.12),
-                name: "btn_pvp"
+                position: CGPoint(x: rightX - 100, y: size.height * 0.12),
+                name: "btn_pvp",
+                highlight: false
             )
             addChild(pvpBtn)
 
             let clanBtn = createMenuButton(
                 text: loc.localize("menu.clans"),
-                position: CGPoint(x: size.width / 2 + 200, y: size.height * 0.12),
-                name: "btn_clans"
+                position: CGPoint(x: rightX + 100, y: size.height * 0.12),
+                name: "btn_clans",
+                highlight: false
             )
             addChild(clanBtn)
         }
     }
 
-    private func createMenuButton(text: String, position: CGPoint, name: String) -> SKNode {
+    private func createMenuButton(text: String, position: CGPoint, name: String, highlight: Bool) -> SKNode {
         let container = SKNode()
         container.position = position
         container.name = name
 
-        let bg = SKShapeNode(rectOf: CGSize(width: 300, height: 44), cornerRadius: 10)
-        bg.fillColor = SKColor(red: 0.5, green: 0.35, blue: 0.18, alpha: 1)
-        bg.strokeColor = SKColor(red: 0.7, green: 0.5, blue: 0.25, alpha: 1)
-        bg.lineWidth = 2
+        let btnW: CGFloat = highlight ? 240 : 220
+        let btnH: CGFloat = highlight ? 40 : 36
+
+        let bg = SKShapeNode(rectOf: CGSize(width: btnW, height: btnH), cornerRadius: 10)
+        bg.fillColor = highlight ?
+            SKColor(red: 0.7, green: 0.5, blue: 0.1, alpha: 1) :
+            SKColor(red: 0.4, green: 0.28, blue: 0.12, alpha: 1)
+        bg.strokeColor = highlight ?
+            SKColor(red: 1, green: 0.85, blue: 0.3, alpha: 1) :
+            SKColor(red: 0.6, green: 0.45, blue: 0.2, alpha: 0.8)
+        bg.lineWidth = highlight ? 2 : 1
         bg.name = name
         container.addChild(bg)
 
-        let label = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        let label = SKLabelNode(fontNamed: highlight ? "AvenirNext-Bold" : "AvenirNext-DemiBold")
         label.text = text
-        label.fontSize = 18
+        label.fontSize = highlight ? 17 : 15
         label.fontColor = .white
         label.verticalAlignmentMode = .center
         label.name = name
@@ -123,24 +164,16 @@ class MainMenuScene: SKScene {
             switch node.name {
             case "btn_continue":
                 transitionToOverworld()
+                return
             case "btn_inventory":
                 transitionToInventory()
+                return
             case "btn_shop":
                 transitionToShop()
+                return
             case "btn_settings":
                 transitionToSettings()
-            case "btn_ranking":
-                // TODO: Ranking scene
-                break
-            case "btn_challenges":
-                // TODO: Challenges scene
-                break
-            case "btn_pvp":
-                // TODO: PvP scene
-                break
-            case "btn_clans":
-                // TODO: Clans scene
-                break
+                return
             default:
                 break
             }

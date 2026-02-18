@@ -109,7 +109,8 @@ final class GameManager {
               count > 0,
               let food = FoodDatabase.shared.food(for: foodType) else { return nil }
 
-        playerData?.foodInventory[foodType] = (playerData?.foodInventory[foodType] ?? 1) - 1
+        let currentCount = playerData?.foodInventory[foodType] ?? 1
+        playerData?.foodInventory[foodType] = currentCount - 1
         if playerData?.foodInventory[foodType] == 0 {
             playerData?.foodInventory.removeValue(forKey: foodType)
         }

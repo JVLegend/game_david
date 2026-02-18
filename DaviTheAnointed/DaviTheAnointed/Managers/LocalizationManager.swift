@@ -45,7 +45,7 @@ final class LocalizationManager {
     }
 
     // MARK: - Portuguese Strings
-    static let portugueseStrings: [String: String] = [
+    static var portugueseStrings: [String: String] = [
         // Menu
         "menu.continue": "Continuar Jornada",
         "menu.inventory": "Inventário",
@@ -309,7 +309,7 @@ final class LocalizationManager {
     ]
 
     // MARK: - English Strings
-    static let englishStrings: [String: String] = [
+    static var englishStrings: [String: String] = [
         // Menu
         "menu.continue": "Continue Journey",
         "menu.inventory": "Inventory",

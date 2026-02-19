@@ -1,5 +1,7 @@
 import Foundation
 import SpriteKit
+import FirebaseFirestore
+import FirebaseAuth
 
 final class GameManager {
     static let shared = GameManager()
@@ -70,6 +72,21 @@ final class GameManager {
 
     func addRubies(_ amount: Int) {
         mutate { p in p.rubies += amount }
+        save()
+    }
+
+    // MARK: - Inventory
+    func addItemToInventory(_ itemId: String) {
+        mutate { p in p.inventory.append(itemId) }
+        save()
+    }
+
+    func removeItemFromInventory(_ itemId: String) {
+        mutate { p in
+            if let idx = p.inventory.firstIndex(of: itemId) {
+                p.inventory.remove(at: idx)
+            }
+        }
         save()
     }
 
@@ -199,7 +216,44 @@ final class GameManager {
             UserDefaults.standard.set(encoded, forKey: "player_data_\(data.userId)")
         }
 
-        // TODO: Save to Firestore
+        // Save to Firestore (only for real Firebase users, not dev_player)
+        guard !data.userId.hasPrefix("dev_") else { return }
+        saveToFirestore(data)
+    }
+
+    private func saveToFirestore(_ data: PlayerData) {
+        guard let encoded = try? JSONEncoder().encode(data),
+              let dict = try? JSONSerialization.jsonObject(with: encoded) as? [String: Any] else { return }
+
+        let db = Firestore.firestore()
+        db.collection("players").document(data.userId).setData(dict, merge: true) { error in
+            if let error = error {
+                print("[FIRESTORE] Save error: \(error.localizedDescription)")
+            } else {
+                print("[FIRESTORE] Player data saved ✓")
+            }
+        }
+    }
+
+    func loadFromFirestore(userId: String, completion: @escaping (Bool) -> Void) {
+        let db = Firestore.firestore()
+        db.collection("players").document(userId).getDocument { [weak self] snapshot, error in
+            guard let self = self else { return }
+            if let error = error {
+                print("[FIRESTORE] Load error: \(error.localizedDescription)")
+                completion(false)
+                return
+            }
+            guard let dict = snapshot?.data(),
+                  let jsonData = try? JSONSerialization.data(withJSONObject: dict),
+                  let player = try? JSONDecoder().decode(PlayerData.self, from: jsonData) else {
+                completion(false)
+                return
+            }
+            self.playerData = player
+            print("[FIRESTORE] Player data loaded ✓")
+            completion(true)
+        }
     }
 
     func loadLocal(userId: String) -> PlayerData? {

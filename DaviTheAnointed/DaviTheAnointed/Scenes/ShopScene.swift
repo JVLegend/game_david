@@ -64,8 +64,8 @@ class ShopScene: SKScene {
             setupCharactersTab(player: player)
         }
 
-        // Back button
-        let backBtn = createButton(text: loc.localize("general.back"), position: CGPoint(x: 60, y: 25), name: "btn_back")
+        // Back button — topo esquerdo
+        let backBtn = createButton(text: "← \(loc.localize("general.back"))", position: CGPoint(x: 60, y: size.height - 22), name: "btn_back")
         addChild(backBtn)
     }
 
@@ -390,8 +390,7 @@ class ShopScene: SKScene {
     private func buyItem(_ itemId: String) {
         guard let item = EquipmentDatabase.shared.item(withId: itemId) else { return }
         guard GameManager.shared.spendGold(item.price) else { return }
-        GameManager.shared.playerData?.inventory.append(itemId)
-        GameManager.shared.save()
+        GameManager.shared.addItemToInventory(itemId)
         setupUI()
     }
 

@@ -88,8 +88,8 @@ class InventoryScene: SKScene {
             addChild(label)
         }
 
-        // Back button
-        let backBtn = createButton(text: loc.localize("general.back"), position: CGPoint(x: 60, y: 25), name: "btn_back")
+        // Back button — canto inferior esquerdo, bem visível
+        let backBtn = createButton(text: "← \(loc.localize("general.back"))", position: CGPoint(x: 60, y: size.height - 22), name: "btn_back")
         addChild(backBtn)
     }
 

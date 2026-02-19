@@ -1,10 +1,28 @@
 import SpriteKit
+import FirebaseAuth
 
 class LoginScene: SKScene {
+
+    private var isLoggingIn = false
 
     override func didMove(to view: SKView) {
         backgroundColor = SKColor(red: 0.12, green: 0.08, blue: 0.06, alpha: 1)
         setupUI()
+        checkExistingSession()
+    }
+
+    // MARK: - Auto-login if already signed in to Firebase
+    private func checkExistingSession() {
+        if let user = Auth.auth().currentUser {
+            print("[AUTH] Existing Firebase session: \(user.uid)")
+            let language = LocalizationManager.shared.language
+            GameManager.shared.initializePlayer(
+                userId: user.uid,
+                displayName: user.displayName ?? user.email ?? "Player",
+                language: language
+            )
+            transitionToMainMenu()
+        }
     }
 
     private func setupUI() {
@@ -48,21 +66,42 @@ class LoginScene: SKScene {
 
         addChild(googleBtn)
 
-        // Dev skip button (for testing without Google Auth)
+        // Anonymous / Guest button
+        let guestBtn = SKNode()
+        guestBtn.position = CGPoint(x: size.width / 2, y: size.height * 0.28)
+        guestBtn.name = "btn_guest"
+
+        let guestBg = SKShapeNode(rectOf: CGSize(width: 230, height: 42), cornerRadius: 6)
+        guestBg.fillColor = SKColor(white: 0.2, alpha: 0.7)
+        guestBg.strokeColor = SKColor(white: 0.4, alpha: 0.6)
+        guestBg.name = "btn_guest"
+        guestBtn.addChild(guestBg)
+
+        let guestLabel = SKLabelNode(fontNamed: "AvenirNext-Regular")
+        guestLabel.text = "Jogar como Convidado"
+        guestLabel.fontSize = 14
+        guestLabel.fontColor = SKColor(white: 0.75, alpha: 1)
+        guestLabel.verticalAlignmentMode = .center
+        guestLabel.name = "btn_guest"
+        guestBtn.addChild(guestLabel)
+
+        addChild(guestBtn)
+
+        // Dev skip button
         let devBtn = SKNode()
-        devBtn.position = CGPoint(x: size.width / 2, y: size.height * 0.25)
+        devBtn.position = CGPoint(x: size.width / 2, y: size.height * 0.15)
         devBtn.name = "btn_dev"
 
-        let devBg = SKShapeNode(rectOf: CGSize(width: 200, height: 40), cornerRadius: 6)
-        devBg.fillColor = SKColor(white: 0.3, alpha: 0.5)
-        devBg.strokeColor = SKColor(white: 0.5, alpha: 0.5)
+        let devBg = SKShapeNode(rectOf: CGSize(width: 200, height: 34), cornerRadius: 6)
+        devBg.fillColor = SKColor(white: 0.3, alpha: 0.4)
+        devBg.strokeColor = SKColor(white: 0.4, alpha: 0.4)
         devBg.name = "btn_dev"
         devBtn.addChild(devBg)
 
         let devLabel = SKLabelNode(fontNamed: "AvenirNext-Regular")
         devLabel.text = "Dev Mode (Skip Login)"
-        devLabel.fontSize = 14
-        devLabel.fontColor = SKColor(white: 0.6, alpha: 1)
+        devLabel.fontSize = 12
+        devLabel.fontColor = SKColor(white: 0.5, alpha: 1)
         devLabel.verticalAlignmentMode = .center
         devLabel.name = "btn_dev"
         devBtn.addChild(devLabel)
@@ -71,24 +110,61 @@ class LoginScene: SKScene {
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard !isLoggingIn else { return }
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
         let nodes = self.nodes(at: location)
 
         for node in nodes {
-            if node.name == "btn_google" {
-                // TODO: Implement Google Sign-In via Firebase Auth
-                // For now, use dev mode
+            switch node.name {
+            case "btn_google":
+                // TODO: Implement Google Sign-In (requires GoogleSignIn SDK + URL scheme)
+                // For now, fall through to anonymous auth
+                loginAnonymously()
+                return
+            case "btn_guest":
+                loginAnonymously()
+                return
+            case "btn_dev":
                 loginWithDevMode()
                 return
-            } else if node.name == "btn_dev" {
-                loginWithDevMode()
-                return
+            default:
+                break
             }
         }
     }
 
+    // MARK: - Anonymous Firebase Auth (Guest)
+    private func loginAnonymously() {
+        isLoggingIn = true
+        Auth.auth().signInAnonymously { [weak self] result, error in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("[AUTH] Anonymous sign-in error: \(error.localizedDescription)")
+                    // Fallback to local dev mode
+                    self.loginWithDevMode()
+                    return
+                }
+                guard let user = result?.user else {
+                    self.loginWithDevMode()
+                    return
+                }
+                print("[AUTH] Anonymous sign-in: \(user.uid)")
+                let language = LocalizationManager.shared.language
+                GameManager.shared.initializePlayer(
+                    userId: user.uid,
+                    displayName: "Guerreiro",
+                    language: language
+                )
+                self.transitionToMainMenu()
+            }
+        }
+    }
+
+    // MARK: - Dev Mode (local only)
     private func loginWithDevMode() {
+        isLoggingIn = false
         let language = LocalizationManager.shared.language
         GameManager.shared.initializePlayer(
             userId: "dev_player_001",

@@ -49,6 +49,65 @@ class BattleScene: SKScene {
     private var progressBar: SKNode!
     private var foodButtons: [SKNode] = []
 
+    // MARK: - Sprite Animation
+    private let playerHeight: CGFloat = 90
+    private var playerIdleFrames: [SKTexture] = []
+    private var playerWalkFrames: [SKTexture] = []
+    private var playerAttackFrames: [SKTexture] = []
+    private var currentPlayerAnim: String = ""  // "idle", "walk", "attack"
+
+    private func loadPlayerTextures() {
+        let character = GameManager.shared.playerData?.activeCharacter ?? .davi
+        // davi_jovem usa cajado; davi_funda usa funda — ambos têm mesma estrutura de frames
+        let prefix: String
+        switch character {
+        case .davi:
+            prefix = "davi_jovem"
+        default:
+            prefix = "davi_jovem"  // fallback até ter outros sprites
+        }
+
+        // Row 0 (00-05): idle
+        playerIdleFrames = (0...5).map { SKTexture(imageNamed: "\(prefix)_\(String(format: "%02d", $0))") }
+        // Row 1 (06-11): walk
+        playerWalkFrames = (6...11).map { SKTexture(imageNamed: "\(prefix)_\(String(format: "%02d", $0))") }
+        // Row 2 (12-17): attack
+        playerAttackFrames = (12...17).map { SKTexture(imageNamed: "\(prefix)_\(String(format: "%02d", $0))") }
+
+        // Configura texture inicial
+        if let first = playerIdleFrames.first {
+            playerNode.texture = first
+            playerNode.size = CGSize(width: first.size().width / first.size().height * playerHeight,
+                                    height: playerHeight)
+        }
+    }
+
+    private func playAnim(_ anim: String, loop: Bool = true) {
+        guard anim != currentPlayerAnim else { return }
+        currentPlayerAnim = anim
+
+        playerNode.removeAction(forKey: "playerAnim")
+
+        let frames: [SKTexture]
+        let fps: TimeInterval
+        switch anim {
+        case "walk":
+            frames = playerWalkFrames
+            fps = 0.10
+        case "attack":
+            frames = playerAttackFrames
+            fps = 0.08
+        default:  // "idle"
+            frames = playerIdleFrames
+            fps = 0.12
+        }
+        guard !frames.isEmpty else { return }
+
+        let animAction = SKAction.animate(with: frames, timePerFrame: fps)
+        let action = loop ? SKAction.repeatForever(animAction) : animAction
+        playerNode.run(action, withKey: "playerAnim")
+    }
+
     private let loc = LocalizationManager.shared
 
     override func didMove(to view: SKView) {
@@ -127,20 +186,15 @@ class BattleScene: SKScene {
         ground.zPosition = -5
         addChild(ground)
 
-        // Player — começa no início do mundo
-        playerNode = SKSpriteNode(color: SKColor(red: 0.3, green: 0.5, blue: 0.8, alpha: 1),
-                                   size: CGSize(width: 40, height: 70))
+        // Player — começa no início do mundo com sprite
+        playerNode = SKSpriteNode(color: .clear, size: CGSize(width: 50, height: playerHeight))
         playerNode.position = CGPoint(x: 100, y: size.height * 0.33)
         playerNode.zPosition = 5
         addChild(playerNode)
 
-        let playerLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
-        playerLabel.text = GameManager.shared.playerData?.activeCharacter == .davi ?
-            loc.localize("character.davi") : loc.localize("character.bigJ")
-        playerLabel.fontSize = 10
-        playerLabel.fontColor = .white
-        playerLabel.position = CGPoint(x: 0, y: 42)
-        playerNode.addChild(playerLabel)
+        // Carrega texturas e inicia animação idle
+        loadPlayerTextures()
+        playAnim("idle")
 
         // Enemy — está mais à frente no mundo
         enemyNode = SKSpriteNode(color: .red, size: CGSize(width: 40, height: 70))
@@ -310,48 +364,75 @@ class BattleScene: SKScene {
 
     // MARK: - Battle Flow
     private func startBattle() {
-        battleState = .running
-        spawnNextEnemy()
-
-        // Player corre até perto do inimigo
-        let targetX = enemyNode.position.x - 90
-        let dist = abs(targetX - playerNode.position.x)
-        let duration = TimeInterval(dist / 200)   // 200 pts/seg
-        let moveAction = SKAction.moveTo(x: targetX, duration: duration)
-        let startFighting = SKAction.run { [weak self] in
-            self?.battleState = .fighting
-        }
-        playerNode.run(SKAction.sequence([moveAction, startFighting]))
+        walkToEnemy(index: 0)
     }
 
-    private func spawnNextEnemy() {
-        guard currentEnemyIndex < enemyQueue.count else {
+    /// Posiciona o inimigo no mundo e faz o player andar até ele
+    private func walkToEnemy(index: Int) {
+        guard index < enemyQueue.count else {
             victory()
             return
         }
+        battleState = .walking
 
-        let enemy = enemyQueue[currentEnemyIndex]
-        currentEnemy = enemy
-        enemyCurrentHP = enemy.hp
-        enemyMaxHP = enemy.hp
-
-        // Posiciona o inimigo à frente do player no mundo (avança 400pts por inimigo)
-        let enemyX = 100 + CGFloat(currentEnemyIndex + 1) * 450
+        // Posiciona o inimigo no mundo antes de andar
+        let enemy = enemyQueue[index]
+        let enemyX = 150 + CGFloat(index) * 480
         enemyNode.position = CGPoint(x: enemyX, y: size.height * 0.33)
         enemyNode.isHidden = false
         enemyNode.color = enemy.isBoss ? SKColor(red: 0.6, green: 0.1, blue: 0.1, alpha: 1) :
             (enemy.isSubBoss ? SKColor(red: 0.5, green: 0.3, blue: 0.1, alpha: 1) : .red)
-        let enemySize = enemy.isBoss ? CGSize(width: 60, height: 105) : CGSize(width: 40, height: 70)
-        enemyNode.size = enemySize
+        enemyNode.size = enemy.isBoss ? CGSize(width: 60, height: 105) : CGSize(width: 40, height: 70)
         enemyNameLabel.text = enemy.localizedName
 
-        // Update progress bar
-        if let progressIcon = progressBar.childNode(withName: "progress_\(currentEnemyIndex)") as? SKShapeNode {
-            progressIcon.fillColor = SKColor(red: 0.8, green: 0.3, blue: 0.1, alpha: 1)
+        // Player anda até perto do inimigo
+        let targetX = enemyX - 90
+        let dist = abs(targetX - playerNode.position.x)
+        let duration = TimeInterval(max(0.5, dist / 220))
+        let walk = SKAction.moveTo(x: targetX, duration: duration)
+        let beginFight = SKAction.run { [weak self] in
+            guard let self = self else { return }
+            self.spawnEnemy(at: index)
+        }
+        playAnim("walk")
+        playerNode.run(SKAction.sequence([walk, beginFight]))
+    }
+
+    /// Configura o inimigo atual e começa o combate
+    private func spawnEnemy(at index: Int) {
+        guard index < enemyQueue.count else { victory(); return }
+
+        let enemy = enemyQueue[index]
+        currentEnemy = enemy
+        currentEnemyIndex = index
+        enemyCurrentHP = enemy.hp
+        enemyMaxHP = enemy.hp
+
+        // Atualiza visual
+        enemyNode.isHidden = false
+        enemyNode.alpha = 1
+        enemyNode.setScale(1)
+
+        // Progress bar — marca como ativo
+        for i in 0..<enemyQueue.count {
+            if let icon = progressBar.childNode(withName: "progress_\(i)") as? SKShapeNode {
+                if i < index {
+                    icon.fillColor = SKColor(red: 0.2, green: 0.8, blue: 0.2, alpha: 1) // mortos = verde
+                } else if i == index {
+                    icon.fillColor = SKColor(red: 0.8, green: 0.3, blue: 0.1, alpha: 1) // atual = laranja
+                } else {
+                    icon.fillColor = SKColor(white: 0.3, alpha: 0.8) // futuros = cinza
+                }
+            }
         }
 
         updateEnemyHPBar()
+        // Zera timers para evitar ataque imediato
+        playerAttackTimer = 0
         enemyAttackTimer = 0
+        lastUpdateTime = 0
+        battleState = .fighting
+        playAnim("attack")
     }
 
     // MARK: - Update Loop
@@ -452,13 +533,25 @@ class BattleScene: SKScene {
 
         enemiesKilled += 1
 
-        // Mark progress
-        if let icon = progressBar.childNode(withName: "progress_\(currentEnemyIndex)") as? SKShapeNode {
-            icon.fillColor = SKColor(red: 0.2, green: 0.8, blue: 0.2, alpha: 1)
-        }
+        // Para o combate IMEDIATAMENTE
+        battleState = .walking
+        currentEnemy = nil
+        playAnim("idle")  // volta ao idle enquanto morre o inimigo
 
-        // Death animation
-        let deathAnim = SKAction.sequence([
+        // Ouro e XP
+        if let boss = bossData, boss.enemy.id == enemy.id {
+            goldEarned += boss.goldReward
+            xpEarned += boss.xpReward
+        } else {
+            goldEarned += 10 + enemy.hp / 5
+            xpEarned += 5 + enemy.hp / 10
+        }
+        goldLabel.text = "\(goldEarned) 🪙"
+
+        let nextIndex = currentEnemyIndex + 1
+
+        // Animação de morte + próximo inimigo
+        let deathFade = SKAction.sequence([
             SKAction.group([
                 SKAction.fadeOut(withDuration: 0.3),
                 SKAction.scale(to: 0.5, duration: 0.3),
@@ -469,39 +562,15 @@ class BattleScene: SKScene {
                 self?.enemyNode.setScale(1.0)
             }
         ])
-        enemyNode.run(deathAnim)
+        enemyNode.run(deathFade)
 
-        // Add gold from kill
-        if let boss = bossData, boss.enemy.id == enemy.id {
-            goldEarned += boss.goldReward
-            xpEarned += boss.xpReward
-        } else {
-            goldEarned += 10 + enemy.hp / 5
-            xpEarned += 5 + enemy.hp / 10
-        }
-        goldLabel.text = "\(goldEarned)"
-
-        currentEnemyIndex += 1
-
-        // Player anda até o próximo inimigo (ou para o fim do mundo se não houver mais)
-        let delay = SKAction.wait(forDuration: 0.5)
-        let walkAndSpawn = SKAction.run { [weak self] in
+        // Aguarda um momento e anda para o próximo
+        let delay = SKAction.wait(forDuration: 0.8)
+        let next = SKAction.run { [weak self] in
             guard let self = self else { return }
-            if self.currentEnemyIndex < self.enemyQueue.count {
-                // Calcula posição do próximo inimigo
-                let nextEnemyX = 100 + CGFloat(self.currentEnemyIndex + 1) * 450
-                let targetX = nextEnemyX - 90
-                let dist = abs(targetX - self.playerNode.position.x)
-                let duration = TimeInterval(dist / 250)
-                let walk = SKAction.moveTo(x: targetX, duration: duration)
-                let spawn = SKAction.run { [weak self] in self?.spawnNextEnemy() }
-                let fight = SKAction.run { [weak self] in self?.battleState = .fighting }
-                self.playerNode.run(SKAction.sequence([walk, spawn, fight]))
-            } else {
-                self.victory()
-            }
+            self.walkToEnemy(index: nextIndex)
         }
-        run(SKAction.sequence([delay, walkAndSpawn]))
+        run(SKAction.sequence([delay, next]))
     }
 
     // MARK: - Victory / Defeat

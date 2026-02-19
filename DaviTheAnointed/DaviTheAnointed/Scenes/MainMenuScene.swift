@@ -21,7 +21,7 @@ class MainMenuScene: SKScene {
         addChild(bgRect)
 
         // === COLUNA ESQUERDA: título + stats do player ===
-        let leftX: CGFloat = size.width * 0.22
+        let leftX: CGFloat = size.width * 0.28
 
         let title = SKLabelNode(fontNamed: "AvenirNext-Bold")
         title.text = loc.localize("login.title")
@@ -33,7 +33,7 @@ class MainMenuScene: SKScene {
 
         // Stats do jogador (nivel, gold, rubies) em linha horizontal no topo
         let statsY = size.height - 22
-        let statSpacing: CGFloat = (size.width * 0.44) / 3
+        let statSpacing: CGFloat = (size.width * 0.50) / 3
 
         let statItems: [(String, SKColor)] = [
             ("\(loc.localize("hud.level")) \(player.level)", .white),
@@ -71,7 +71,7 @@ class MainMenuScene: SKScene {
         _ = divider
 
         // === COLUNA DIREITA: botões do menu ===
-        let rightX: CGFloat = size.width * 0.72
+        let rightX: CGFloat = size.width * 0.75
 
         // Botão principal (Iniciar/Continuar Jornada) com destaque
         let isNewPlayer = player.highestMapCompleted == 0 &&

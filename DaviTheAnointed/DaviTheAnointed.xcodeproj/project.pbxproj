@@ -27,6 +27,58 @@
 		AA00112233445566778899C6 /* SettingsScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00112233445566778899C7 /* SettingsScene.swift */; };
 		AA00112233445566778899CC /* SpriteKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA00112233445566778899CD /* SpriteKit.framework */; };
 		AA00112233445566778899E3 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00112233445566778899E2 /* SceneDelegate.swift */; };
+		4F5D8465439D03FBB5CB53CA /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 64907C788DD7289B5F76A48E /* GoogleService-Info.plist */; };
+		13B16CFF66D62C07FD0F77E8 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = FBSPM0001AUTHPROD00001 /* FirebaseAuth */; };
+		11257CAF4DF15BAD06064AD6 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = FBSPM0001FSPROD000001 /* FirebaseFirestore */; };
+		TXBLD000000AA0011 /* davi_funda_00.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000000AA0011 /* davi_funda_00.png */; };
+		TXBLD000001AA0011 /* davi_funda_01.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000001AA0011 /* davi_funda_01.png */; };
+		TXBLD000002AA0011 /* davi_funda_02.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000002AA0011 /* davi_funda_02.png */; };
+		TXBLD000003AA0011 /* davi_funda_03.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000003AA0011 /* davi_funda_03.png */; };
+		TXBLD000004AA0011 /* davi_funda_04.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000004AA0011 /* davi_funda_04.png */; };
+		TXBLD000005AA0011 /* davi_funda_05.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000005AA0011 /* davi_funda_05.png */; };
+		TXBLD000006AA0011 /* davi_funda_06.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000006AA0011 /* davi_funda_06.png */; };
+		TXBLD000007AA0011 /* davi_funda_07.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000007AA0011 /* davi_funda_07.png */; };
+		TXBLD000008AA0011 /* davi_funda_08.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000008AA0011 /* davi_funda_08.png */; };
+		TXBLD000009AA0011 /* davi_funda_09.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000009AA0011 /* davi_funda_09.png */; };
+		TXBLD000010AA0011 /* davi_funda_10.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000010AA0011 /* davi_funda_10.png */; };
+		TXBLD000011AA0011 /* davi_funda_11.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000011AA0011 /* davi_funda_11.png */; };
+		TXBLD000012AA0011 /* davi_funda_12.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000012AA0011 /* davi_funda_12.png */; };
+		TXBLD000013AA0011 /* davi_funda_13.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000013AA0011 /* davi_funda_13.png */; };
+		TXBLD000014AA0011 /* davi_funda_14.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000014AA0011 /* davi_funda_14.png */; };
+		TXBLD000015AA0011 /* davi_funda_15.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000015AA0011 /* davi_funda_15.png */; };
+		TXBLD000016AA0011 /* davi_funda_16.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000016AA0011 /* davi_funda_16.png */; };
+		TXBLD000017AA0011 /* davi_funda_17.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000017AA0011 /* davi_funda_17.png */; };
+		TXBLD000018AA0011 /* davi_funda_18.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000018AA0011 /* davi_funda_18.png */; };
+		TXBLD000019AA0011 /* davi_funda_19.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000019AA0011 /* davi_funda_19.png */; };
+		TXBLD000020AA0011 /* davi_funda_20.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000020AA0011 /* davi_funda_20.png */; };
+		TXBLD000021AA0011 /* davi_funda_21.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000021AA0011 /* davi_funda_21.png */; };
+		TXBLD000022AA0011 /* davi_funda_22.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000022AA0011 /* davi_funda_22.png */; };
+		TXBLD000023AA0011 /* davi_funda_23.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000023AA0011 /* davi_funda_23.png */; };
+		TXBLD000024AA0011 /* davi_funda_24.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000024AA0011 /* davi_funda_24.png */; };
+		TXBLD000025AA0011 /* davi_funda_25.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000025AA0011 /* davi_funda_25.png */; };
+		TXBLD000026AA0011 /* davi_funda_26.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000026AA0011 /* davi_funda_26.png */; };
+		TXBLD000027AA0011 /* davi_funda_27.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000027AA0011 /* davi_funda_27.png */; };
+		TXBLD000028AA0011 /* davi_funda_28.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000028AA0011 /* davi_funda_28.png */; };
+		TXBLD000029AA0011 /* davi_funda_29.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000029AA0011 /* davi_funda_29.png */; };
+		TXBLD000030AA0011 /* davi_funda_sheet.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000030AA0011 /* davi_funda_sheet.png */; };
+		TXBLD000031AA0011 /* davi_jovem_00.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000031AA0011 /* davi_jovem_00.png */; };
+		TXBLD000032AA0011 /* davi_jovem_01.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000032AA0011 /* davi_jovem_01.png */; };
+		TXBLD000033AA0011 /* davi_jovem_02.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000033AA0011 /* davi_jovem_02.png */; };
+		TXBLD000034AA0011 /* davi_jovem_03.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000034AA0011 /* davi_jovem_03.png */; };
+		TXBLD000035AA0011 /* davi_jovem_04.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000035AA0011 /* davi_jovem_04.png */; };
+		TXBLD000036AA0011 /* davi_jovem_05.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000036AA0011 /* davi_jovem_05.png */; };
+		TXBLD000037AA0011 /* davi_jovem_06.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000037AA0011 /* davi_jovem_06.png */; };
+		TXBLD000038AA0011 /* davi_jovem_07.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000038AA0011 /* davi_jovem_07.png */; };
+		TXBLD000039AA0011 /* davi_jovem_08.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000039AA0011 /* davi_jovem_08.png */; };
+		TXBLD000040AA0011 /* davi_jovem_09.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000040AA0011 /* davi_jovem_09.png */; };
+		TXBLD000041AA0011 /* davi_jovem_10.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000041AA0011 /* davi_jovem_10.png */; };
+		TXBLD000042AA0011 /* davi_jovem_11.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000042AA0011 /* davi_jovem_11.png */; };
+		TXBLD000043AA0011 /* davi_jovem_12.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000043AA0011 /* davi_jovem_12.png */; };
+		TXBLD000044AA0011 /* davi_jovem_13.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000044AA0011 /* davi_jovem_13.png */; };
+		TXBLD000045AA0011 /* davi_jovem_14.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000045AA0011 /* davi_jovem_14.png */; };
+		TXBLD000046AA0011 /* davi_jovem_15.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000046AA0011 /* davi_jovem_15.png */; };
+		TXBLD000047AA0011 /* davi_jovem_16.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000047AA0011 /* davi_jovem_16.png */; };
+		TXBLD000048AA0011 /* davi_jovem_17.png in Resources */ = {isa = PBXBuildFile; fileRef = TXFILE000048AA0011 /* davi_jovem_17.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,6 +104,56 @@
 		AA00112233445566778899CE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA00112233445566778899CF /* DaviTheAnointed.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DaviTheAnointed.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA00112233445566778899E2 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		64907C788DD7289B5F76A48E /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		TXFILE000000AA0011 /* davi_funda_00.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_00.png"; sourceTree = "<group>"; };
+		TXFILE000001AA0011 /* davi_funda_01.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_01.png"; sourceTree = "<group>"; };
+		TXFILE000002AA0011 /* davi_funda_02.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_02.png"; sourceTree = "<group>"; };
+		TXFILE000003AA0011 /* davi_funda_03.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_03.png"; sourceTree = "<group>"; };
+		TXFILE000004AA0011 /* davi_funda_04.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_04.png"; sourceTree = "<group>"; };
+		TXFILE000005AA0011 /* davi_funda_05.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_05.png"; sourceTree = "<group>"; };
+		TXFILE000006AA0011 /* davi_funda_06.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_06.png"; sourceTree = "<group>"; };
+		TXFILE000007AA0011 /* davi_funda_07.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_07.png"; sourceTree = "<group>"; };
+		TXFILE000008AA0011 /* davi_funda_08.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_08.png"; sourceTree = "<group>"; };
+		TXFILE000009AA0011 /* davi_funda_09.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_09.png"; sourceTree = "<group>"; };
+		TXFILE000010AA0011 /* davi_funda_10.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_10.png"; sourceTree = "<group>"; };
+		TXFILE000011AA0011 /* davi_funda_11.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_11.png"; sourceTree = "<group>"; };
+		TXFILE000012AA0011 /* davi_funda_12.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_12.png"; sourceTree = "<group>"; };
+		TXFILE000013AA0011 /* davi_funda_13.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_13.png"; sourceTree = "<group>"; };
+		TXFILE000014AA0011 /* davi_funda_14.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_14.png"; sourceTree = "<group>"; };
+		TXFILE000015AA0011 /* davi_funda_15.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_15.png"; sourceTree = "<group>"; };
+		TXFILE000016AA0011 /* davi_funda_16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_16.png"; sourceTree = "<group>"; };
+		TXFILE000017AA0011 /* davi_funda_17.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_17.png"; sourceTree = "<group>"; };
+		TXFILE000018AA0011 /* davi_funda_18.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_18.png"; sourceTree = "<group>"; };
+		TXFILE000019AA0011 /* davi_funda_19.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_19.png"; sourceTree = "<group>"; };
+		TXFILE000020AA0011 /* davi_funda_20.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_20.png"; sourceTree = "<group>"; };
+		TXFILE000021AA0011 /* davi_funda_21.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_21.png"; sourceTree = "<group>"; };
+		TXFILE000022AA0011 /* davi_funda_22.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_22.png"; sourceTree = "<group>"; };
+		TXFILE000023AA0011 /* davi_funda_23.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_23.png"; sourceTree = "<group>"; };
+		TXFILE000024AA0011 /* davi_funda_24.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_24.png"; sourceTree = "<group>"; };
+		TXFILE000025AA0011 /* davi_funda_25.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_25.png"; sourceTree = "<group>"; };
+		TXFILE000026AA0011 /* davi_funda_26.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_26.png"; sourceTree = "<group>"; };
+		TXFILE000027AA0011 /* davi_funda_27.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_27.png"; sourceTree = "<group>"; };
+		TXFILE000028AA0011 /* davi_funda_28.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_28.png"; sourceTree = "<group>"; };
+		TXFILE000029AA0011 /* davi_funda_29.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_29.png"; sourceTree = "<group>"; };
+		TXFILE000030AA0011 /* davi_funda_sheet.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_funda_sheet.png"; sourceTree = "<group>"; };
+		TXFILE000031AA0011 /* davi_jovem_00.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_jovem_00.png"; sourceTree = "<group>"; };
+		TXFILE000032AA0011 /* davi_jovem_01.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_jovem_01.png"; sourceTree = "<group>"; };
+		TXFILE000033AA0011 /* davi_jovem_02.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_jovem_02.png"; sourceTree = "<group>"; };
+		TXFILE000034AA0011 /* davi_jovem_03.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_jovem_03.png"; sourceTree = "<group>"; };
+		TXFILE000035AA0011 /* davi_jovem_04.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_jovem_04.png"; sourceTree = "<group>"; };
+		TXFILE000036AA0011 /* davi_jovem_05.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_jovem_05.png"; sourceTree = "<group>"; };
+		TXFILE000037AA0011 /* davi_jovem_06.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_jovem_06.png"; sourceTree = "<group>"; };
+		TXFILE000038AA0011 /* davi_jovem_07.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_jovem_07.png"; sourceTree = "<group>"; };
+		TXFILE000039AA0011 /* davi_jovem_08.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_jovem_08.png"; sourceTree = "<group>"; };
+		TXFILE000040AA0011 /* davi_jovem_09.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_jovem_09.png"; sourceTree = "<group>"; };
+		TXFILE000041AA0011 /* davi_jovem_10.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_jovem_10.png"; sourceTree = "<group>"; };
+		TXFILE000042AA0011 /* davi_jovem_11.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_jovem_11.png"; sourceTree = "<group>"; };
+		TXFILE000043AA0011 /* davi_jovem_12.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_jovem_12.png"; sourceTree = "<group>"; };
+		TXFILE000044AA0011 /* davi_jovem_13.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_jovem_13.png"; sourceTree = "<group>"; };
+		TXFILE000045AA0011 /* davi_jovem_14.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_jovem_14.png"; sourceTree = "<group>"; };
+		TXFILE000046AA0011 /* davi_jovem_15.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_jovem_15.png"; sourceTree = "<group>"; };
+		TXFILE000047AA0011 /* davi_jovem_16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_jovem_16.png"; sourceTree = "<group>"; };
+		TXFILE000048AA0011 /* davi_jovem_17.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "davi_jovem_17.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +162,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA00112233445566778899CC /* SpriteKit.framework in Frameworks */,
+				13B16CFF66D62C07FD0F77E8 /* FirebaseAuth in Frameworks */,
+				11257CAF4DF15BAD06064AD6 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -69,6 +173,7 @@
 		AA00112233445566778899D1 /* DaviTheAnointed */ = {
 			isa = PBXGroup;
 			children = (
+				TEXTURESGROUP000001 /* Textures */,
 				AA001122334455667788990B /* AppDelegate.swift */,
 				AA00112233445566778899E2 /* SceneDelegate.swift */,
 				AA001122334455667788990D /* GameViewController.swift */,
@@ -76,6 +181,7 @@
 				AA00112233445566778899D4 /* Models */,
 				AA00112233445566778899D5 /* Managers */,
 				AA00112233445566778899D6 /* Scenes */,
+				64907C788DD7289B5F76A48E /* GoogleService-Info.plist */,
 			);
 			path = DaviTheAnointed;
 			sourceTree = "<group>";
@@ -142,6 +248,63 @@
 			);
 			sourceTree = "<group>";
 		};
+
+		TEXTURESGROUP000001 /* Textures */ = {
+			isa = PBXGroup;
+			children = (
+				TXFILE000000AA0011 /* davi_funda_00.png */,
+				TXFILE000001AA0011 /* davi_funda_01.png */,
+				TXFILE000002AA0011 /* davi_funda_02.png */,
+				TXFILE000003AA0011 /* davi_funda_03.png */,
+				TXFILE000004AA0011 /* davi_funda_04.png */,
+				TXFILE000005AA0011 /* davi_funda_05.png */,
+				TXFILE000006AA0011 /* davi_funda_06.png */,
+				TXFILE000007AA0011 /* davi_funda_07.png */,
+				TXFILE000008AA0011 /* davi_funda_08.png */,
+				TXFILE000009AA0011 /* davi_funda_09.png */,
+				TXFILE000010AA0011 /* davi_funda_10.png */,
+				TXFILE000011AA0011 /* davi_funda_11.png */,
+				TXFILE000012AA0011 /* davi_funda_12.png */,
+				TXFILE000013AA0011 /* davi_funda_13.png */,
+				TXFILE000014AA0011 /* davi_funda_14.png */,
+				TXFILE000015AA0011 /* davi_funda_15.png */,
+				TXFILE000016AA0011 /* davi_funda_16.png */,
+				TXFILE000017AA0011 /* davi_funda_17.png */,
+				TXFILE000018AA0011 /* davi_funda_18.png */,
+				TXFILE000019AA0011 /* davi_funda_19.png */,
+				TXFILE000020AA0011 /* davi_funda_20.png */,
+				TXFILE000021AA0011 /* davi_funda_21.png */,
+				TXFILE000022AA0011 /* davi_funda_22.png */,
+				TXFILE000023AA0011 /* davi_funda_23.png */,
+				TXFILE000024AA0011 /* davi_funda_24.png */,
+				TXFILE000025AA0011 /* davi_funda_25.png */,
+				TXFILE000026AA0011 /* davi_funda_26.png */,
+				TXFILE000027AA0011 /* davi_funda_27.png */,
+				TXFILE000028AA0011 /* davi_funda_28.png */,
+				TXFILE000029AA0011 /* davi_funda_29.png */,
+				TXFILE000030AA0011 /* davi_funda_sheet.png */,
+				TXFILE000031AA0011 /* davi_jovem_00.png */,
+				TXFILE000032AA0011 /* davi_jovem_01.png */,
+				TXFILE000033AA0011 /* davi_jovem_02.png */,
+				TXFILE000034AA0011 /* davi_jovem_03.png */,
+				TXFILE000035AA0011 /* davi_jovem_04.png */,
+				TXFILE000036AA0011 /* davi_jovem_05.png */,
+				TXFILE000037AA0011 /* davi_jovem_06.png */,
+				TXFILE000038AA0011 /* davi_jovem_07.png */,
+				TXFILE000039AA0011 /* davi_jovem_08.png */,
+				TXFILE000040AA0011 /* davi_jovem_09.png */,
+				TXFILE000041AA0011 /* davi_jovem_10.png */,
+				TXFILE000042AA0011 /* davi_jovem_11.png */,
+				TXFILE000043AA0011 /* davi_jovem_12.png */,
+				TXFILE000044AA0011 /* davi_jovem_13.png */,
+				TXFILE000045AA0011 /* davi_jovem_14.png */,
+				TXFILE000046AA0011 /* davi_jovem_15.png */,
+				TXFILE000047AA0011 /* davi_jovem_16.png */,
+				TXFILE000048AA0011 /* davi_jovem_17.png */,
+			);
+			path = "Resources/Textures";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -161,6 +324,10 @@
 			productName = DaviTheAnointed;
 			productReference = AA00112233445566778899CF /* DaviTheAnointed.app */;
 			productType = "com.apple.product-type.application";
+			packageProductDependencies = (
+				361FEAE45FF9BF32235838F5 /* FirebaseAuth */,
+				E410E6CD721F41BA973B1867 /* FirebaseFirestore */,
+			);
 		};
 /* End PBXNativeTarget section */
 
@@ -193,6 +360,9 @@
 			targets = (
 				AA00112233445566778899D8 /* DaviTheAnointed */,
 			);
+			packageReferences = (
+				68CCE76D3E9CE125A7A52B76 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 		};
 /* End PBXProject section */
 
@@ -201,6 +371,56 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				TXBLD000000AA0011 /* davi_funda_00.png in Resources */,
+				TXBLD000001AA0011 /* davi_funda_01.png in Resources */,
+				TXBLD000002AA0011 /* davi_funda_02.png in Resources */,
+				TXBLD000003AA0011 /* davi_funda_03.png in Resources */,
+				TXBLD000004AA0011 /* davi_funda_04.png in Resources */,
+				TXBLD000005AA0011 /* davi_funda_05.png in Resources */,
+				TXBLD000006AA0011 /* davi_funda_06.png in Resources */,
+				TXBLD000007AA0011 /* davi_funda_07.png in Resources */,
+				TXBLD000008AA0011 /* davi_funda_08.png in Resources */,
+				TXBLD000009AA0011 /* davi_funda_09.png in Resources */,
+				TXBLD000010AA0011 /* davi_funda_10.png in Resources */,
+				TXBLD000011AA0011 /* davi_funda_11.png in Resources */,
+				TXBLD000012AA0011 /* davi_funda_12.png in Resources */,
+				TXBLD000013AA0011 /* davi_funda_13.png in Resources */,
+				TXBLD000014AA0011 /* davi_funda_14.png in Resources */,
+				TXBLD000015AA0011 /* davi_funda_15.png in Resources */,
+				TXBLD000016AA0011 /* davi_funda_16.png in Resources */,
+				TXBLD000017AA0011 /* davi_funda_17.png in Resources */,
+				TXBLD000018AA0011 /* davi_funda_18.png in Resources */,
+				TXBLD000019AA0011 /* davi_funda_19.png in Resources */,
+				TXBLD000020AA0011 /* davi_funda_20.png in Resources */,
+				TXBLD000021AA0011 /* davi_funda_21.png in Resources */,
+				TXBLD000022AA0011 /* davi_funda_22.png in Resources */,
+				TXBLD000023AA0011 /* davi_funda_23.png in Resources */,
+				TXBLD000024AA0011 /* davi_funda_24.png in Resources */,
+				TXBLD000025AA0011 /* davi_funda_25.png in Resources */,
+				TXBLD000026AA0011 /* davi_funda_26.png in Resources */,
+				TXBLD000027AA0011 /* davi_funda_27.png in Resources */,
+				TXBLD000028AA0011 /* davi_funda_28.png in Resources */,
+				TXBLD000029AA0011 /* davi_funda_29.png in Resources */,
+				TXBLD000030AA0011 /* davi_funda_sheet.png in Resources */,
+				TXBLD000031AA0011 /* davi_jovem_00.png in Resources */,
+				TXBLD000032AA0011 /* davi_jovem_01.png in Resources */,
+				TXBLD000033AA0011 /* davi_jovem_02.png in Resources */,
+				TXBLD000034AA0011 /* davi_jovem_03.png in Resources */,
+				TXBLD000035AA0011 /* davi_jovem_04.png in Resources */,
+				TXBLD000036AA0011 /* davi_jovem_05.png in Resources */,
+				TXBLD000037AA0011 /* davi_jovem_06.png in Resources */,
+				TXBLD000038AA0011 /* davi_jovem_07.png in Resources */,
+				TXBLD000039AA0011 /* davi_jovem_08.png in Resources */,
+				TXBLD000040AA0011 /* davi_jovem_09.png in Resources */,
+				TXBLD000041AA0011 /* davi_jovem_10.png in Resources */,
+				TXBLD000042AA0011 /* davi_jovem_11.png in Resources */,
+				TXBLD000043AA0011 /* davi_jovem_12.png in Resources */,
+				TXBLD000044AA0011 /* davi_jovem_13.png in Resources */,
+				TXBLD000045AA0011 /* davi_jovem_14.png in Resources */,
+				TXBLD000046AA0011 /* davi_jovem_15.png in Resources */,
+				TXBLD000047AA0011 /* davi_jovem_16.png in Resources */,
+				TXBLD000048AA0011 /* davi_jovem_17.png in Resources */,
+				4F5D8465439D03FBB5CB53CA /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -234,6 +454,30 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		68CCE76D3E9CE125A7A52B76 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		361FEAE45FF9BF32235838F5 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 68CCE76D3E9CE125A7A52B76 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		E410E6CD721F41BA973B1867 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 68CCE76D3E9CE125A7A52B76 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCBuildConfiguration section */
 		AA00112233445566778899DE /* Debug */ = {

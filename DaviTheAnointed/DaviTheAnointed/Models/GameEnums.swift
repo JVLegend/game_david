@@ -153,8 +153,9 @@ enum CardRarity: String, Codable {
 // MARK: - Battle State
 enum BattleState {
     case idle
-    case running
-    case fighting
+    case running   // carregando
+    case walking   // player andando até próximo inimigo
+    case fighting  // em combate
     case victory
     case defeat
     case paused

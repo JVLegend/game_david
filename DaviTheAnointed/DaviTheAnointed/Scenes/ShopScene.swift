@@ -21,6 +21,12 @@ class ShopScene: SKScene {
 
         guard let player = GameManager.shared.playerData else { return }
 
+        let safeL: CGFloat = 60
+
+        // Back button — topo esquerdo
+        let backBtn = createButton(text: "← \(loc.localize("general.back"))", position: CGPoint(x: safeL + 50, y: size.height - 22), name: "btn_back")
+        addChild(backBtn)
+
         // Title
         let title = SKLabelNode(fontNamed: "AvenirNext-Bold")
         title.text = loc.localize("menu.shop")
@@ -31,24 +37,27 @@ class ShopScene: SKScene {
 
         // Gold display
         let goldLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
-        goldLabel.text = "\(player.gold)"
+        goldLabel.text = "🪙 \(player.gold)"
         goldLabel.fontSize = 14
         goldLabel.fontColor = SKColor(red: 1, green: 0.85, blue: 0.2, alpha: 1)
-        goldLabel.horizontalAlignmentMode = .left
-        goldLabel.position = CGPoint(x: 15, y: size.height - 30)
+        goldLabel.horizontalAlignmentMode = .right
+        goldLabel.position = CGPoint(x: size.width - safeL, y: size.height - 22)
         addChild(goldLabel)
 
-        // Tabs
+        // Tabs — centradas horizontalmente
         let tabs: [(String, ShopTab, String)] = [
             (loc.localize("general.buy"), .buy, "tab_buy"),
             (loc.localize("general.sell"), .sell, "tab_sell"),
             ("Baus", .chests, "tab_chests"),
             (loc.localize("menu.characters"), .characters, "tab_characters"),
         ]
+        let tabW: CGFloat = 105
+        let tabTotalW = tabW * CGFloat(tabs.count)
+        let tabStartX = (size.width - tabTotalW) / 2 + tabW / 2
 
         for (i, tab) in tabs.enumerated() {
-            let x = CGFloat(i) * 120 + size.width * 0.25
-            let btn = createTabButton(text: tab.0, position: CGPoint(x: x, y: size.height - 65), name: tab.2, isActive: currentTab == tab.1)
+            let x = tabStartX + CGFloat(i) * tabW
+            let btn = createTabButton(text: tab.0, position: CGPoint(x: x, y: size.height - 60), name: tab.2, isActive: currentTab == tab.1)
             addChild(btn)
         }
 
@@ -63,10 +72,6 @@ class ShopScene: SKScene {
         case .characters:
             setupCharactersTab(player: player)
         }
-
-        // Back button — topo esquerdo
-        let backBtn = createButton(text: "← \(loc.localize("general.back"))", position: CGPoint(x: 60, y: size.height - 22), name: "btn_back")
-        addChild(backBtn)
     }
 
     private func setupBuyTab(player: PlayerData) {
@@ -74,30 +79,38 @@ class ShopScene: SKScene {
             .filter { $0.price > 0 }
             .sorted { $0.price < $1.price }
 
-        // Slot filter buttons
+        let safeL: CGFloat = 60
+        let safeR: CGFloat = 60
+
+        // Slot filter buttons — centrados
         let slots: [(String, EquipmentSlot?)] = [
             ("All", nil), ("Head", .head), ("Body", .body), ("Wpn", .mainHand),
             ("Shield", .offHand), ("2H", .twoHand), ("Feet", .feet), ("Gloves", .gloves),
         ]
+        let filterW: CGFloat = 58
+        let filterTotalW = filterW * CGFloat(slots.count)
+        let filterStartX = (size.width - filterTotalW) / 2 + filterW / 2
 
         for (i, slot) in slots.enumerated() {
-            let x = CGFloat(i) * 65 + 50
+            let x = filterStartX + CGFloat(i) * filterW
             let isActive = selectedSlotFilter == slot.1
-            let btn = createSmallButton(text: slot.0, position: CGPoint(x: x, y: size.height - 95), name: "filter_\(slot.1?.rawValue ?? "all")", isActive: isActive)
+            let btn = createSmallButton(text: slot.0, position: CGPoint(x: x, y: size.height - 90), name: "filter_\(slot.1?.rawValue ?? "all")", isActive: isActive)
             addChild(btn)
         }
 
-        // Item grid
+        // Item grid — centrado horizontalmente
         let columns = 4
         let itemSize: CGFloat = 70
-        let startX: CGFloat = size.width * 0.3
+        let gridSpacing: CGFloat = 10
+        let gridTotalW = CGFloat(columns) * itemSize + CGFloat(columns - 1) * gridSpacing
+        let gridStartX = (size.width - gridTotalW) / 2 + itemSize / 2
         let startY: CGFloat = size.height - 130
 
         for (i, item) in items.prefix(12).enumerated() {
             let col = i % columns
             let row = i / columns
-            let x = startX + CGFloat(col) * (itemSize + 10)
-            let y = startY - CGFloat(row) * (itemSize + 10)
+            let x = gridStartX + CGFloat(col) * (itemSize + gridSpacing)
+            let y = startY - CGFloat(row) * (itemSize + gridSpacing)
 
             let itemNode = createItemNode(item: item, position: CGPoint(x: x, y: y), canAfford: player.gold >= item.price)
             addChild(itemNode)

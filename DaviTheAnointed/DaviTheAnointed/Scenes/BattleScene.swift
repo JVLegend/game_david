@@ -5,8 +5,8 @@ class BattleScene: SKScene {
     var mapId: Int = 1
     var battleId: Int = 1
 
-    // World width (wider than screen for scrolling)
-    private let worldWidth: CGFloat = 1792  // 2x tela landscape
+    // World width — calculado dinamicamente no setupBattle baseado na quantidade de inimigos
+    private var worldWidth: CGFloat = 1792
 
     // Camera
     private var gameCamera: SKCameraNode!
@@ -125,21 +125,33 @@ class BattleScene: SKScene {
         addChild(gameCamera)
         camera = gameCamera
 
+        // Câmera começa no início do mundo
+        cameraTargetX = size.width / 2
+
         // HUD layer é filho da câmera — fica fixo na tela
         hudLayer = SKNode()
         hudLayer.zPosition = 20
         gameCamera.addChild(hudLayer)
     }
 
+    /// O Davi fica numa posição fixa na tela (levemente à esquerda do centro).
+    /// A câmera se move pelo mundo e o player acompanha a câmera.
+    private let playerScreenX: CGFloat = 0.38  // fração da tela (0 = esquerda, 1 = direita)
+
     private func updateCamera() {
-        guard let player = playerNode else { return }
         let halfW = size.width / 2
-        let targetX = max(halfW, min(worldWidth - halfW, player.position.x))
-        // Suaviza o movimento da câmera
-        let lerpFactor: CGFloat = 0.08
-        let newX = gameCamera.position.x + (targetX - gameCamera.position.x) * lerpFactor
+        let clampedTarget = max(halfW, min(worldWidth - halfW, cameraTargetX))
+        // Lerp suave para acompanhar o alvo
+        let lerpFactor: CGFloat = 0.12
+        let newX = gameCamera.position.x + (clampedTarget - gameCamera.position.x) * lerpFactor
         gameCamera.position = CGPoint(x: newX, y: size.height / 2)
+
+        // Player acompanha a câmera — fica fixo na posição de tela
+        playerNode.position.x = newX - halfW + size.width * playerScreenX
     }
+
+    /// X alvo da câmera no mundo — movemos isso para "andar"
+    private var cameraTargetX: CGFloat = 0
 
     // MARK: - Setup
     private func setupBattle() {
@@ -161,6 +173,10 @@ class BattleScene: SKScene {
 
         goldEarned = 0
         xpEarned = 0
+
+        // Calcula largura do mundo baseado na quantidade de inimigos
+        let lastEnemyX = size.width * 1.2 + CGFloat(max(0, enemyQueue.count - 1)) * size.width * 0.8
+        worldWidth = max(size.width * 2, lastEnemyX + size.width)
 
         // Load food from player inventory
         if let player = GameManager.shared.playerData {
@@ -186,9 +202,11 @@ class BattleScene: SKScene {
         ground.zPosition = -5
         addChild(ground)
 
-        // Player — começa no início do mundo com sprite
+        // Player — posição X controlada pela câmera (fica fixo na tela)
         playerNode = SKSpriteNode(color: .clear, size: CGSize(width: 50, height: playerHeight))
-        playerNode.position = CGPoint(x: 100, y: size.height * 0.33)
+        let initialCamX = size.width / 2
+        playerNode.position = CGPoint(x: initialCamX - size.width / 2 + size.width * playerScreenX,
+                                       y: size.height * 0.33)
         playerNode.zPosition = 5
         addChild(playerNode)
 
@@ -367,7 +385,7 @@ class BattleScene: SKScene {
         walkToEnemy(index: 0)
     }
 
-    /// Posiciona o inimigo no mundo e faz o player andar até ele
+    /// Posiciona o inimigo no mundo e move a câmera até ele (cenário rola, Davi fica fixo)
     private func walkToEnemy(index: Int) {
         guard index < enemyQueue.count else {
             victory()
@@ -375,9 +393,10 @@ class BattleScene: SKScene {
         }
         battleState = .walking
 
-        // Posiciona o inimigo no mundo antes de andar
+        // Posiciona o inimigo no mundo antes de "andar"
         let enemy = enemyQueue[index]
-        let enemyX = 150 + CGFloat(index) * 480
+        // Primeiro inimigo aparece a ~1.5 telas de distância, os seguintes mais à frente
+        let enemyX = size.width * 1.2 + CGFloat(index) * size.width * 0.8
         enemyNode.position = CGPoint(x: enemyX, y: size.height * 0.33)
         enemyNode.isHidden = false
         enemyNode.color = enemy.isBoss ? SKColor(red: 0.6, green: 0.1, blue: 0.1, alpha: 1) :
@@ -385,17 +404,33 @@ class BattleScene: SKScene {
         enemyNode.size = enemy.isBoss ? CGSize(width: 60, height: 105) : CGSize(width: 40, height: 70)
         enemyNameLabel.text = enemy.localizedName
 
-        // Player anda até perto do inimigo
-        let targetX = enemyX - 90
-        let dist = abs(targetX - playerNode.position.x)
+        // A câmera precisa mover até que o player (fixo na tela a 38%) fique a ~90px do inimigo
+        // Posição do player no mundo = cameraX - halfW + screenW * playerScreenX
+        // Queremos playerWorldX = enemyX - 90
+        // Então: cameraX - halfW + screenW * 0.38 = enemyX - 90
+        // cameraX = enemyX - 90 + halfW - screenW * 0.38
+        let halfW = size.width / 2
+        let targetCam = enemyX - 90 + halfW - size.width * playerScreenX
+
+        let dist = abs(targetCam - cameraTargetX)
         let duration = TimeInterval(max(0.5, dist / 220))
-        let walk = SKAction.moveTo(x: targetX, duration: duration)
+
+        // Anima cameraTargetX suavemente usando SKAction no scene
+        playAnim("walk")
+        let startCam = cameraTargetX
+        let scrollAction = SKAction.customAction(withDuration: duration) { [weak self] _, elapsed in
+            guard let self = self else { return }
+            let t = min(1.0, elapsed / CGFloat(duration))
+            // Ease-out para desaceleração natural
+            let eased = 1.0 - (1.0 - t) * (1.0 - t)
+            self.cameraTargetX = startCam + (targetCam - startCam) * eased
+        }
         let beginFight = SKAction.run { [weak self] in
             guard let self = self else { return }
+            self.cameraTargetX = targetCam
             self.spawnEnemy(at: index)
         }
-        playAnim("walk")
-        playerNode.run(SKAction.sequence([walk, beginFight]))
+        run(SKAction.sequence([scrollAction, beginFight]), withKey: "walkToEnemy")
     }
 
     /// Configura o inimigo atual e começa o combate
@@ -447,16 +482,17 @@ class BattleScene: SKScene {
 
         guard let enemy = currentEnemy else { return }
 
-        // Player attack
+        // Player attack (intervalo mínimo de 2s para combate mais pausado)
         playerAttackTimer += dt
-        if playerAttackTimer >= playerStats.effectiveAttackInterval {
+        let playerInterval = max(2.0, playerStats.effectiveAttackInterval)
+        if playerAttackTimer >= playerInterval {
             playerAttackTimer = 0
             performPlayerAttack(enemy: enemy)
         }
 
-        // Enemy attack
+        // Enemy attack (intervalo mínimo de 2s)
         enemyAttackTimer += dt
-        let enemyInterval = 1.0 / enemy.attackSpeed
+        let enemyInterval = max(2.0, 1.0 / enemy.attackSpeed)
         if enemyAttackTimer >= enemyInterval {
             enemyAttackTimer = 0
             performEnemyAttack(enemy: enemy)

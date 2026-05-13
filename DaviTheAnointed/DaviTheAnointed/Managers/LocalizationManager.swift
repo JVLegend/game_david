@@ -58,6 +58,7 @@ final class LocalizationManager {
         "menu.challenges": "Desafios Semanais",
         "menu.settings": "Configurações",
         "menu.characters": "Personagens",
+        "menu.inventory_list": "Meus Itens",
 
         // Language Selection
         "lang.title": "Escolha seu idioma",
@@ -160,6 +161,20 @@ final class LocalizationManager {
         "hud.level": "Nível",
         "hud.gold": "Ouro",
         "hud.rubies": "Rubis",
+
+        // Item Actions & Slots
+        "item.action.equip": "Equipar",
+        "item.action.unequip": "Desequipar",
+        "item.slot.head": "Cabeça",
+        "item.slot.body": "Corpo",
+        "item.slot.feet": "Pés",
+        "item.slot.mainHand": "Mão Principal",
+        "item.slot.offHand": "Mão Secundária",
+        "item.slot.twoHand": "Duas Mãos",
+        "item.slot.necklace": "Colar",
+        "item.slot.ring1": "Anel 1",
+        "item.slot.ring2": "Anel 2",
+        "item.slot.gloves": "Luvas",
 
         // Abilities
         "ability.bite": "Mordida",
@@ -323,6 +338,7 @@ final class LocalizationManager {
         "menu.challenges": "Weekly Challenges",
         "menu.settings": "Settings",
         "menu.characters": "Characters",
+        "menu.inventory_list": "My Items",
 
         // Language Selection
         "lang.title": "Choose your language",
@@ -425,6 +441,20 @@ final class LocalizationManager {
         "hud.level": "Level",
         "hud.gold": "Gold",
         "hud.rubies": "Rubies",
+
+        // Item Actions & Slots
+        "item.action.equip": "Equip",
+        "item.action.unequip": "Unequip",
+        "item.slot.head": "Head",
+        "item.slot.body": "Body",
+        "item.slot.feet": "Feet",
+        "item.slot.mainHand": "Main Hand",
+        "item.slot.offHand": "Off Hand",
+        "item.slot.twoHand": "Two Hands",
+        "item.slot.necklace": "Necklace",
+        "item.slot.ring1": "Ring 1",
+        "item.slot.ring2": "Ring 2",
+        "item.slot.gloves": "Gloves",
 
         // Abilities
         "ability.bite": "Bite",

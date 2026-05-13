@@ -3,6 +3,48 @@ import SpriteKit
 
 class GameViewController: UIViewController {
 
+    private var hasLoadedInitialScene = false
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+
+        if !hasLoadedInitialScene {
+            setupInitialScene()
+            hasLoadedInitialScene = true
+        }
+    }
+
+    private func setupInitialScene() {
+        guard let skView = view as? SKView else {
+            // Se não for SKView, cria uma (caso tenha sido adicionada manualmente)
+            if let existingSkView = view.subviews.first(where: { $0 is SKView }) as? SKView {
+                presentIn(existingSkView)
+            }
+            return
+        }
+        presentIn(skView)
+    }
+
+    private func presentIn(_ skView: SKView) {
+        skView.ignoresSiblingOrder = true
+
+        let baseHeight: CGFloat = 414
+        let aspectRatio = skView.bounds.width / skView.bounds.height
+        let sceneSize = CGSize(width: baseHeight * aspectRatio, height: baseHeight)
+
+        LocalizationManager.shared.loadSavedLanguage()
+
+        let scene: SKScene
+        if LocalizationManager.shared.hasSelectedLanguage {
+            scene = LoginScene(size: sceneSize)
+        } else {
+            scene = LanguageSelectionScene(size: sceneSize)
+        }
+
+        scene.scaleMode = .aspectFill
+        skView.presentScene(scene)
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -10,31 +52,6 @@ class GameViewController: UIViewController {
         let skView = SKView(frame: view.bounds)
         skView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(skView)
-
-        skView.ignoresSiblingOrder = true
-        skView.showsFPS = true
-        skView.showsNodeCount = true
-
-        let sceneSize = CGSize(width: 896, height: 414) // iPhone landscape proportions
-        print("[APP] viewDidLoad - sceneSize: \(sceneSize)")
-
-        // Check if language was already selected
-        LocalizationManager.shared.loadSavedLanguage()
-        print("[APP] hasSelectedLanguage: \(LocalizationManager.shared.hasSelectedLanguage)")
-
-        let scene: SKScene
-        if LocalizationManager.shared.hasSelectedLanguage {
-            print("[APP] Loading LoginScene")
-            scene = LoginScene(size: sceneSize)
-        } else {
-            print("[APP] Loading LanguageSelectionScene")
-            scene = LanguageSelectionScene(size: sceneSize)
-        }
-
-        scene.scaleMode = .aspectFill
-        print("[APP] Presenting scene: \(type(of: scene))")
-        skView.presentScene(scene)
-        print("[APP] Scene presented")
     }
 
     override var shouldAutorotate: Bool {

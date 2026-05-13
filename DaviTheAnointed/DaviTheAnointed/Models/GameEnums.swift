@@ -1,4 +1,5 @@
 import Foundation
+import SpriteKit
 
 // MARK: - Language
 enum GameLanguage: String, Codable, CaseIterable {
@@ -21,13 +22,13 @@ enum ItemRarity: String, Codable, CaseIterable {
     case epic
     case legendary
 
-    var color: String {
+    var color: SKColor {
         switch self {
-        case .common: return "gray"
-        case .uncommon: return "green"
-        case .rare: return "blue"
-        case .epic: return "purple"
-        case .legendary: return "gold"
+        case .common: return .gray
+        case .uncommon: return .green
+        case .rare: return SKColor(red: 0.2, green: 0.5, blue: 1.0, alpha: 1)
+        case .epic: return .purple
+        case .legendary: return .orange
         }
     }
 

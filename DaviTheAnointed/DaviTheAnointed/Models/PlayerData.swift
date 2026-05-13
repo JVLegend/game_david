@@ -22,6 +22,7 @@ struct PlayerData: Codable {
     var pvpWins: Int
     var clanId: String?
     var achievements: [String]
+    var activeRunBonuses: CharacterStats?
     var createdAt: Date
     var lastSaved: Date
 
@@ -48,6 +49,7 @@ struct PlayerData: Codable {
             pvpWins: 0,
             clanId: nil,
             achievements: [],
+            activeRunBonuses: nil,
             createdAt: Date(),
             lastSaved: Date()
         )

@@ -1,7 +1,5 @@
 import Foundation
 import SpriteKit
-import FirebaseFirestore
-import FirebaseAuth
 
 final class GameManager {
     static let shared = GameManager()
@@ -32,6 +30,11 @@ final class GameManager {
             if let item = EquipmentDatabase.shared.item(withId: itemId) {
                 stats = stats + item.stats
             }
+        }
+
+        // Add temporary run bonuses (if any)
+        if let runBonuses = player.activeRunBonuses {
+            stats = stats + runBonuses
         }
 
         // Ensure currentHP doesn't exceed maxHP
@@ -182,6 +185,23 @@ final class GameManager {
         return true
     }
 
+    // MARK: - Map Run Bonuses
+    func addRunBonus(_ bonus: CharacterStats) {
+        mutate { p in
+            if let current = p.activeRunBonuses {
+                p.activeRunBonuses = current + bonus
+            } else {
+                p.activeRunBonuses = bonus
+            }
+        }
+        save()
+    }
+
+    func clearRunBonuses() {
+        mutate { p in p.activeRunBonuses = nil }
+        save()
+    }
+
     // MARK: - Battle Results
     func completeBattle(mapId: Int, battleId: Int, stars: Int, goldEarned: Int, xpEarned: Int, enemiesKilled: Int) {
         mutate { p in
@@ -206,54 +226,16 @@ final class GameManager {
         save()
     }
 
-    // MARK: - Save
+    // MARK: - Persistence (MOCKED for Local Test)
     func save() {
         mutate { p in p.lastSaved = Date() }
         guard let data = playerData else { return }
 
-        // Save locally
+        // Save locally only
         if let encoded = try? JSONEncoder().encode(data) {
             UserDefaults.standard.set(encoded, forKey: "player_data_\(data.userId)")
         }
-
-        // Save to Firestore (only for real Firebase users, not dev_player)
-        guard !data.userId.hasPrefix("dev_") else { return }
-        saveToFirestore(data)
-    }
-
-    private func saveToFirestore(_ data: PlayerData) {
-        guard let encoded = try? JSONEncoder().encode(data),
-              let dict = try? JSONSerialization.jsonObject(with: encoded) as? [String: Any] else { return }
-
-        let db = Firestore.firestore()
-        db.collection("players").document(data.userId).setData(dict, merge: true) { error in
-            if let error = error {
-                print("[FIRESTORE] Save error: \(error.localizedDescription)")
-            } else {
-                print("[FIRESTORE] Player data saved ✓")
-            }
-        }
-    }
-
-    func loadFromFirestore(userId: String, completion: @escaping (Bool) -> Void) {
-        let db = Firestore.firestore()
-        db.collection("players").document(userId).getDocument { [weak self] snapshot, error in
-            guard let self = self else { return }
-            if let error = error {
-                print("[FIRESTORE] Load error: \(error.localizedDescription)")
-                completion(false)
-                return
-            }
-            guard let dict = snapshot?.data(),
-                  let jsonData = try? JSONSerialization.data(withJSONObject: dict),
-                  let player = try? JSONDecoder().decode(PlayerData.self, from: jsonData) else {
-                completion(false)
-                return
-            }
-            self.playerData = player
-            print("[FIRESTORE] Player data loaded ✓")
-            completion(true)
-        }
+        print("[MOCK] Player data saved locally ✓")
     }
 
     func loadLocal(userId: String) -> PlayerData? {
@@ -268,7 +250,6 @@ final class GameManager {
         } else {
             var newPlayer = PlayerData.newPlayer(userId: userId, displayName: displayName, language: language)
             newPlayer.inventory.append("weapon_01")
-            // Equip starter weapon directly on the local copy
             if let item = EquipmentDatabase.shared.item(withId: "weapon_01") {
                 newPlayer.equippedItems[item.slot] = "weapon_01"
                 if let idx = newPlayer.inventory.firstIndex(of: "weapon_01") {
@@ -280,5 +261,10 @@ final class GameManager {
             mutate { p in p.powerScore = ps }
         }
         save()
+    }
+    
+    // Fallback for completion handlers
+    func loadFromFirestore(userId: String, completion: @escaping (Bool) -> Void) {
+        completion(false)
     }
 }

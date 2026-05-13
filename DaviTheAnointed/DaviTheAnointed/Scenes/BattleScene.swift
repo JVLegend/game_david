@@ -49,12 +49,25 @@ class BattleScene: SKScene {
     private var progressBar: SKNode!
     private var foodButtons: [SKNode] = []
 
+    // Skill state
+    private var skillButtons: [SKNode] = []
+    private var skillLastUsed: [String: TimeInterval] = [:]
+    private var skillCooldowns: [String: TimeInterval] = [:]
+    private var enemyStunnedTimer: TimeInterval = 0
+
+    // Bonus Cards
+    private var bonusCardEffects: [() -> Void] = []
+    private var isShowingCards: Bool = false
+
     // MARK: - Sprite Animation
     private let playerHeight: CGFloat = 90
     private var playerIdleFrames: [SKTexture] = []
     private var playerWalkFrames: [SKTexture] = []
     private var playerAttackFrames: [SKTexture] = []
     private var currentPlayerAnim: String = ""  // "idle", "walk", "attack"
+
+    private var wolfWalkFrames: [SKTexture] = []
+    private var currentEnemyAnim: String = ""
 
     private func loadPlayerTextures() {
         let character = GameManager.shared.playerData?.activeCharacter ?? .davi
@@ -79,6 +92,48 @@ class BattleScene: SKScene {
             playerNode.texture = first
             playerNode.size = CGSize(width: first.size().width / first.size().height * playerHeight,
                                     height: playerHeight)
+        }
+    }
+
+    private func loadEnemyTextures() {
+        wolfWalkFrames = (0...3).map { SKTexture(imageNamed: "wolf_walk_\($0)") }
+    }
+
+    private func playEnemyAnim(_ anim: String, for enemy: EnemyData, loop: Bool = true) {
+        guard anim != currentEnemyAnim else { return }
+        currentEnemyAnim = anim
+
+        enemyNode.removeAction(forKey: "enemyAnim")
+
+        // Somente o lobo tem frames por enquanto
+        if enemy.textureName == "lobocinzento" || enemy.textureName == "wolf" {
+            switch anim {
+            case "walk":
+                let animAction = SKAction.animate(with: wolfWalkFrames, timePerFrame: 0.15)
+                let action = loop ? SKAction.repeatForever(animAction) : animAction
+                enemyNode.run(action, withKey: "enemyAnim")
+                return
+            default: break
+            }
+        }
+
+        // Animações genéricas (respiro/idle) para outros ou se não houver frames
+        switch anim {
+        case "idle":
+            let breathUp = SKAction.moveBy(x: 0, y: 5, duration: 1.2)
+            breathUp.timingMode = .easeInEaseOut
+            let breathSequence = SKAction.sequence([breathUp, breathUp.reversed()])
+            enemyNode.run(SKAction.repeatForever(breathSequence), withKey: "enemyAnim")
+        case "attack":
+            // Salto de ataque
+            let jump = SKAction.sequence([
+                SKAction.moveBy(x: -30, y: 20, duration: 0.15),
+                SKAction.moveBy(x: 30, y: -20, duration: 0.15)
+            ])
+            enemyNode.run(jump, withKey: "enemyAnim")
+            currentEnemyAnim = "" // Reset para voltar ao idle depois
+        default:
+            break
         }
     }
 
@@ -111,7 +166,8 @@ class BattleScene: SKScene {
     private let loc = LocalizationManager.shared
 
     override func didMove(to view: SKView) {
-        backgroundColor = SKColor(red: 0.3, green: 0.5, blue: 0.35, alpha: 1)
+        backgroundColor = SKColor(red: 0.1, green: 0.1, blue: 0.15, alpha: 1)
+        loadEnemyTextures()
         setupCamera()
         setupBattle()
         setupHUD()
@@ -130,7 +186,7 @@ class BattleScene: SKScene {
 
         // HUD layer é filho da câmera — fica fixo na tela
         hudLayer = SKNode()
-        hudLayer.zPosition = 20
+        hudLayer.zPosition = 200 // Ensure it's above everything
         gameCamera.addChild(hudLayer)
     }
 
@@ -175,8 +231,8 @@ class BattleScene: SKScene {
         xpEarned = 0
 
         // Calcula largura do mundo baseado na quantidade de inimigos
-        let lastEnemyX = size.width * 1.2 + CGFloat(max(0, enemyQueue.count - 1)) * size.width * 0.8
-        worldWidth = max(size.width * 2, lastEnemyX + size.width)
+        let lastEnemyX = size.width * 1.5 + CGFloat(max(0, enemyQueue.count - 1)) * size.width * 1.0
+        worldWidth = max(size.width * 3, lastEnemyX + size.width)
 
         // Load food from player inventory
         if let player = GameManager.shared.playerData {
@@ -187,18 +243,18 @@ class BattleScene: SKScene {
     private func setupHUD() {
         // === MUNDO (rola com câmera) ===
 
-        // Background do mundo — mais largo que a tela
-        let bgNode = SKSpriteNode(color: SKColor(red: 0.25, green: 0.45, blue: 0.3, alpha: 1),
-                                   size: CGSize(width: worldWidth, height: size.height))
+        // Background do mundo — mais largo que a tela, usando textura gerada
+        let bgTexture = SKTexture(imageNamed: "background_forest")
+        let bgNode = SKSpriteNode(texture: bgTexture, size: CGSize(width: worldWidth, height: size.height))
         bgNode.position = CGPoint(x: worldWidth / 2, y: size.height / 2)
         bgNode.zPosition = -10
         addChild(bgNode)
 
-        // Chão que se estende pelo mundo inteiro
-        let ground = SKShapeNode(rectOf: CGSize(width: worldWidth, height: size.height * 0.28))
-        ground.fillColor = SKColor(red: 0.35, green: 0.25, blue: 0.15, alpha: 1)
-        ground.strokeColor = .clear
-        ground.position = CGPoint(x: worldWidth / 2, y: size.height * 0.14)
+        // Chão que se estende pelo mundo inteiro, usando textura gerada
+        let groundTexture = SKTexture(imageNamed: "ground_grass")
+        let groundHeight = size.height * 0.28
+        let ground = SKSpriteNode(texture: groundTexture, size: CGSize(width: worldWidth, height: groundHeight))
+        ground.position = CGPoint(x: worldWidth / 2, y: groundHeight / 2)
         ground.zPosition = -5
         addChild(ground)
 
@@ -206,7 +262,7 @@ class BattleScene: SKScene {
         playerNode = SKSpriteNode(color: .clear, size: CGSize(width: 50, height: playerHeight))
         let initialCamX = size.width / 2
         playerNode.position = CGPoint(x: initialCamX - size.width / 2 + size.width * playerScreenX,
-                                       y: size.height * 0.33)
+                                       y: groundHeight + playerHeight / 2 - 10)
         playerNode.zPosition = 5
         addChild(playerNode)
 
@@ -215,14 +271,15 @@ class BattleScene: SKScene {
         playAnim("idle")
 
         // Enemy — está mais à frente no mundo
-        enemyNode = SKSpriteNode(color: .red, size: CGSize(width: 40, height: 70))
-        enemyNode.position = CGPoint(x: worldWidth * 0.6, y: size.height * 0.33)
+        enemyNode = SKSpriteNode(imageNamed: "wolf")
+        enemyNode.size = CGSize(width: 80, height: 80)
+        enemyNode.position = CGPoint(x: worldWidth * 0.6, y: groundHeight + 30)
         enemyNode.zPosition = 5
         enemyNode.isHidden = true
         addChild(enemyNode)
 
         enemyNameLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
-        enemyNameLabel.fontSize = 12
+        enemyNameLabel.fontSize = 14
         enemyNameLabel.fontColor = .white
         enemyNameLabel.position = CGPoint(x: 0, y: 50)
         enemyNode.addChild(enemyNameLabel)
@@ -231,7 +288,7 @@ class BattleScene: SKScene {
         enemyHPBar = SKShapeNode(rectOf: CGSize(width: 80, height: 8), cornerRadius: 2)
         enemyHPBar.fillColor = SKColor(white: 0.2, alpha: 0.8)
         enemyHPBar.strokeColor = SKColor(white: 0.5, alpha: 1)
-        enemyHPBar.position = CGPoint(x: 0, y: 60)
+        enemyHPBar.position = CGPoint(x: 0, y: 65)
         enemyHPBar.zPosition = 20
         enemyNode.addChild(enemyHPBar)
 
@@ -244,14 +301,14 @@ class BattleScene: SKScene {
         // === HUD FIXO (filho da câmera, não rola) ===
 
         // Player HP Bar — centralizado na parte inferior do HUD
-        let hpBarWidth: CGFloat = 200
-        let hpBarHeight: CGFloat = 12
+        let hpBarWidth: CGFloat = min(size.width * 0.4, 250)
+        let hpBarHeight: CGFloat = 16
 
-        playerHPBar = SKShapeNode(rectOf: CGSize(width: hpBarWidth, height: hpBarHeight), cornerRadius: 3)
-        playerHPBar.fillColor = SKColor(white: 0.2, alpha: 0.8)
-        playerHPBar.strokeColor = SKColor(white: 0.5, alpha: 1)
+        playerHPBar = SKShapeNode(rectOf: CGSize(width: hpBarWidth, height: hpBarHeight), cornerRadius: 4)
+        playerHPBar.fillColor = SKColor(white: 0.1, alpha: 0.9)
+        playerHPBar.strokeColor = SKColor(white: 0.6, alpha: 1)
         // posição relativa à câmera (centro = 0,0), então y negativo = parte de baixo
-        playerHPBar.position = CGPoint(x: 0, y: -(size.height / 2) + size.height * 0.12)
+        playerHPBar.position = CGPoint(x: 0, y: -(size.height / 2) + 40)
         playerHPBar.zPosition = 20
         hudLayer.addChild(playerHPBar)
 
@@ -263,7 +320,7 @@ class BattleScene: SKScene {
 
         let hpText = SKLabelNode(fontNamed: "AvenirNext-Bold")
         hpText.name = "hp_text"
-        hpText.fontSize = 9
+        hpText.fontSize = 10
         hpText.fontColor = .white
         hpText.verticalAlignmentMode = .center
         hpText.zPosition = 22
@@ -271,30 +328,37 @@ class BattleScene: SKScene {
 
         // Gold (topo esquerdo da HUD)
         goldLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
-        goldLabel.text = "0 🪙"
-        goldLabel.fontSize = 15
+        goldLabel.text = "0"
+        goldLabel.fontSize = 18
         goldLabel.fontColor = SKColor(red: 1, green: 0.85, blue: 0.2, alpha: 1)
         goldLabel.horizontalAlignmentMode = .left
-        goldLabel.position = CGPoint(x: -(size.width / 2) + 16, y: (size.height / 2) - 28)
+        goldLabel.position = CGPoint(x: -(size.width / 2) + 50, y: (size.height / 2) - 40)
         goldLabel.zPosition = 30
         hudLayer.addChild(goldLabel)
+
+        let goldIcon = SKSpriteNode(imageNamed: "icon_gold")
+        goldIcon.size = CGSize(width: 24, height: 24)
+        goldIcon.position = CGPoint(x: -(size.width / 2) + 30, y: (size.height / 2) - 34)
+        goldIcon.zPosition = 30
+        hudLayer.addChild(goldIcon)
 
         // Stats panel e progress bar também no HUD
         setupStatsPanel()
         setupProgressBar()
         setupFoodButtons()
+        setupSkillButtons()
     }
 
     private func setupStatsPanel() {
         statsPanel = SKNode()
         // posição relativa à câmera: canto inferior esquerdo
-        statsPanel.position = CGPoint(x: -(size.width / 2) + 8, y: -(size.height / 2) + 8)
+        statsPanel.position = CGPoint(x: -(size.width / 2) + 10, y: -(size.height / 2) + 10)
         statsPanel.zPosition = 30
         hudLayer.addChild(statsPanel)
 
         let panelBg = SKShapeNode(rectOf: CGSize(width: 140, height: 120), cornerRadius: 6)
-        panelBg.fillColor = SKColor(white: 0.1, alpha: 0.85)
-        panelBg.strokeColor = SKColor(red: 0.5, green: 0.35, blue: 0.18, alpha: 1)
+        panelBg.fillColor = SKColor(white: 0.05, alpha: 0.9)
+        panelBg.strokeColor = SKColor(red: 0.6, green: 0.4, blue: 0.2, alpha: 1)
         panelBg.position = CGPoint(x: 70, y: 60)
         statsPanel.addChild(panelBg)
 
@@ -310,12 +374,12 @@ class BattleScene: SKScene {
 
         for (i, line) in lines.enumerated() {
             let isHeader = line.1.isEmpty
-            let label = SKLabelNode(fontNamed: isHeader ? "AvenirNext-Bold" : "AvenirNext-Regular")
+            let label = SKLabelNode(fontNamed: isHeader ? "AvenirNext-Bold" : "AvenirNext-Medium")
             label.text = isHeader ? line.0 : "  \(line.0): \(line.1)"
-            label.fontSize = isHeader ? 10 : 9
-            label.fontColor = isHeader ? SKColor(red: 1, green: 0.7, blue: 0.3, alpha: 1) : .white
+            label.fontSize = isHeader ? 11 : 10
+            label.fontColor = isHeader ? SKColor(red: 1, green: 0.75, blue: 0.3, alpha: 1) : .white
             label.horizontalAlignmentMode = .left
-            label.position = CGPoint(x: 8, y: 110 - CGFloat(i) * 15)
+            label.position = CGPoint(x: 10, y: 108 - CGFloat(i) * 15)
             statsPanel.addChild(label)
         }
     }
@@ -323,17 +387,17 @@ class BattleScene: SKScene {
     private func setupProgressBar() {
         progressBar = SKNode()
         // topo centro da HUD
-        progressBar.position = CGPoint(x: 0, y: (size.height / 2) - 20)
+        progressBar.position = CGPoint(x: 0, y: (size.height / 2) - 25)
         progressBar.zPosition = 30
         hudLayer.addChild(progressBar)
 
         let totalEnemies = enemyQueue.count
-        let spacing: CGFloat = 30
+        let spacing: CGFloat = 35
 
         for i in 0..<totalEnemies {
-            let icon = SKShapeNode(circleOfRadius: 8)
-            icon.fillColor = SKColor(white: 0.3, alpha: 0.8)
-            icon.strokeColor = SKColor(white: 0.5, alpha: 1)
+            let icon = SKShapeNode(circleOfRadius: 10)
+            icon.fillColor = SKColor(white: 0.2, alpha: 0.9)
+            icon.strokeColor = SKColor(white: 0.6, alpha: 1)
             icon.position = CGPoint(x: CGFloat(i) * spacing - CGFloat(totalEnemies - 1) * spacing / 2, y: 0)
             icon.name = "progress_\(i)"
             progressBar.addChild(icon)
@@ -342,41 +406,93 @@ class BattleScene: SKScene {
 
     private func setupFoodButtons() {
         // canto direito da HUD, posição relativa à câmera
-        let startX: CGFloat = (size.width / 2) - 60
-        let startY: CGFloat = size.height * 0.1
+        let startX: CGFloat = (size.width / 2) - 40
+        let startY: CGFloat = 60 // Relative to center Y
 
         for (index, foodSlot) in foodSlots.enumerated() {
             guard let food = FoodDatabase.shared.food(for: foodSlot.0) else { continue }
 
             let btn = SKNode()
-            btn.position = CGPoint(x: startX, y: startY - CGFloat(index) * 55)
+            btn.position = CGPoint(x: startX, y: startY - CGFloat(index) * 60)
             btn.name = "food_\(index)"
             btn.zPosition = 30
 
-            let bg = SKShapeNode(rectOf: CGSize(width: 48, height: 48), cornerRadius: 6)
-            bg.fillColor = SKColor(red: 0.3, green: 0.5, blue: 0.2, alpha: 0.9)
-            bg.strokeColor = SKColor(red: 0.5, green: 0.7, blue: 0.3, alpha: 1)
+            let bg = SKShapeNode(rectOf: CGSize(width: 50, height: 50), cornerRadius: 8)
+            bg.fillColor = SKColor(red: 0.2, green: 0.4, blue: 0.15, alpha: 0.95)
+            bg.strokeColor = SKColor(red: 0.4, green: 0.7, blue: 0.3, alpha: 1)
+            bg.lineWidth = 2
             bg.name = btn.name
             btn.addChild(bg)
 
             let label = SKLabelNode(fontNamed: "AvenirNext-Bold")
             label.text = "+\(food.healAmount)"
-            label.fontSize = 11
-            label.fontColor = SKColor(red: 0.3, green: 1, blue: 0.3, alpha: 1)
+            label.fontSize = 12
+            label.fontColor = SKColor(red: 0.5, green: 1, blue: 0.5, alpha: 1)
             label.verticalAlignmentMode = .center
             label.name = btn.name
             btn.addChild(label)
 
             let countLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
             countLabel.text = "x\(foodSlot.1)"
-            countLabel.fontSize = 9
+            countLabel.fontSize = 11
             countLabel.fontColor = .white
-            countLabel.position = CGPoint(x: 16, y: -16)
+            countLabel.position = CGPoint(x: 18, y: -18)
             countLabel.name = "food_count_\(index)"
             btn.addChild(countLabel)
 
             hudLayer.addChild(btn)
             foodButtons.append(btn)
+        }
+    }
+
+    private func setupSkillButtons() {
+        // canto direito da HUD, posição relativa à câmera, à esquerda das comidas
+        let startX: CGFloat = (size.width / 2) - 140
+        let startY: CGFloat = -(size.height / 2) + 60
+
+        let skills = [
+            ("Golpe do Cajado", 8.0, "C"),
+            ("Pedrada", 10.0, "P")
+        ]
+
+        for (index, skill) in skills.enumerated() {
+            let btn = SKNode()
+            btn.position = CGPoint(x: startX - CGFloat(index) * 75, y: startY)
+            btn.name = "skill_\(skill.0)"
+            btn.zPosition = 30
+
+            let bg = SKSpriteNode(imageNamed: "botao_pedra")
+            bg.size = CGSize(width: 60, height: 60)
+            bg.name = btn.name
+            btn.addChild(bg)
+
+            let label = SKLabelNode(fontNamed: "AvenirNext-Bold")
+            label.text = skill.2
+            label.fontSize = 24
+            label.fontColor = .white
+            label.verticalAlignmentMode = .center
+            label.name = btn.name
+            btn.addChild(label)
+
+            let cdOverlay = SKShapeNode(circleOfRadius: 26)
+            cdOverlay.fillColor = SKColor(white: 0, alpha: 0.7)
+            cdOverlay.strokeColor = .clear
+            cdOverlay.name = "cd_overlay_\(skill.0)"
+            cdOverlay.isHidden = true
+            cdOverlay.zPosition = 31
+            btn.addChild(cdOverlay)
+
+            let cdLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+            cdLabel.fontSize = 16
+            cdLabel.fontColor = .white
+            cdLabel.verticalAlignmentMode = .center
+            cdLabel.name = "cd_label_\(skill.0)"
+            cdLabel.zPosition = 32
+            btn.addChild(cdLabel)
+
+            hudLayer.addChild(btn)
+            skillButtons.append(btn)
+            skillCooldowns[skill.0] = skill.1
         }
     }
 
@@ -396,24 +512,44 @@ class BattleScene: SKScene {
         // Posiciona o inimigo no mundo antes de "andar"
         let enemy = enemyQueue[index]
         // Primeiro inimigo aparece a ~1.5 telas de distância, os seguintes mais à frente
-        let enemyX = size.width * 1.2 + CGFloat(index) * size.width * 0.8
-        enemyNode.position = CGPoint(x: enemyX, y: size.height * 0.33)
+        let enemyX = size.width * 1.5 + CGFloat(index) * size.width * 1.0
+        enemyNode.position = CGPoint(x: enemyX, y: size.height * 0.28 + 30)
         enemyNode.isHidden = false
-        enemyNode.color = enemy.isBoss ? SKColor(red: 0.6, green: 0.1, blue: 0.1, alpha: 1) :
-            (enemy.isSubBoss ? SKColor(red: 0.5, green: 0.3, blue: 0.1, alpha: 1) : .red)
-        enemyNode.size = enemy.isBoss ? CGSize(width: 60, height: 105) : CGSize(width: 40, height: 70)
+        
+        // Use textureName from enemy if possible, otherwise default lobocinzento
+        let texName = enemy.textureName.isEmpty ? "lobocinzento" : (SKTexture(imageNamed: enemy.textureName).size().width > 0 ? enemy.textureName : "lobocinzento")
+        enemyNode.texture = SKTexture(imageNamed: texName)
+        
+        if enemy.id == "alpha_wolf" {
+            enemyNode.size = CGSize(width: 100, height: 100) // Maior que o comum
+            enemyNode.color = .darkGray
+            enemyNode.colorBlendFactor = 0.3
+        } else if enemy.isBoss {
+            enemyNode.color = SKColor(red: 1.0, green: 0.5, blue: 0.5, alpha: 1)
+            enemyNode.colorBlendFactor = 0.3
+            enemyNode.size = CGSize(width: 120, height: 120)
+        } else {
+            enemyNode.color = .white
+            enemyNode.colorBlendFactor = 0
+            enemyNode.size = CGSize(width: 80, height: 80)
+        }
+
+        // Garantir que o inimigo encare o player (esquerda)
+        enemyNode.xScale = -abs(enemyNode.xScale)
+        
+        // Iniciar animação de andar
+        playEnemyAnim("walk", for: enemy)
+
         enemyNameLabel.text = enemy.localizedName
+        enemyNameLabel.position = CGPoint(x: 0, y: enemyNode.size.height / 2 + 10)
+        enemyHPBar.position = CGPoint(x: 0, y: enemyNode.size.height / 2 + 25)
 
         // A câmera precisa mover até que o player (fixo na tela a 38%) fique a ~90px do inimigo
-        // Posição do player no mundo = cameraX - halfW + screenW * playerScreenX
-        // Queremos playerWorldX = enemyX - 90
-        // Então: cameraX - halfW + screenW * 0.38 = enemyX - 90
-        // cameraX = enemyX - 90 + halfW - screenW * 0.38
         let halfW = size.width / 2
-        let targetCam = enemyX - 90 + halfW - size.width * playerScreenX
+        let targetCam = enemyX - 100 + halfW - size.width * playerScreenX
 
         let dist = abs(targetCam - cameraTargetX)
-        let duration = TimeInterval(max(0.5, dist / 220))
+        let duration = TimeInterval(max(0.6, dist / 250))
 
         // Anima cameraTargetX suavemente usando SKAction no scene
         playAnim("walk")
@@ -421,8 +557,8 @@ class BattleScene: SKScene {
         let scrollAction = SKAction.customAction(withDuration: duration) { [weak self] _, elapsed in
             guard let self = self else { return }
             let t = min(1.0, elapsed / CGFloat(duration))
-            // Ease-out para desaceleração natural
-            let eased = 1.0 - (1.0 - t) * (1.0 - t)
+            // Ease-in-out para movimento mais natural
+            let eased = t < 0.5 ? 2 * t * t : 1 - pow(-2 * t + 2, 2) / 2
             self.cameraTargetX = startCam + (targetCam - startCam) * eased
         }
         let beginFight = SKAction.run { [weak self] in
@@ -446,7 +582,9 @@ class BattleScene: SKScene {
         // Atualiza visual
         enemyNode.isHidden = false
         enemyNode.alpha = 1
-        enemyNode.setScale(1)
+        
+        // Parar animação de andar e começar idle
+        playEnemyAnim("idle", for: enemy)
 
         // Progress bar — marca como ativo
         for i in 0..<enemyQueue.count {
@@ -475,11 +613,13 @@ class BattleScene: SKScene {
         // Câmera sempre segue o player
         updateCamera()
 
-        guard battleState == .fighting else { return }
-
         let dt = lastUpdateTime == 0 ? 0 : currentTime - lastUpdateTime
         lastUpdateTime = currentTime
 
+        // Update skill cooldown visuals
+        updateSkillCooldowns(currentTime)
+
+        guard battleState == .fighting else { return }
         guard let enemy = currentEnemy else { return }
 
         // Player attack (intervalo mínimo de 2s para combate mais pausado)
@@ -492,10 +632,34 @@ class BattleScene: SKScene {
 
         // Enemy attack (intervalo mínimo de 2s)
         enemyAttackTimer += dt
-        let enemyInterval = max(2.0, 1.0 / enemy.attackSpeed)
-        if enemyAttackTimer >= enemyInterval {
-            enemyAttackTimer = 0
-            performEnemyAttack(enemy: enemy)
+        if enemyStunnedTimer > 0 {
+            enemyStunnedTimer -= dt
+        } else {
+            let enemyInterval = max(2.0, 1.0 / enemy.attackSpeed)
+            if enemyAttackTimer >= enemyInterval {
+                enemyAttackTimer = 0
+                performEnemyAttack(enemy: enemy)
+            }
+        }
+    }
+
+    private func updateSkillCooldowns(_ currentTime: TimeInterval) {
+        for (skillName, cooldown) in skillCooldowns {
+            let lastUsed = skillLastUsed[skillName] ?? (currentTime - cooldown)
+            let elapsed = currentTime - lastUsed
+            let remaining = max(0, cooldown - elapsed)
+
+            if let overlay = hudLayer.childNode(withName: "//cd_overlay_\(skillName)") as? SKShapeNode,
+               let label = hudLayer.childNode(withName: "//cd_label_\(skillName)") as? SKLabelNode {
+                if remaining > 0 {
+                    overlay.isHidden = false
+                    label.isHidden = false
+                    label.text = String(format: "%.1f", remaining)
+                } else {
+                    overlay.isHidden = true
+                    label.isHidden = true
+                }
+            }
         }
     }
 
@@ -537,31 +701,46 @@ class BattleScene: SKScene {
     }
 
     private func performEnemyAttack(enemy: EnemyData) {
-        // Check dodge
-        if playerStats.rollDodge(attackType: enemy.attackType) {
-            showDodgeText(at: playerNode.position)
-            return
+        // Animação de ataque
+        playEnemyAnim("attack", for: enemy)
+        
+        // Pequeno delay para o dano coincidir com o salto
+        let wait = SKAction.wait(forDuration: 0.15)
+        let dealDamage = SKAction.run { [weak self] in
+            guard let self = self else { return }
+            
+            // Check dodge
+            if self.playerStats.rollDodge(attackType: enemy.attackType) {
+                self.showDodgeText(at: self.playerNode.position)
+                return
+            }
+
+            let rawDamage = Int.random(in: enemy.damageMin...enemy.damageMax)
+            let finalDamage = self.playerStats.applyArmor(rawDamage: rawDamage)
+
+            self.playerStats.currentHP -= finalDamage
+
+            self.showDamageNumber(finalDamage, isCrit: false, at: self.playerNode.position, isEnemy: false)
+
+            // Player hit flash
+            let flash = SKAction.sequence([
+                SKAction.colorize(with: .red, colorBlendFactor: 0.8, duration: 0.05),
+                SKAction.colorize(withColorBlendFactor: 0, duration: 0.15),
+            ])
+            self.playerNode.run(flash)
+
+            self.updatePlayerHPBar()
+
+            if self.playerStats.currentHP <= 0 {
+                self.defeat()
+            }
         }
-
-        let rawDamage = Int.random(in: enemy.damageMin...enemy.damageMax)
-        let finalDamage = playerStats.applyArmor(rawDamage: rawDamage)
-
-        playerStats.currentHP -= finalDamage
-
-        showDamageNumber(finalDamage, isCrit: false, at: playerNode.position, isEnemy: false)
-
-        // Player hit flash
-        let flash = SKAction.sequence([
-            SKAction.colorize(with: .red, colorBlendFactor: 0.8, duration: 0.05),
-            SKAction.colorize(withColorBlendFactor: 0, duration: 0.15),
-        ])
-        playerNode.run(flash)
-
-        updatePlayerHPBar()
-
-        if playerStats.currentHP <= 0 {
-            defeat()
+        
+        let backToIdle = SKAction.run { [weak self] in
+            self?.playEnemyAnim("idle", for: enemy)
         }
+        
+        run(SKAction.sequence([wait, dealDamage, SKAction.wait(forDuration: 0.2), backToIdle]))
     }
 
     private func enemyDefeated() {
@@ -627,8 +806,105 @@ class BattleScene: SKScene {
             goldEarned: goldEarned, xpEarned: xpEarned, enemiesKilled: enemiesKilled
         )
 
-        // Show victory overlay
-        showEndOverlay(victory: true, stars: stars)
+        // Se não for boss, mostra as cartas de bônus antes do overlay final
+        if bossData == nil {
+            showBonusCards(stars: stars)
+        } else {
+            // Limpa bônus ao completar o mapa (matar boss)
+            GameManager.shared.clearRunBonuses()
+            showEndOverlay(victory: true, stars: stars)
+        }
+    }
+
+    private func showBonusCards(stars: Int) {
+        isShowingCards = true
+
+        let overlay = SKShapeNode(rectOf: CGSize(width: size.width, height: size.height), cornerRadius: 0)
+        overlay.fillColor = SKColor(white: 0, alpha: 0.8)
+        overlay.strokeColor = .clear
+        overlay.zPosition = 200
+        overlay.name = "bonus_cards_overlay"
+        hudLayer.addChild(overlay)
+
+        let title = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        title.text = "ESCOLHA UMA BÊNÇÃO"
+        title.fontSize = 24
+        title.fontColor = SKColor(red: 1, green: 0.85, blue: 0.2, alpha: 1)
+        title.position = CGPoint(x: 0, y: 120)
+        overlay.addChild(title)
+
+        struct BonusCardOption {
+            let title: String
+            let description: String
+            let effect: () -> Void
+        }
+
+        let allOptions: [BonusCardOption] = [
+            BonusCardOption(title: "Benção de Força", description: "+15% Dano", effect: {
+                GameManager.shared.addRunBonus(CharacterStats(damageMultiplier: 0.15))
+            }),
+            BonusCardOption(title: "Escudo da Fé", description: "+10 Armadura", effect: {
+                GameManager.shared.addRunBonus(CharacterStats(armor: 10))
+            }),
+            BonusCardOption(title: "Mãos Ágeis", description: "+15% Vel. Ataque", effect: {
+                GameManager.shared.addRunBonus(CharacterStats(attackSpeedBonus: 0.15))
+            }),
+            BonusCardOption(title: "Pele de Bronze", description: "+20 HP Máx", effect: {
+                GameManager.shared.addRunBonus(CharacterStats(maxHP: 20))
+            }),
+            BonusCardOption(title: "Olho de Águia", description: "+10% Crítico", effect: {
+                GameManager.shared.addRunBonus(CharacterStats(critChance: 0.10))
+            })
+        ]
+
+        let selected = allOptions.shuffled().prefix(3)
+        bonusCardEffects = []
+
+        let cardW: CGFloat = 150
+        let cardH: CGFloat = 200
+        let spacing: CGFloat = 20
+
+        for (i, card) in selected.enumerated() {
+            let cardNode = SKShapeNode(rectOf: CGSize(width: cardW, height: cardH), cornerRadius: 12)
+            cardNode.fillColor = SKColor(red: 0.1, green: 0.2, blue: 0.4, alpha: 1)
+            cardNode.strokeColor = .white
+            cardNode.lineWidth = 2
+            cardNode.position = CGPoint(x: CGFloat(i - 1) * (cardW + spacing), y: -20)
+            cardNode.name = "card_\(i)"
+            overlay.addChild(cardNode)
+
+            let t = SKLabelNode(fontNamed: "AvenirNext-Bold")
+            t.text = card.title
+            t.fontSize = 14
+            t.position = CGPoint(x: 0, y: 60)
+            t.name = cardNode.name
+            cardNode.addChild(t)
+
+            let d = SKLabelNode(fontNamed: "AvenirNext-Regular")
+            d.text = card.description
+            d.fontSize = 12
+            d.numberOfLines = 0
+            d.position = CGPoint(x: 0, y: 0)
+            d.name = cardNode.name
+            cardNode.addChild(d)
+
+            bonusCardEffects.append(card.effect)
+        }
+        
+        overlay.userData = NSMutableDictionary()
+        overlay.userData?["stars"] = stars
+    }
+
+    private func applyBonusCard(index: Int) {
+        guard index < bonusCardEffects.count else { return }
+        bonusCardEffects[index]()
+        
+        if let overlay = hudLayer.childNode(withName: "bonus_cards_overlay") {
+            let stars = (overlay.userData?["stars"] as? Int) ?? 1
+            overlay.removeFromParent()
+            isShowingCards = false
+            showEndOverlay(victory: true, stars: stars)
+        }
     }
 
     private func defeat() {
@@ -784,6 +1060,20 @@ class BattleScene: SKScene {
                 }
                 return
             }
+
+            if name.hasPrefix("skill_") {
+                let skillName = name.replacingOccurrences(of: "skill_", with: "")
+                useSkill(named: skillName)
+                return
+            }
+
+            if name.hasPrefix("card_") {
+                let parts = name.split(separator: "_")
+                if let index = Int(parts.last ?? "") {
+                    applyBonusCard(index: index)
+                }
+                return
+            }
         }
     }
 
@@ -825,5 +1115,66 @@ class BattleScene: SKScene {
             SKAction.removeFromParent()
         ])
         healLabel.run(anim)
+    }
+
+    private func useSkill(named name: String) {
+        guard battleState == .fighting, let enemy = currentEnemy else { return }
+
+        let now = lastUpdateTime
+        let cooldown = skillCooldowns[name] ?? 0
+        let lastUsed = skillLastUsed[name] ?? (now - cooldown)
+
+        if now - lastUsed < cooldown { return }
+
+        skillLastUsed[name] = now
+
+        if name == "Golpe do Cajado" {
+            let damage = Int(Double(playerStats.rollDamage()) * 1.5)
+            enemyCurrentHP -= damage
+            enemyStunnedTimer = 1.0
+            showDamageNumber(damage, isCrit: false, at: enemyNode.position, isEnemy: true)
+
+            // Visual effect: simple lunge
+            playerNode.run(SKAction.sequence([
+                SKAction.moveBy(x: 20, y: 0, duration: 0.1),
+                SKAction.moveBy(x: -20, y: 0, duration: 0.1)
+            ]))
+
+            // Stun effect on enemy
+            enemyNode.run(SKAction.sequence([
+                SKAction.colorize(with: .yellow, colorBlendFactor: 0.5, duration: 0.1),
+                SKAction.wait(forDuration: 0.8),
+                SKAction.colorize(withColorBlendFactor: 0, duration: 0.1)
+            ]))
+        } else if name == "Pedrada" {
+            let damage = Int(Double(playerStats.rollDamage()) * 2.0)
+            enemyCurrentHP -= damage
+            if Double.random(in: 0...1) < 0.2 {
+                enemyStunnedTimer = 1.0
+                enemyNode.run(SKAction.sequence([
+                    SKAction.colorize(with: .yellow, colorBlendFactor: 0.5, duration: 0.1),
+                    SKAction.wait(forDuration: 0.8),
+                    SKAction.colorize(withColorBlendFactor: 0, duration: 0.1)
+                ]))
+            }
+            showDamageNumber(damage, isCrit: false, at: enemyNode.position, isEnemy: true)
+
+            // Visual effect: projectile
+            let stone = SKShapeNode(circleOfRadius: 4)
+            stone.fillColor = .gray
+            stone.strokeColor = .black
+            stone.position = playerNode.position
+            stone.zPosition = 10
+            addChild(stone)
+            stone.run(SKAction.sequence([
+                SKAction.move(to: enemyNode.position, duration: 0.2),
+                SKAction.removeFromParent()
+            ]))
+        }
+
+        updateEnemyHPBar()
+        if enemyCurrentHP <= 0 {
+            enemyDefeated()
+        }
     }
 }

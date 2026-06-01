@@ -114,6 +114,13 @@ class BattleScene: SKScene {
         // Row 0 (00-05): idle
         let prefix = "davi_jovem"
         playerIdleFrames = (0...5).map { SKTexture(imageNamed: "\(prefix)_\(String(format: "%02d", $0))") }
+        // Pixel walk: wider leg poses from the newer Davi sprite set.
+        let pixelWalk = (0...7).map { SKTexture(imageNamed: "\(prefix)_walk_pixel_\(String(format: "%02d", $0))") }
+        if pixelWalk.allSatisfy({ $0.size().width > 0 }) {
+            playerWalkFrames = pixelWalk
+            return
+        }
+
         // Grounded walk: same foot baseline across frames, so Davi walks instead of bouncing.
         let groundedWalk = (0...7).map { SKTexture(imageNamed: "\(prefix)_walk_grounded_\(String(format: "%02d", $0))") }
         if groundedWalk.allSatisfy({ $0.size().width > 0 }) {

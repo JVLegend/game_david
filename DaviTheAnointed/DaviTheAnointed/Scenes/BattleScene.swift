@@ -409,7 +409,7 @@ class BattleScene: SKScene {
         // Most enemy sheets face right in the source art, so the right-side enemy node
         // is mirrored to face Davi. These newer animal sheets already face left.
         switch enemy.textureName {
-        case "enemy_rabid_fox", "enemy_wild_boar", "enemy_hunting_eagle", "enemy_giant_scorpion", "enemy_pack_hyena":
+        case "enemy_rabid_fox", "enemy_hungry_jackal", "enemy_wild_boar", "enemy_hunting_eagle", "enemy_giant_scorpion", "enemy_pack_hyena":
             return false
         default:
             return true

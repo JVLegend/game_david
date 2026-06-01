@@ -5,6 +5,8 @@ class OverworldScene: SKScene {
     private let loc = LocalizationManager.shared
     private var availableBattleNames = Set<String>()
     private var selectedMapId: Int = 0
+    private var previewMapId: Int?
+    private var previewBattleId: Int?
 
     override func didMove(to view: SKView) {
         backgroundColor = SKColor(red: 0.1, green: 0.2, blue: 0.1, alpha: 1)
@@ -267,12 +269,29 @@ class OverworldScene: SKScene {
 
                 let parts = name.split(separator: "_")
                 if parts.count == 3, let mapId = Int(parts[1]), let battleId = Int(parts[2]) {
-                    startBattle(mapId: mapId, battleId: battleId)
+                    showBattlePreview(mapId: mapId, battleId: battleId)
                     return
                 }
             }
 
             switch name {
+            case "btn_preview_close", "battle_preview_overlay":
+                childNode(withName: "battle_preview_overlay")?.removeFromParent()
+                previewMapId = nil
+                previewBattleId = nil
+                return
+            case "btn_preview_start":
+                if let mapId = previewMapId, let battleId = previewBattleId {
+                    childNode(withName: "battle_preview_overlay")?.removeFromParent()
+                    startBattle(mapId: mapId, battleId: battleId)
+                }
+                return
+            case "btn_preview_repeat_prev":
+                if let mapId = previewMapId, let battleId = previewBattleId {
+                    childNode(withName: "battle_preview_overlay")?.removeFromParent()
+                    startBattle(mapId: mapId, battleId: max(1, battleId - 1))
+                }
+                return
             case "btn_map_prev":
                 selectedMapId = max(1, selectedMapId - 1)
                 setupUI()
@@ -298,6 +317,134 @@ class OverworldScene: SKScene {
             default:
                 break
             }
+        }
+    }
+
+    private func showBattlePreview(mapId: Int, battleId: Int) {
+        guard let player = GameManager.shared.playerData,
+              let map = EnemyDatabase.shared.map(withId: mapId),
+              let battle = map.battles.first(where: { $0.battleId == battleId }),
+              isBattleAvailable(battle, in: map, player: player) else { return }
+
+        childNode(withName: "battle_preview_overlay")?.removeFromParent()
+        previewMapId = mapId
+        previewBattleId = battleId
+
+        let root = SKNode()
+        root.name = "battle_preview_overlay"
+        root.zPosition = 100
+        addChild(root)
+
+        let dim = SKShapeNode(rectOf: size)
+        dim.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        dim.fillColor = SKColor.black.withAlphaComponent(0.56)
+        dim.strokeColor = .clear
+        dim.name = "battle_preview_overlay"
+        root.addChild(dim)
+
+        let panelSize = CGSize(width: min(460, size.width * 0.76), height: min(286, size.height * 0.78))
+        let panel = SKShapeNode(rectOf: panelSize, cornerRadius: 14)
+        panel.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        panel.fillColor = SKColor(red: 0.09, green: 0.065, blue: 0.035, alpha: 0.98)
+        panel.strokeColor = SKColor(red: 1.0, green: 0.76, blue: 0.22, alpha: 0.95)
+        panel.lineWidth = 3
+        root.addChild(panel)
+
+        let completedStars = player.starsForBattle(mapId: mapId, battleId: battleId)
+        let title = makePreviewLabel(text: battle.localizedName, size: 20, color: SKColor(red: 1, green: 0.86, blue: 0.36, alpha: 1), weight: "AvenirNext-Heavy")
+        title.position = CGPoint(x: 0, y: panelSize.height * 0.38)
+        panel.addChild(title)
+
+        let enemyData = battle.enemies.compactMap { EnemyDatabase.shared.enemy(withId: $0) }
+        let enemyNames = enemyData.map(\.localizedName).joined(separator: ", ")
+        let difficulty = previewDifficulty(for: battle, enemies: enemyData, player: player)
+        let status = completedStars > 0
+            ? (loc.language == .portuguese ? "Concluída: \(completedStars) estrela(s)" : "Cleared: \(completedStars) star(s)")
+            : (loc.language == .portuguese ? "Primeira vitória libera progresso" : "First win unlocks progress")
+
+        let info = makePreviewLabel(text: "\(difficulty)  •  \(status)", size: 13, color: SKColor(white: 0.92, alpha: 1))
+        info.position = CGPoint(x: 0, y: panelSize.height * 0.25)
+        panel.addChild(info)
+
+        let enemies = makePreviewLabel(
+            text: (loc.language == .portuguese ? "Inimigos: " : "Enemies: ") + enemyNames,
+            size: 12,
+            color: .white
+        )
+        enemies.numberOfLines = 2
+        enemies.preferredMaxLayoutWidth = panelSize.width - 54
+        enemies.position = CGPoint(x: 0, y: panelSize.height * 0.10)
+        panel.addChild(enemies)
+
+        let rewards = makePreviewLabel(
+            text: "+\(battle.goldReward) \(loc.localize("hud.gold"))   +\(battle.xpReward) XP",
+            size: 14,
+            color: SKColor(red: 1, green: 0.85, blue: 0.28, alpha: 1),
+            weight: "AvenirNext-Bold"
+        )
+        rewards.position = CGPoint(x: 0, y: -panelSize.height * 0.05)
+        panel.addChild(rewards)
+
+        let dropNames = battle.possibleDropIds.compactMap { EquipmentDatabase.shared.item(withId: $0)?.localizedName }
+        let dropText = dropNames.isEmpty
+            ? (loc.language == .portuguese ? "Drops: sem item raro nesta luta" : "Drops: no rare item in this fight")
+            : (loc.language == .portuguese ? "Drops possíveis: " : "Possible drops: ") + dropNames.prefix(3).joined(separator: ", ")
+        let drops = makePreviewLabel(text: dropText, size: 11, color: SKColor(red: 0.70, green: 0.94, blue: 1, alpha: 1))
+        drops.numberOfLines = 2
+        drops.preferredMaxLayoutWidth = panelSize.width - 60
+        drops.position = CGPoint(x: 0, y: -panelSize.height * 0.19)
+        panel.addChild(drops)
+
+        let start = createButton(
+            text: loc.language == .portuguese ? "Iniciar" : "Start",
+            position: CGPoint(x: panelSize.width * 0.23, y: -panelSize.height * 0.37),
+            name: "btn_preview_start",
+            size: CGSize(width: 118, height: 38)
+        )
+        panel.addChild(start)
+
+        if battleId > 1 && player.starsForBattle(mapId: mapId, battleId: battleId - 1) > 0 {
+            let repeatPrev = createButton(
+                text: loc.language == .portuguese ? "Repetir anterior" : "Repeat prev",
+                position: CGPoint(x: -panelSize.width * 0.23, y: -panelSize.height * 0.37),
+                name: "btn_preview_repeat_prev",
+                size: CGSize(width: 136, height: 38)
+            )
+            panel.addChild(repeatPrev)
+        } else {
+            let close = createButton(
+                text: loc.localize("general.close"),
+                position: CGPoint(x: -panelSize.width * 0.23, y: -panelSize.height * 0.37),
+                name: "btn_preview_close",
+                size: CGSize(width: 110, height: 38)
+            )
+            panel.addChild(close)
+        }
+    }
+
+    private func makePreviewLabel(text: String, size: CGFloat, color: SKColor, weight: String = "AvenirNext-DemiBold") -> SKLabelNode {
+        let label = SKLabelNode(fontNamed: weight)
+        label.text = text
+        label.fontSize = size
+        label.fontColor = color
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        return label
+    }
+
+    private func previewDifficulty(for battle: BattleDefinition, enemies: [EnemyData], player: PlayerData) -> String {
+        let totalHP = enemies.reduce(0) { $0 + $1.hp }
+        let averageDamage = enemies.reduce(0) { $0 + (($1.damageMin + $1.damageMax) / 2) }
+        let pressure = totalHP + averageDamage * 8 + (battle.isBossBattle ? 80 : 0)
+        let playerPower = max(80, player.powerScore + player.level * 18)
+        let ratio = Double(pressure) / Double(playerPower)
+
+        if ratio < 0.75 {
+            return loc.language == .portuguese ? "Dificuldade: favorável" : "Difficulty: favorable"
+        } else if ratio < 1.15 {
+            return loc.language == .portuguese ? "Dificuldade: equilibrada" : "Difficulty: balanced"
+        } else {
+            return loc.language == .portuguese ? "Dificuldade: perigosa" : "Difficulty: dangerous"
         }
     }
 

@@ -218,6 +218,19 @@ class InventoryScene: SKScene {
             leftPanel.addChild(label)
 
         }
+
+        let activeSets = EquipmentSetDatabase.shared.activeSets(forEquippedItemIds: Set(player.equippedItems.values))
+            .filter { !$0.activeBonuses.isEmpty }
+        if let strongestSet = activeSets.sorted(by: { $0.activeBonuses.count > $1.activeBonuses.count }).first {
+            let setLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+            setLabel.text = "\(strongestSet.definition.name(language: loc.language)): \(strongestSet.equippedPieces)p"
+            setLabel.fontSize = 10.5
+            setLabel.fontColor = SKColor(red: 0.70, green: 0.94, blue: 1, alpha: 1)
+            setLabel.horizontalAlignmentMode = .left
+            setLabel.position = CGPoint(x: statsX, y: statsY - 98)
+            fit(label: setLabel, maxWidth: panelW - statsX - 14, minimumSize: 8)
+            leftPanel.addChild(setLabel)
+        }
     }
 
     private func setupRightContent(player: PlayerData) {

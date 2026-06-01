@@ -140,6 +140,44 @@ enum PlayableCharacter: String, Codable, CaseIterable {
         }
     }
 
+    func roleTitle(language: GameLanguage) -> String {
+        switch self {
+        case .davi:
+            return language == .portuguese ? "Pastor equilibrado" : "Balanced shepherd"
+        case .bigJ:
+            return language == .portuguese ? "Atacante veloz" : "Fast striker"
+        case .sansao:
+            return language == .portuguese ? "Força bruta" : "Raw power"
+        case .josue:
+            return language == .portuguese ? "Defensor tático" : "Tactical defender"
+        case .debora:
+            return language == .portuguese ? "Líder ágil" : "Agile leader"
+        case .elias:
+            return language == .portuguese ? "Sustentação" : "Sustain fighter"
+        case .gideao:
+            return language == .portuguese ? "Sobrevivente" : "Survivor"
+        }
+    }
+
+    func playstyleHint(language: GameLanguage) -> String {
+        switch self {
+        case .davi:
+            return language == .portuguese ? "Bom para aprender e farmar com segurança." : "Good for learning and steady farming."
+        case .bigJ:
+            return language == .portuguese ? "Crita mais e joga melhor em lutas rápidas." : "More crits and better in quick fights."
+        case .sansao:
+            return language == .portuguese ? "Aguenta pancada e vence pelo dano alto." : "Takes hits and wins through heavy damage."
+        case .josue:
+            return language == .portuguese ? "Mais armadura contra fases com muito ataque à distância." : "More armor for ranged-heavy stages."
+        case .debora:
+            return language == .portuguese ? "Ataca em ritmo alto e reposiciona melhor." : "Attacks faster and repositions well."
+        case .elias:
+            return language == .portuguese ? "Recupera vida e perdoa erros em lutas longas." : "Heals back and forgives mistakes in long fights."
+        case .gideao:
+            return language == .portuguese ? "Esquiva muito e é ótimo para chefes perigosos." : "Dodges often and shines against dangerous bosses."
+        }
+    }
+
     var textureName: String {
         return rawValue
     }

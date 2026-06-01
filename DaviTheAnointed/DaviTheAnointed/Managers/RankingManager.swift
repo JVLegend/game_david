@@ -5,6 +5,10 @@ struct RankingEntry: Codable {
     let displayName: String
     let powerScore: Int
     let level: Int
+    let totalStars: Int
+    let totalEnemiesKilled: Int
+    let totalGoldEarned: Int
+    let highestMapCompleted: Int
 }
 
 final class RankingManager {
@@ -25,7 +29,11 @@ final class RankingManager {
                     userId: player.userId,
                     displayName: player.displayName,
                     powerScore: player.powerScore,
-                    level: player.level
+                    level: player.level,
+                    totalStars: player.totalStars,
+                    totalEnemiesKilled: player.totalEnemiesKilled,
+                    totalGoldEarned: player.totalGoldEarned,
+                    highestMapCompleted: player.highestMapCompleted
                 ))
             }
 

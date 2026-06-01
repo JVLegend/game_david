@@ -254,15 +254,39 @@ class BattleScene: SKScene {
                 ])
                 enemyNode.run(SKAction.group([stride, lunge]), withKey: "enemyAnim")
             } else {
-                // Salto de ataque
-                let jump = SKAction.sequence([
-                    SKAction.moveBy(x: -30, y: 20, duration: 0.15),
-                    SKAction.moveBy(x: 30, y: -20, duration: 0.15),
-                    SKAction.run { [weak self] in
-                        self?.resetEnemyVerticalPosition()
-                    }
-                ])
-                enemyNode.run(jump, withKey: "enemyAnim")
+                let attackMotion: SKAction
+                if enemy.attackType == .ranged {
+                    attackMotion = SKAction.sequence([
+                        SKAction.group([
+                            SKAction.moveBy(x: 16, y: 3, duration: 0.10),
+                            SKAction.rotate(toAngle: 0.08, duration: 0.10, shortestUnitArc: true)
+                        ]),
+                        SKAction.group([
+                            SKAction.moveBy(x: -16, y: -3, duration: 0.16),
+                            SKAction.rotate(toAngle: 0, duration: 0.16, shortestUnitArc: true)
+                        ]),
+                        SKAction.run { [weak self] in
+                            self?.resetEnemyVerticalPosition()
+                        }
+                    ])
+                } else {
+                    let stride = frames.isEmpty ? SKAction.wait(forDuration: 0.01) : SKAction.animate(with: frames + Array(frames.reversed()), timePerFrame: 0.06)
+                    let lunge = SKAction.sequence([
+                        SKAction.group([
+                            SKAction.moveBy(x: -36, y: 14, duration: 0.13),
+                            SKAction.rotate(toAngle: -0.06, duration: 0.13, shortestUnitArc: true)
+                        ]),
+                        SKAction.group([
+                            SKAction.moveBy(x: 36, y: -14, duration: 0.18),
+                            SKAction.rotate(toAngle: 0, duration: 0.18, shortestUnitArc: true)
+                        ]),
+                        SKAction.run { [weak self] in
+                            self?.resetEnemyVerticalPosition()
+                        }
+                    ])
+                    attackMotion = SKAction.group([stride, lunge])
+                }
+                enemyNode.run(attackMotion, withKey: "enemyAnim")
             }
             currentEnemyAnim = "" // Reset para voltar ao idle depois
         default:
@@ -840,6 +864,15 @@ class BattleScene: SKScene {
         setupProgressBar()
         setupFoodButtons()
         setupSkillButtons()
+        run(SKAction.sequence([
+            SKAction.wait(forDuration: 0.7),
+            SKAction.run { [weak self] in
+                guard let self else { return }
+                self.showCombatToast(self.loc.language == .portuguese
+                    ? "Comida cura. Pedra atordoa, cajado causa dano forte."
+                    : "Food heals. Stone can stun, staff hits harder.")
+            }
+        ]))
     }
 
     private func setupStatsPanel() {
@@ -1637,6 +1670,7 @@ class BattleScene: SKScene {
 
         // Show damage number
         showDamageNumber(finalDamage, isCrit: isCrit, at: enemyNode.position, isEnemy: true)
+        shakeCamera(strength: isCrit ? 9 : 4)
 
         // Player attack animation
         playAnim("attack", loop: false)
@@ -1690,6 +1724,7 @@ class BattleScene: SKScene {
             self.playerStats.currentHP -= finalDamage
 
             self.showDamageNumber(finalDamage, isCrit: false, at: self.playerNode.position, isEnemy: false)
+            self.shakeCamera(strength: enemy.isBoss ? 9 : 6)
 
             // Player hit flash
             let flash = SKAction.sequence([
@@ -2052,6 +2087,20 @@ class BattleScene: SKScene {
                     itemLabel.fontSize -= 0.5
                 }
                 overlay.addChild(itemLabel)
+            } else if let battleDef = currentBattleDef {
+                let possibleDrops = battleDef.possibleDropIds.compactMap { EquipmentDatabase.shared.item(withId: $0)?.localizedName }
+                if !possibleDrops.isEmpty {
+                    let dropHint = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+                    dropHint.text = (loc.language == .portuguese ? "Pode dropar: " : "Can drop: ") + possibleDrops.prefix(2).joined(separator: ", ")
+                    dropHint.fontSize = 11
+                    dropHint.fontColor = SKColor(white: 1, alpha: 0.62)
+                    dropHint.numberOfLines = 2
+                    dropHint.preferredMaxLayoutWidth = overlaySize.width - 56
+                    dropHint.horizontalAlignmentMode = .center
+                    dropHint.verticalAlignmentMode = .center
+                    dropHint.position = CGPoint(x: 0, y: -overlaySize.height * 0.15)
+                    overlay.addChild(dropHint)
+                }
             }
             addMissionRewardLabel(to: overlay, overlaySize: overlaySize, y: -overlaySize.height * 0.25)
         } else {
@@ -2073,6 +2122,19 @@ class BattleScene: SKScene {
             overlay.addChild(rewardLabel)
             addMissionRewardLabel(to: overlay, overlaySize: overlaySize, y: -overlaySize.height * 0.20)
         }
+
+        let nextTip = SKLabelNode(fontNamed: "AvenirNext-Medium")
+        nextTip.text = victory
+            ? (loc.language == .portuguese ? "Próximo: escolha uma bênção, equipe drops ou avance no mapa." : "Next: pick a blessing, equip drops, or advance on the map.")
+            : (loc.language == .portuguese ? "Você manteve ouro/XP. Repita a fase ou compre equipamento." : "You kept gold/XP. Replay the stage or buy gear.")
+        nextTip.fontSize = 10.5
+        nextTip.fontColor = SKColor(white: 1, alpha: 0.70)
+        nextTip.numberOfLines = 2
+        nextTip.preferredMaxLayoutWidth = overlaySize.width - 58
+        nextTip.horizontalAlignmentMode = .center
+        nextTip.verticalAlignmentMode = .center
+        nextTip.position = CGPoint(x: 0, y: -overlaySize.height / 2 + 86)
+        overlay.addChild(nextTip)
 
         // Continue button
         let continueBtn = SKNode()

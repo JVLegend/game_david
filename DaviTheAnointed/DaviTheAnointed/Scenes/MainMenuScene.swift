@@ -590,7 +590,12 @@ class MainMenuScene: SKScene {
         desc.position = CGPoint(x: -width / 2 + 12, y: -9)
         desc.zPosition = 2
 
-        if let mission = missions.first {
+        if let daily = DailyMissionManager.nextVisibleMission(for: player) {
+            title.text = loc.language == .portuguese ? "DIÁRIA" : "DAILY"
+            detail.text = daily.title(language: loc.language)
+            progress.text = DailyMissionManager.progressText(for: daily, userId: player.userId)
+            desc.text = loc.language == .portuguese ? "Reinicia todos os dias e ajuda no grind." : "Resets daily and helps your grind."
+        } else if let mission = missions.first {
             detail.text = mission.title(language: loc.language)
             progress.text = mission.progressText(for: player)
             desc.text = mission.description(language: loc.language)

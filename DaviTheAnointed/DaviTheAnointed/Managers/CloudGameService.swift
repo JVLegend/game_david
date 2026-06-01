@@ -71,6 +71,10 @@ final class CloudGameService {
             "displayName": .string(player.displayName),
             "powerScore": .integer(player.powerScore),
             "level": .integer(player.level),
+            "totalStars": .integer(player.totalStars),
+            "totalEnemiesKilled": .integer(player.totalEnemiesKilled),
+            "totalGoldEarned": .integer(player.totalGoldEarned),
+            "highestMapCompleted": .integer(player.highestMapCompleted),
             "updatedAt": .timestamp(Date())
         ]
 
@@ -99,11 +103,15 @@ final class CloudGameService {
                     let entries = rows.compactMap { response -> RankingEntry? in
                         guard let fields = response.document?.fields else { return nil }
                         return RankingEntry(
-                            userId: fields["userId"]?.stringValue ?? "",
-                            displayName: fields["displayName"]?.stringValue ?? "Jogador",
-                            powerScore: fields["powerScore"]?.intValue ?? 0,
-                            level: fields["level"]?.intValue ?? 1
-                        )
+	                            userId: fields["userId"]?.stringValue ?? "",
+	                            displayName: fields["displayName"]?.stringValue ?? "Jogador",
+	                            powerScore: fields["powerScore"]?.intValue ?? 0,
+	                            level: fields["level"]?.intValue ?? 1,
+                                totalStars: fields["totalStars"]?.intValue ?? 0,
+                                totalEnemiesKilled: fields["totalEnemiesKilled"]?.intValue ?? 0,
+                                totalGoldEarned: fields["totalGoldEarned"]?.intValue ?? 0,
+                                highestMapCompleted: fields["highestMapCompleted"]?.intValue ?? 0
+	                        )
                     }
                     completion(entries.filter { !$0.userId.isEmpty })
                 case .failure:

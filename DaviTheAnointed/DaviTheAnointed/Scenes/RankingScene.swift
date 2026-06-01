@@ -1,10 +1,43 @@
 import SpriteKit
 
 class RankingScene: SKScene {
+    private enum RankingMetric: String, CaseIterable {
+        case power
+        case stars
+        case enemies
+        case gold
+
+        func title(language: GameLanguage) -> String {
+            switch self {
+            case .power:
+                return language == .portuguese ? "Poder" : "Power"
+            case .stars:
+                return language == .portuguese ? "Estrelas" : "Stars"
+            case .enemies:
+                return language == .portuguese ? "Inimigos" : "Enemies"
+            case .gold:
+                return language == .portuguese ? "Ouro" : "Gold"
+            }
+        }
+
+        func score(for entry: RankingEntry) -> Int {
+            switch self {
+            case .power:
+                return entry.powerScore
+            case .stars:
+                return entry.totalStars
+            case .enemies:
+                return entry.totalEnemiesKilled
+            case .gold:
+                return entry.totalGoldEarned
+            }
+        }
+    }
     
     private let loc = LocalizationManager.shared
     private var rankingData: [RankingEntry] = []
     private var loadingLabel: SKLabelNode?
+    private var selectedMetric: RankingMetric = .power
     
     override func didMove(to view: SKView) {
         backgroundColor = SKColor(red: 0.05, green: 0.05, blue: 0.05, alpha: 1)
@@ -38,8 +71,17 @@ class RankingScene: SKScene {
         title.position = CGPoint(x: size.width / 2, y: size.height - 30)
         addChild(title)
         
+        let tabY = size.height - 70
+        let tabWidth: CGFloat = 86
+        let totalWidth = tabWidth * CGFloat(RankingMetric.allCases.count) + 8 * CGFloat(RankingMetric.allCases.count - 1)
+        for (index, metric) in RankingMetric.allCases.enumerated() {
+            let x = size.width / 2 - totalWidth / 2 + tabWidth / 2 + CGFloat(index) * (tabWidth + 8)
+            let tab = createMetricTab(metric: metric, position: CGPoint(x: x, y: tabY), width: tabWidth)
+            addChild(tab)
+        }
+
         // Headers
-        let headerY = size.height - 70
+        let headerY = size.height - 110
         let posHeader = SKLabelNode(fontNamed: "AvenirNext-Bold")
         posHeader.text = "#"
         posHeader.fontSize = 12
@@ -56,7 +98,8 @@ class RankingScene: SKScene {
         addChild(nameHeader)
         
         let scoreHeader = SKLabelNode(fontNamed: "AvenirNext-Bold")
-        scoreHeader.text = "POWER SCORE"
+        scoreHeader.name = "score_header"
+        scoreHeader.text = selectedMetric.title(language: loc.language).uppercased()
         scoreHeader.fontSize = 12
         scoreHeader.fontColor = .gray
         scoreHeader.horizontalAlignmentMode = .right
@@ -83,8 +126,17 @@ class RankingScene: SKScene {
     }
     
     private func displayRanking() {
+        children.filter { $0.name == "ranking_row" || $0.name == "empty_ranking" || $0.name == "score_header" }.forEach { node in
+            if node.name == "score_header", let label = node as? SKLabelNode {
+                label.text = selectedMetric.title(language: loc.language).uppercased()
+            } else if node.name != "score_header" {
+                node.removeFromParent()
+            }
+        }
+
         if rankingData.isEmpty {
             let emptyLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+            emptyLabel.name = "empty_ranking"
             emptyLabel.text = "Ranking indisponível. Entre com Google ou Apple para sincronizar sua pontuação."
             emptyLabel.fontSize = 13
             emptyLabel.fontColor = SKColor(white: 1, alpha: 0.85)
@@ -95,18 +147,22 @@ class RankingScene: SKScene {
             return
         }
 
-        let startY = size.height - 100
+        let sortedData = rankingData.sorted { selectedMetric.score(for: $0) > selectedMetric.score(for: $1) }
+        let startY = size.height - 140
         let spacing: CGFloat = 25
         
-        for (index, entry) in rankingData.enumerated() {
+        for (index, entry) in sortedData.prefix(12).enumerated() {
             let y = startY - CGFloat(index) * spacing
+            let row = SKNode()
+            row.name = "ranking_row"
+            addChild(row)
             
             // Background row
             let rowBg = SKShapeNode(rectOf: CGSize(width: size.width * 0.7, height: 22), cornerRadius: 4)
             rowBg.position = CGPoint(x: size.width / 2, y: y + 4)
             rowBg.fillColor = index % 2 == 0 ? SKColor(white: 1, alpha: 0.05) : .clear
             rowBg.strokeColor = .clear
-            addChild(rowBg)
+            row.addChild(rowBg)
             
             // Position
             let posLbl = SKLabelNode(fontNamed: "AvenirNext-Bold")
@@ -114,7 +170,7 @@ class RankingScene: SKScene {
             posLbl.fontSize = 13
             posLbl.fontColor = index < 3 ? SKColor(red: 1, green: 0.85, blue: 0.2, alpha: 1) : .white
             posLbl.position = CGPoint(x: size.width * 0.2, y: y)
-            addChild(posLbl)
+            row.addChild(posLbl)
             
             // Name (Level)
             let nameLbl = SKLabelNode(fontNamed: "AvenirNext-Medium")
@@ -123,17 +179,49 @@ class RankingScene: SKScene {
             nameLbl.fontColor = .white
             nameLbl.horizontalAlignmentMode = .left
             nameLbl.position = CGPoint(x: size.width * 0.3, y: y)
-            addChild(nameLbl)
+            row.addChild(nameLbl)
             
             // Score
             let scoreLbl = SKLabelNode(fontNamed: "AvenirNext-Bold")
-            scoreLbl.text = "\(entry.powerScore)"
+            scoreLbl.text = "\(selectedMetric.score(for: entry))"
             scoreLbl.fontSize = 13
             scoreLbl.fontColor = SKColor(red: 0.4, green: 0.8, blue: 1.0, alpha: 1)
             scoreLbl.horizontalAlignmentMode = .right
             scoreLbl.position = CGPoint(x: size.width * 0.8, y: y)
-            addChild(scoreLbl)
+            row.addChild(scoreLbl)
+
+            let subLbl = SKLabelNode(fontNamed: "AvenirNext-Medium")
+            subLbl.text = "Map \(entry.highestMapCompleted + 1) • ★ \(entry.totalStars)"
+            subLbl.fontSize = 9
+            subLbl.fontColor = SKColor(white: 1, alpha: 0.55)
+            subLbl.horizontalAlignmentMode = .left
+            subLbl.position = CGPoint(x: size.width * 0.3, y: y - 10)
+            row.addChild(subLbl)
         }
+    }
+
+    private func createMetricTab(metric: RankingMetric, position: CGPoint, width: CGFloat) -> SKNode {
+        let node = SKNode()
+        node.name = "tab_metric_\(metric.rawValue)"
+        node.position = position
+
+        let selected = metric == selectedMetric
+        let bg = SKShapeNode(rectOf: CGSize(width: width, height: 28), cornerRadius: 6)
+        bg.name = node.name
+        bg.fillColor = selected ? SKColor(red: 0.36, green: 0.24, blue: 0.08, alpha: 0.96) : SKColor(white: 0.04, alpha: 0.76)
+        bg.strokeColor = selected ? SKColor(red: 1, green: 0.78, blue: 0.22, alpha: 1) : SKColor(red: 0.55, green: 0.42, blue: 0.20, alpha: 0.8)
+        bg.lineWidth = 1.5
+        node.addChild(bg)
+
+        let label = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        label.name = node.name
+        label.text = metric.title(language: loc.language)
+        label.fontSize = 11
+        label.fontColor = selected ? SKColor(red: 1, green: 0.86, blue: 0.34, alpha: 1) : .white
+        label.verticalAlignmentMode = .center
+        node.addChild(label)
+
+        return node
     }
     
     private func createButton(text: String, position: CGPoint, name: String) -> SKNode {
@@ -163,10 +251,19 @@ class RankingScene: SKScene {
         let location = touch.location(in: self)
         let node = atPoint(location)
         
-        if node.name == "btn_back" || node.parent?.name == "btn_back" {
+        let name = node.name ?? node.parent?.name
+        if name == "btn_back" {
             let scene = MainMenuScene(size: self.size)
             scene.scaleMode = .resizeFill
             self.view?.presentScene(scene, transition: SKTransition.fade(withDuration: 0.3))
+        } else if let name, name.hasPrefix("tab_metric_") {
+            let raw = String(name.dropFirst("tab_metric_".count))
+            if let metric = RankingMetric(rawValue: raw) {
+                selectedMetric = metric
+                setupUI()
+                loadingLabel?.removeFromParent()
+                displayRanking()
+            }
         }
     }
 }

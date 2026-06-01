@@ -64,6 +64,102 @@ struct MissionCompletion {
     }
 }
 
+struct DailyMissionDefinition {
+    enum Metric {
+        case wins
+        case enemiesKilled
+        case goldEarned
+    }
+
+    let id: String
+    let titlePT: String
+    let titleEN: String
+    let metric: Metric
+    let target: Int
+    let rewardGold: Int
+    let rewardXP: Int
+
+    func title(language: GameLanguage) -> String {
+        language == .portuguese ? titlePT : titleEN
+    }
+}
+
+enum DailyMissionManager {
+    private static let prefix = "daily_mission"
+
+    static let missions: [DailyMissionDefinition] = [
+        DailyMissionDefinition(id: "daily_win_2", titlePT: "Diária: 2 vitórias", titleEN: "Daily: 2 wins", metric: .wins, target: 2, rewardGold: 90, rewardXP: 35),
+        DailyMissionDefinition(id: "daily_enemies_8", titlePT: "Diária: 8 inimigos", titleEN: "Daily: 8 enemies", metric: .enemiesKilled, target: 8, rewardGold: 120, rewardXP: 45),
+        DailyMissionDefinition(id: "daily_gold_250", titlePT: "Diária: 250 ouro", titleEN: "Daily: 250 gold", metric: .goldEarned, target: 250, rewardGold: 150, rewardXP: 55)
+    ]
+
+    static func recordBattleResult(userId: String?, victory: Bool, goldEarned: Int, enemiesKilled: Int) {
+        let id = userId ?? "local"
+        if victory {
+            increment("wins", by: 1, userId: id)
+        }
+        increment("enemies", by: enemiesKilled, userId: id)
+        increment("gold", by: goldEarned, userId: id)
+    }
+
+    static func completeReadyMissions(for player: PlayerData) -> [MissionCompletion] {
+        missions.compactMap { mission in
+            guard !isClaimed(mission, userId: player.userId),
+                  progressValue(for: mission, userId: player.userId) >= mission.target else { return nil }
+            UserDefaults.standard.set(true, forKey: key("claimed_\(mission.id)", userId: player.userId))
+            return MissionCompletion(
+                title: mission.title(language: player.language),
+                rewardGold: mission.rewardGold,
+                rewardXP: mission.rewardXP
+            )
+        }
+    }
+
+    static func progressText(for mission: DailyMissionDefinition, userId: String) -> String {
+        "\(min(progressValue(for: mission, userId: userId), mission.target))/\(mission.target)"
+    }
+
+    static func nextVisibleMission(for player: PlayerData) -> DailyMissionDefinition? {
+        missions.first { mission in
+            !isClaimed(mission, userId: player.userId)
+        }
+    }
+
+    private static func progressValue(for mission: DailyMissionDefinition, userId: String) -> Int {
+        switch mission.metric {
+        case .wins:
+            return UserDefaults.standard.integer(forKey: key("wins", userId: userId))
+        case .enemiesKilled:
+            return UserDefaults.standard.integer(forKey: key("enemies", userId: userId))
+        case .goldEarned:
+            return UserDefaults.standard.integer(forKey: key("gold", userId: userId))
+        }
+    }
+
+    private static func isClaimed(_ mission: DailyMissionDefinition, userId: String) -> Bool {
+        UserDefaults.standard.bool(forKey: key("claimed_\(mission.id)", userId: userId))
+    }
+
+    private static func increment(_ metric: String, by amount: Int, userId: String) {
+        guard amount > 0 else { return }
+        let storageKey = key(metric, userId: userId)
+        let current = UserDefaults.standard.integer(forKey: storageKey)
+        UserDefaults.standard.set(current + amount, forKey: storageKey)
+    }
+
+    private static func key(_ metric: String, userId: String) -> String {
+        "\(prefix):\(userId):\(todayKey):\(metric)"
+    }
+
+    private static var todayKey: String {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: Date())
+    }
+}
+
 enum GameMissionManager {
     static let achievementPrefix = "mission:"
 
@@ -168,6 +264,13 @@ extension GameManager {
                 rewardGold: mission.rewardGold,
                 rewardXP: mission.rewardXP
             ))
+        }
+
+        for completion in DailyMissionManager.completeReadyMissions(for: player) {
+            player.gold += completion.rewardGold
+            player.totalGoldEarned += completion.rewardGold
+            _ = player.addExperience(completion.rewardXP)
+            completions.append(completion)
         }
 
         guard !completions.isEmpty else { return [] }

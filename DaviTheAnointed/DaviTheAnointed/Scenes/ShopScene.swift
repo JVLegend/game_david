@@ -1136,6 +1136,16 @@ class ShopScene: SKScene {
         status.position = CGPoint(x: size.width / 2 - 54, y: size.height / 2 + 48)
         overlay.addChild(status)
 
+        let role = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        role.text = character.roleTitle(language: loc.language)
+        role.fontSize = 11
+        role.fontColor = SKColor(red: 0.70, green: 0.94, blue: 1, alpha: 1)
+        role.horizontalAlignmentMode = .left
+        role.verticalAlignmentMode = .center
+        role.position = CGPoint(x: size.width / 2 - 54, y: size.height / 2 + 26)
+        fit(label: role, maxWidth: 190, minimumSize: 8)
+        overlay.addChild(role)
+
         if !isUnlocked {
             let price = SKLabelNode(fontNamed: "AvenirNext-Bold")
             price.text = "\(character.price)"
@@ -1143,7 +1153,7 @@ class ShopScene: SKScene {
             price.fontColor = player.gold >= character.price ? SKColor(red: 1, green: 0.84, blue: 0.18, alpha: 1) : .red
             price.horizontalAlignmentMode = .left
             price.verticalAlignmentMode = .center
-            price.position = CGPoint(x: size.width / 2 - 54, y: size.height / 2 + 26)
+            price.position = CGPoint(x: size.width / 2 - 54, y: size.height / 2 + 8)
             overlay.addChild(price)
 
             let coin = SKSpriteNode(imageNamed: "menu_icon_gold")
@@ -1157,7 +1167,7 @@ class ShopScene: SKScene {
         statTitle.fontSize = 13
         statTitle.fontColor = SKColor(red: 1, green: 0.84, blue: 0.24, alpha: 1)
         statTitle.horizontalAlignmentMode = .left
-        statTitle.position = CGPoint(x: size.width / 2 - 140, y: size.height / 2 - 18)
+        statTitle.position = CGPoint(x: size.width / 2 - 140, y: size.height / 2 - 24)
         overlay.addChild(statTitle)
 
         for (index, line) in characterBonusLines(for: character).prefix(6).enumerated() {
@@ -1167,10 +1177,21 @@ class ShopScene: SKScene {
             statLine.fontColor = SKColor(white: 0.92, alpha: 0.96)
             statLine.horizontalAlignmentMode = .left
             statLine.verticalAlignmentMode = .center
-            statLine.position = CGPoint(x: size.width / 2 - 140 + CGFloat(index % 2) * 150, y: size.height / 2 - 44 - CGFloat(index / 2) * 24)
+            statLine.position = CGPoint(x: size.width / 2 - 140 + CGFloat(index % 2) * 150, y: size.height / 2 - 50 - CGFloat(index / 2) * 22)
             fit(label: statLine, maxWidth: 136, minimumSize: 9)
             overlay.addChild(statLine)
         }
+
+        let hint = SKLabelNode(fontNamed: "AvenirNext-Medium")
+        hint.text = character.playstyleHint(language: loc.language)
+        hint.fontSize = 10
+        hint.fontColor = SKColor(white: 0.9, alpha: 0.72)
+        hint.numberOfLines = 2
+        hint.preferredMaxLayoutWidth = 292
+        hint.horizontalAlignmentMode = .center
+        hint.verticalAlignmentMode = .center
+        hint.position = CGPoint(x: size.width / 2, y: size.height / 2 - 94)
+        overlay.addChild(hint)
 
         let close = createButton(
             text: loc.localize("general.close"),

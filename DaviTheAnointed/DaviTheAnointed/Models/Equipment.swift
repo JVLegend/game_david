@@ -255,3 +255,92 @@ struct EquipmentDatabase {
         }
     }
 }
+
+// MARK: - Equipment Sets
+struct EquipmentSetBonus {
+    let pieces: Int
+    let stats: CharacterStats
+    let titlePT: String
+    let titleEN: String
+
+    func title(language: GameLanguage) -> String {
+        language == .portuguese ? titlePT : titleEN
+    }
+}
+
+struct EquipmentSetDefinition {
+    let id: String
+    let namePT: String
+    let nameEN: String
+    let itemIds: Set<String>
+    let bonuses: [EquipmentSetBonus]
+
+    func name(language: GameLanguage) -> String {
+        language == .portuguese ? namePT : nameEN
+    }
+}
+
+struct ActiveEquipmentSet {
+    let definition: EquipmentSetDefinition
+    let equippedPieces: Int
+    let activeBonuses: [EquipmentSetBonus]
+}
+
+struct EquipmentSetDatabase {
+    static let shared = EquipmentSetDatabase()
+
+    let allSets: [EquipmentSetDefinition]
+
+    private init() {
+        allSets = [
+            EquipmentSetDefinition(
+                id: "shepherd",
+                namePT: "Pastor de Belém",
+                nameEN: "Bethlehem Shepherd",
+                itemIds: ["weapon_01", "head_01", "body_01", "feet_sandals_01", "waist_01", "gloves_01", "shield_01", "twohand_01"],
+                bonuses: [
+                    EquipmentSetBonus(pieces: 2, stats: CharacterStats(maxHP: 10, armor: 2), titlePT: "2 peças: +10 vida, +2 armadura", titleEN: "2 pieces: +10 HP, +2 armor"),
+                    EquipmentSetBonus(pieces: 4, stats: CharacterStats(damageMin: 2, damageMax: 3), titlePT: "4 peças: +2-3 dano", titleEN: "4 pieces: +2-3 damage"),
+                    EquipmentSetBonus(pieces: 6, stats: CharacterStats(dodgeMelee: 0.04, runSpeed: 5), titlePT: "6 peças: +4% esquiva corpo a corpo", titleEN: "6 pieces: +4% melee dodge")
+                ]
+            ),
+            EquipmentSetDefinition(
+                id: "slinger",
+                namePT: "Atirador do Vale",
+                nameEN: "Valley Slinger",
+                itemIds: ["weapon_sling_01", "weapon_sling_02", "gloves_02", "feet_sandals_02", "waist_02", "twohand_03", "twohand_07"],
+                bonuses: [
+                    EquipmentSetBonus(pieces: 2, stats: CharacterStats(critChance: 0.04, dodgeRanged: 0.03), titlePT: "2 peças: +4% crítico, +3% esquiva à distância", titleEN: "2 pieces: +4% crit, +3% ranged dodge"),
+                    EquipmentSetBonus(pieces: 4, stats: CharacterStats(damageMin: 3, damageMax: 5, critDamage: 0.10), titlePT: "4 peças: +3-5 dano, +10% dano crítico", titleEN: "4 pieces: +3-5 damage, +10% crit damage")
+                ]
+            ),
+            EquipmentSetDefinition(
+                id: "covenant",
+                namePT: "Aliança",
+                nameEN: "Covenant",
+                itemIds: ["head_11", "body_12", "shield_13", "twohand_staff_02", "gloves_03", "head_14", "body_14"],
+                bonuses: [
+                    EquipmentSetBonus(pieces: 2, stats: CharacterStats(maxHP: 18, armor: 6), titlePT: "2 peças: +18 vida, +6 armadura", titleEN: "2 pieces: +18 HP, +6 armor"),
+                    EquipmentSetBonus(pieces: 4, stats: CharacterStats(dodgeMelee: 0.04, dodgeRanged: 0.04, lifeSteal: 0.04), titlePT: "4 peças: +4% roubo de vida e esquivas", titleEN: "4 pieces: +4% lifesteal and dodges")
+                ]
+            )
+        ]
+    }
+
+    func activeSets(forEquippedItemIds itemIds: Set<String>) -> [ActiveEquipmentSet] {
+        allSets.compactMap { definition in
+            let pieces = definition.itemIds.intersection(itemIds).count
+            let bonuses = definition.bonuses.filter { pieces >= $0.pieces }
+            guard pieces > 0 else { return nil }
+            return ActiveEquipmentSet(definition: definition, equippedPieces: pieces, activeBonuses: bonuses)
+        }
+    }
+
+    func bonus(forEquippedItemIds itemIds: Set<String>) -> CharacterStats {
+        activeSets(forEquippedItemIds: itemIds)
+            .flatMap(\.activeBonuses)
+            .reduce(CharacterStats()) { partial, bonus in
+                partial + bonus.stats
+            }
+    }
+}

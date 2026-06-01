@@ -32,6 +32,9 @@ final class GameManager {
             }
         }
 
+        let equippedSetBonus = EquipmentSetDatabase.shared.bonus(forEquippedItemIds: Set(player.equippedItems.values))
+        stats = stats + equippedSetBonus
+
         // Add temporary run bonuses (if any)
         if let runBonuses = player.activeRunBonuses {
             stats = stats + runBonuses
@@ -242,6 +245,7 @@ final class GameManager {
             p.totalEnemiesKilled += enemiesKilled
             _ = p.addExperience(xpEarned)
         }
+        DailyMissionManager.recordBattleResult(userId: playerData?.userId, victory: true, goldEarned: goldEarned, enemiesKilled: enemiesKilled)
         addGold(goldEarned)
 
         // Check if map is completed (all 4 battles done)
@@ -268,6 +272,7 @@ final class GameManager {
             p.totalEnemiesKilled += enemiesKilled
             _ = p.addExperience(xpEarned)
         }
+        DailyMissionManager.recordBattleResult(userId: playerData?.userId, victory: false, goldEarned: goldEarned, enemiesKilled: enemiesKilled)
 
         let ps = powerScore
         mutate { p in p.powerScore = ps }

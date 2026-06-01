@@ -145,18 +145,43 @@ class BattleScene: SKScene {
 
     private func loadRosterPlayerTexture(for character: PlayableCharacter) {
         let requestedTexture = SKTexture(imageNamed: character.rosterTextureName)
-        let texture = requestedTexture.size().width > 0
+        let baseTexture = requestedTexture.size().width > 0
             ? requestedTexture
             : SKTexture(imageNamed: PlayableCharacter.davi.rosterTextureName)
+        let texture = croppedRosterTexture(baseTexture, for: character)
         playerIdleFrames = [texture]
         playerWalkFrames = [texture]
         playerAttackFrames = [texture]
 
         playerNode.texture = texture
-        // Roster portraits live on a square transparent canvas, so render them a bit taller in battle.
-        let height = playerHeight + 18
+        let height = rosterBattleHeight(for: character)
         let aspect = texture.size().height > 0 ? texture.size().width / texture.size().height : 1
         playerNode.size = CGSize(width: height * aspect, height: height)
+    }
+
+    private func croppedRosterTexture(_ texture: SKTexture, for character: PlayableCharacter) -> SKTexture {
+        switch character {
+        case .bigJ:
+            return SKTexture(rect: CGRect(x: 230.0 / 768.0, y: 12.0 / 768.0, width: 310.0 / 768.0, height: 744.0 / 768.0), in: texture)
+        case .josue:
+            return SKTexture(rect: CGRect(x: 232.0 / 768.0, y: 12.0 / 768.0, width: 304.0 / 768.0, height: 744.0 / 768.0), in: texture)
+        default:
+            return SKTexture(rect: CGRect(x: 132.0 / 768.0, y: 8.0 / 768.0, width: 504.0 / 768.0, height: 752.0 / 768.0), in: texture)
+        }
+    }
+
+    private func rosterBattleHeight(for character: PlayableCharacter) -> CGFloat {
+        switch character {
+        case .bigJ, .josue:
+            return playerHeight + 38
+        default:
+            return playerHeight + 26
+        }
+    }
+
+    private func alignPlayerToGround(_ groundHeight: CGFloat) {
+        playerBaseY = groundHeight + playerNode.size.height / 2 - 10
+        playerNode.position.y = playerBaseY
     }
 
     private func loadEnemyTextures() {
@@ -618,6 +643,7 @@ class BattleScene: SKScene {
 
         // Carrega texturas e inicia animação idle
         loadPlayerTextures()
+        alignPlayerToGround(groundHeight)
         playAnim("idle")
 
         // Enemy — está mais à frente no mundo

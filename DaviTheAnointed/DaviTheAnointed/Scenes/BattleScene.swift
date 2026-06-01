@@ -207,19 +207,49 @@ class BattleScene: SKScene {
                 enemyNode.run(SKAction.group([breathLoop, swayLoop]), withKey: "enemyAnim")
             }
         case "attack":
-            // Salto de ataque
-            let jump = SKAction.sequence([
-                SKAction.moveBy(x: -30, y: 20, duration: 0.15),
-                SKAction.moveBy(x: 30, y: -20, duration: 0.15),
-                SKAction.run { [weak self] in
-                    self?.resetEnemyVerticalPosition()
-                }
-            ])
-            enemyNode.run(jump, withKey: "enemyAnim")
+            if isWolfEnemy(enemy), !frames.isEmpty {
+                let stride = SKAction.animate(with: frames + Array(frames.reversed()), timePerFrame: 0.055)
+                let lunge = SKAction.sequence([
+                    SKAction.group([
+                        SKAction.moveBy(x: -54, y: 8, duration: 0.13),
+                        SKAction.rotate(toAngle: -0.08, duration: 0.13, shortestUnitArc: true)
+                    ]),
+                    SKAction.group([
+                        SKAction.moveBy(x: 18, y: -4, duration: 0.06),
+                        SKAction.rotate(toAngle: 0.04, duration: 0.06, shortestUnitArc: true)
+                    ]),
+                    SKAction.wait(forDuration: 0.04),
+                    SKAction.group([
+                        SKAction.moveBy(x: 36, y: -4, duration: 0.16),
+                        SKAction.rotate(toAngle: 0, duration: 0.16, shortestUnitArc: true)
+                    ]),
+                    SKAction.run { [weak self] in
+                        self?.resetEnemyVerticalPosition()
+                    }
+                ])
+                enemyNode.run(SKAction.group([stride, lunge]), withKey: "enemyAnim")
+            } else {
+                // Salto de ataque
+                let jump = SKAction.sequence([
+                    SKAction.moveBy(x: -30, y: 20, duration: 0.15),
+                    SKAction.moveBy(x: 30, y: -20, duration: 0.15),
+                    SKAction.run { [weak self] in
+                        self?.resetEnemyVerticalPosition()
+                    }
+                ])
+                enemyNode.run(jump, withKey: "enemyAnim")
+            }
             currentEnemyAnim = "" // Reset para voltar ao idle depois
         default:
             break
         }
+    }
+
+    private func isWolfEnemy(_ enemy: EnemyData) -> Bool {
+        enemy.id == "grey_wolf"
+            || enemy.id == "alpha_wolf"
+            || enemy.textureName == "lobocinzento"
+            || enemy.textureName == "wolf"
     }
 
     private func resetEnemyVerticalPosition() {

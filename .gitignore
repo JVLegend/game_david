@@ -39,6 +39,7 @@ Podfile.lock
 
 # Local release/build artifacts
 .asc/
+previews/
 
 # Local agent/tool configuration
 .claude/

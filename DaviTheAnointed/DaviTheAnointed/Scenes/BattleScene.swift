@@ -43,6 +43,7 @@ class BattleScene: SKScene {
 
     // Nodes
     private var playerNode: SKSpriteNode!
+    private var playerShadowNode: SKShapeNode!
     private var enemyNode: SKSpriteNode!
     private var playerHPBar: SKShapeNode!
     private var playerHPFill: SKShapeNode!
@@ -113,11 +114,17 @@ class BattleScene: SKScene {
         // Row 0 (00-05): idle
         let prefix = "davi_jovem"
         playerIdleFrames = (0...5).map { SKTexture(imageNamed: "\(prefix)_\(String(format: "%02d", $0))") }
-        // Walk enhanced: longer cycle with stronger leg/hip movement. Falls back to the original row if needed.
-        let enhancedWalk = (0...7).map { SKTexture(imageNamed: "\(prefix)_walk_enhanced_\(String(format: "%02d", $0))") }
-        playerWalkFrames = enhancedWalk.allSatisfy { $0.size().width > 0 }
-            ? enhancedWalk
-            : (6...11).map { SKTexture(imageNamed: "\(prefix)_\(String(format: "%02d", $0))") }
+        // Grounded walk: same foot baseline across frames, so Davi walks instead of bouncing.
+        let groundedWalk = (0...7).map { SKTexture(imageNamed: "\(prefix)_walk_grounded_\(String(format: "%02d", $0))") }
+        if groundedWalk.allSatisfy({ $0.size().width > 0 }) {
+            playerWalkFrames = groundedWalk
+        } else {
+            // Walk enhanced: longer cycle with stronger leg/hip movement. Falls back to the original row if needed.
+            let enhancedWalk = (0...7).map { SKTexture(imageNamed: "\(prefix)_walk_enhanced_\(String(format: "%02d", $0))") }
+            playerWalkFrames = enhancedWalk.allSatisfy { $0.size().width > 0 }
+                ? enhancedWalk
+                : (6...11).map { SKTexture(imageNamed: "\(prefix)_\(String(format: "%02d", $0))") }
+        }
         // Row 2 (12-17): attack
         playerAttackFrames = (12...17).map { SKTexture(imageNamed: "\(prefix)_\(String(format: "%02d", $0))") }
 
@@ -360,25 +367,24 @@ class BattleScene: SKScene {
         playerNode.removeAction(forKey: "playerIdleMotion")
         removeAction(forKey: "playerStepDust")
 
-        let stepUp = SKAction.group([
-            SKAction.moveTo(y: playerBaseY + 5, duration: 0.10),
-            SKAction.scaleX(to: 1.035, y: 0.975, duration: 0.10),
-            SKAction.rotate(toAngle: 0.025, duration: 0.10, shortestUnitArc: true)
+        playerNode.position.y = playerBaseY
+
+        let stepForward = SKAction.group([
+            SKAction.scaleX(to: 1.018, y: 0.992, duration: 0.12),
+            SKAction.rotate(toAngle: 0.018, duration: 0.12, shortestUnitArc: true)
         ])
-        stepUp.timingMode = .easeInEaseOut
-        let stepDown = SKAction.group([
-            SKAction.moveTo(y: playerBaseY, duration: 0.10),
-            SKAction.scaleX(to: 0.985, y: 1.015, duration: 0.10),
-            SKAction.rotate(toAngle: -0.018, duration: 0.10, shortestUnitArc: true)
+        stepForward.timingMode = .easeInEaseOut
+        let stepBack = SKAction.group([
+            SKAction.scaleX(to: 0.992, y: 1.006, duration: 0.12),
+            SKAction.rotate(toAngle: -0.014, duration: 0.12, shortestUnitArc: true)
         ])
-        stepDown.timingMode = .easeInEaseOut
+        stepBack.timingMode = .easeInEaseOut
         let settle = SKAction.group([
-            SKAction.moveTo(y: playerBaseY + 1, duration: 0.08),
             SKAction.scaleX(to: 1.0, y: 1.0, duration: 0.08),
             SKAction.rotate(toAngle: 0, duration: 0.08, shortestUnitArc: true)
         ])
         settle.timingMode = .easeInEaseOut
-        playerNode.run(SKAction.repeatForever(SKAction.sequence([stepUp, stepDown, settle])), withKey: "walkMotion")
+        playerNode.run(SKAction.repeatForever(SKAction.sequence([stepForward, stepBack, settle])), withKey: "walkMotion")
 
         let dustLoop = SKAction.repeatForever(SKAction.sequence([
             SKAction.run { [weak self] in self?.emitStepDust() },
@@ -500,6 +506,7 @@ class BattleScene: SKScene {
 
         // Player acompanha a câmera — fica fixo na posição de tela
         playerNode.position.x = newX - halfW + size.width * playerScreenX
+        playerShadowNode.position.x = playerNode.position.x
     }
 
     /// X alvo da câmera no mundo — movemos isso para "andar"
@@ -561,6 +568,14 @@ class BattleScene: SKScene {
         playerNode.position = CGPoint(x: initialCamX - size.width / 2 + size.width * playerScreenX,
                                        y: groundHeight + playerHeight / 2 - 10)
         playerBaseY = playerNode.position.y
+
+        playerShadowNode = SKShapeNode(ellipseOf: CGSize(width: 54, height: 12))
+        playerShadowNode.fillColor = SKColor(white: 0.02, alpha: 0.24)
+        playerShadowNode.strokeColor = .clear
+        playerShadowNode.position = CGPoint(x: playerNode.position.x, y: groundHeight + 3)
+        playerShadowNode.zPosition = 4.7
+        addChild(playerShadowNode)
+
         playerNode.zPosition = 5
         addChild(playerNode)
 

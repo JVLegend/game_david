@@ -38,6 +38,7 @@
 		116A765BE9696124F3743097 /* boss_prince_walk_0.png in Resources */ = {isa = PBXBuildFile; fileRef = 4DB71AF29284BECA7980F2CC /* boss_prince_walk_0.png */; };
 		11AB7530D6546725AF33A051 /* enemy_desert_stalker_walk_1.png in Resources */ = {isa = PBXBuildFile; fileRef = 4E4FA9EA49C21C7953D3326C /* enemy_desert_stalker_walk_1.png */; };
 		120D4860F242DD793793BB75 /* gloves_slinger_grips.png in Resources */ = {isa = PBXBuildFile; fileRef = CF2CC1A63C82116F91AD6C5C /* gloves_slinger_grips.png */; };
+		1252DFE0AFED3569CCAA008E /* davi_jovem_walk_grounded_03.png in Resources */ = {isa = PBXBuildFile; fileRef = 53559079D2A14ED8746B06BC /* davi_jovem_walk_grounded_03.png */; };
 		1297A728CF591FB95700A84E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B32F4A7EE61E1E9B4AD891C2 /* GoogleService-Info.plist */; };
 		14850AE7D77436B4CCADAE90 /* body_15.png in Resources */ = {isa = PBXBuildFile; fileRef = 1EFAE7BDCAA111654D0AEC9C /* body_15.png */; };
 		14C2D657DB2D0563F5975E0A /* davi_jovem_walk_enhanced_06.png in Resources */ = {isa = PBXBuildFile; fileRef = 49633FDD4D0B08A1E6751118 /* davi_jovem_walk_enhanced_06.png */; };
@@ -136,6 +137,7 @@
 		53544465FCDC55935D54FB46 /* bg_saul_court.png in Resources */ = {isa = PBXBuildFile; fileRef = 3F31B20BFE486A0F08B2A0F7 /* bg_saul_court.png */; };
 		53578DB91E441E366EE77A82 /* head_10.png in Resources */ = {isa = PBXBuildFile; fileRef = 27579020290973838AE2934F /* head_10.png */; };
 		5550C5868AD90B725401E0FD /* twohand_03.png in Resources */ = {isa = PBXBuildFile; fileRef = F644E54807783D25E9F9AD79 /* twohand_03.png */; };
+		56065523CAAE177FFD0DE9CE /* davi_jovem_walk_grounded_01.png in Resources */ = {isa = PBXBuildFile; fileRef = F0FA4BF5BF9A382877D4BCE2 /* davi_jovem_walk_grounded_01.png */; };
 		56C62EE74D79C429BA427442 /* enemy_philistine_priest.png in Resources */ = {isa = PBXBuildFile; fileRef = CE95C2F5350D9900E24D53EC /* enemy_philistine_priest.png */; };
 		582B1B60FB4011475D767B95 /* weapon_06.png in Resources */ = {isa = PBXBuildFile; fileRef = 204E75DF2D2641AAA568944E /* weapon_06.png */; };
 		58CDF3126B43F5BABFD0BADF /* enemy_philistine_war_archer_walk_0.png in Resources */ = {isa = PBXBuildFile; fileRef = AF7248610402E842D5C86049 /* enemy_philistine_war_archer_walk_0.png */; };
@@ -160,6 +162,7 @@
 		61FC779BD3F173254DF78BAE /* enemy_absalom_knight_walk_3.png in Resources */ = {isa = PBXBuildFile; fileRef = A31CD506ADFBEA8C1594278D /* enemy_absalom_knight_walk_3.png */; };
 		620297E7805A2D0EC790EED3 /* body_10.png in Resources */ = {isa = PBXBuildFile; fileRef = A4BB07B88AEED5A186E9659B /* body_10.png */; };
 		6371E5E8EF6220EDEFFCCBE6 /* battle_skill_soccer_ball.png in Resources */ = {isa = PBXBuildFile; fileRef = 678352067921E68CE712D49F /* battle_skill_soccer_ball.png */; };
+		63ADAB786EDDA7A88D916739 /* davi_jovem_walk_grounded_04.png in Resources */ = {isa = PBXBuildFile; fileRef = 5907BE41E0E11460AB82E7C6 /* davi_jovem_walk_grounded_04.png */; };
 		63B2F2763969ED5D8B88EA89 /* enemy_jebusite_elite_walk_0.png in Resources */ = {isa = PBXBuildFile; fileRef = 627018117CC38462A96968D2 /* enemy_jebusite_elite_walk_0.png */; };
 		64CC79A07076CFD5D2EE0D39 /* enemy_jebusite_elite.png in Resources */ = {isa = PBXBuildFile; fileRef = 27752FCFFD06642EC02D7559 /* enemy_jebusite_elite.png */; };
 		6649EEC2C0E6D4FA71AB3C64 /* button_texture.png in Resources */ = {isa = PBXBuildFile; fileRef = 339060DAEA170A0EE307D47C /* button_texture.png */; };
@@ -224,6 +227,7 @@
 		902AF86E0359886D2E4541D5 /* enemy_philistine_healer_walk_3.png in Resources */ = {isa = PBXBuildFile; fileRef = BD3B5A18374783924C27C178 /* enemy_philistine_healer_walk_3.png */; };
 		905E1D5ACD00249BA00C9632 /* enemy_philistine_heavy_guard_walk_0.png in Resources */ = {isa = PBXBuildFile; fileRef = 77443CF1DD9FDABE51CE72DD /* enemy_philistine_heavy_guard_walk_0.png */; };
 		9165D926AB92BA876E7969F4 /* head_12.png in Resources */ = {isa = PBXBuildFile; fileRef = 35950428AAAE626CC6217902 /* head_12.png */; };
+		917E5C160F042E740BBD5C8F /* davi_jovem_walk_grounded_07.png in Resources */ = {isa = PBXBuildFile; fileRef = 40CA88FE92EA85F63ACEF0B8 /* davi_jovem_walk_grounded_07.png */; };
 		931A7C5825011B01E25F4F31 /* twohand_01.png in Resources */ = {isa = PBXBuildFile; fileRef = B11ECF013627577E66D8005A /* twohand_01.png */; };
 		948F3DCE15A7D2A882166F21 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BAAE6E02FB7F2D9BD88E9F2 /* AuthManager.swift */; };
 		95BA33D1194932D156E47C50 /* head_03.png in Resources */ = {isa = PBXBuildFile; fileRef = 874DF95165558A54019892B1 /* head_03.png */; };
@@ -295,8 +299,10 @@
 		B693E0FF4A944953E4CB50EC /* enemy_philistine_heavy_guard_walk_1.png in Resources */ = {isa = PBXBuildFile; fileRef = CB26417B7645D918CB471D8D /* enemy_philistine_heavy_guard_walk_1.png */; };
 		B9B6CED3D241CC3422898A3D /* boss_goliath_walk_0.png in Resources */ = {isa = PBXBuildFile; fileRef = EB643172E63D80AAB46DA142 /* boss_goliath_walk_0.png */; };
 		BC264473289607AB8F3B2320 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = A887EEBD8ADB6A5ABD8BFC20 /* FirebaseCore */; };
+		BDD27FD743D90B6DF856B4DE /* davi_jovem_walk_grounded_02.png in Resources */ = {isa = PBXBuildFile; fileRef = 55247C1464AED8CF41CF2A2E /* davi_jovem_walk_grounded_02.png */; };
 		BE683FA4F4715CE48ADAD487 /* twohand_07.png in Resources */ = {isa = PBXBuildFile; fileRef = 6A53AF20F18E593996DC7E29 /* twohand_07.png */; };
 		BED3A2822AC0405F3CA8864C /* enemy_philistine_archer_walk_1.png in Resources */ = {isa = PBXBuildFile; fileRef = F1EE9BD80C4D2532F6A07F62 /* enemy_philistine_archer_walk_1.png */; };
+		BF4B34524C2A65443499AE9B /* davi_jovem_walk_grounded_00.png in Resources */ = {isa = PBXBuildFile; fileRef = 2FBEFE4AF8143EBE94547323 /* davi_jovem_walk_grounded_00.png */; };
 		BF7C06E2D27F2DDEB7E8ABEA /* enemy_philistine_elite.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E839E2611088670C4682DDD /* enemy_philistine_elite.png */; };
 		BFDCA8C90F2D47307B5B9F65 /* weapon_sling_reinforced.png in Resources */ = {isa = PBXBuildFile; fileRef = ACF25CA2FC14D886B8F70B97 /* weapon_sling_reinforced.png */; };
 		C1CA319D46B17B07C7F9DB77 /* enemy_saul_spearman_walk_0.png in Resources */ = {isa = PBXBuildFile; fileRef = BEFBC0C15E582D5338CE1B57 /* enemy_saul_spearman_walk_0.png */; };
@@ -335,6 +341,7 @@
 		D50B1F73ADB228FAA02DD26E /* enemy_bandit_archer_walk_2.png in Resources */ = {isa = PBXBuildFile; fileRef = 18D8B91D41E3C7B22AC1B743 /* enemy_bandit_archer_walk_2.png */; };
 		D6CDB17C44E70F53F3DA698D /* body_08.png in Resources */ = {isa = PBXBuildFile; fileRef = CCF21FE21AEE5A5EB651E3C4 /* body_08.png */; };
 		D729A341854DCF251CB36223 /* background_epic_login.png in Resources */ = {isa = PBXBuildFile; fileRef = 22CF8BAD083C0BE9F1AD25EE /* background_epic_login.png */; };
+		D8B02D480117EDCE5DC92B54 /* davi_jovem_walk_grounded_06.png in Resources */ = {isa = PBXBuildFile; fileRef = 290E246B850EA3AA2EB42E59 /* davi_jovem_walk_grounded_06.png */; };
 		D9BE48CF4760EA5712C5145B /* grass_tuft_02.png in Resources */ = {isa = PBXBuildFile; fileRef = E881C354E984565BE5A381A4 /* grass_tuft_02.png */; };
 		DCC6CEBC47E41781CDF7EBD7 /* enemy_desert_bandit_walk_2.png in Resources */ = {isa = PBXBuildFile; fileRef = 17D0690248F835057B89F2C7 /* enemy_desert_bandit_walk_2.png */; };
 		DD5C48A3F8E3D3839581F366 /* boss_commander_walk_3.png in Resources */ = {isa = PBXBuildFile; fileRef = 542149E6CF77489845C83EE0 /* boss_commander_walk_3.png */; };
@@ -361,6 +368,7 @@
 		E5F91A63634DA2007D3014C4 /* enemy_saul_guard_walk_2.png in Resources */ = {isa = PBXBuildFile; fileRef = A985B0E1CF499B58A3BD0688 /* enemy_saul_guard_walk_2.png */; };
 		E8C93A171D90650F78406FFE /* enemy_rabid_fox_walk_0.png in Resources */ = {isa = PBXBuildFile; fileRef = 02BCCB6800701E355B66F323 /* enemy_rabid_fox_walk_0.png */; };
 		E918FB7662CCAD9AA8DED4C8 /* enemy_jebusite_slinger_walk_0.png in Resources */ = {isa = PBXBuildFile; fileRef = 9CBABFA7D298EFDCF9DBDD9E /* enemy_jebusite_slinger_walk_0.png */; };
+		E947615A056437CD10052851 /* davi_jovem_walk_grounded_05.png in Resources */ = {isa = PBXBuildFile; fileRef = A0B623B0F306DAFB46CB74EA /* davi_jovem_walk_grounded_05.png */; };
 		E9A3DF1BFC55754E17795635 /* boss_general_walk_3.png in Resources */ = {isa = PBXBuildFile; fileRef = C1D770467BC58C1A65D8DFDB /* boss_general_walk_3.png */; };
 		E9D3799F9968C28EC12A5635 /* enemy_philistine_war_archer.png in Resources */ = {isa = PBXBuildFile; fileRef = 9B0738FBA765035C72D012F6 /* enemy_philistine_war_archer.png */; };
 		EADC5B28DC8593B3BA60BA73 /* enemy_desert_stalker_walk_2.png in Resources */ = {isa = PBXBuildFile; fileRef = E9675B79AE36064FE6792F21 /* enemy_desert_stalker_walk_2.png */; };
@@ -533,6 +541,7 @@
 		276BE964D208DB2830A64CA1 /* enemy_saul_spearman_walk_1.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_saul_spearman_walk_1.png; path = enemy_saul_spearman_walk_1.png; sourceTree = "<group>"; };
 		27752FCFFD06642EC02D7559 /* enemy_jebusite_elite.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_jebusite_elite.png; path = enemy_jebusite_elite.png; sourceTree = "<group>"; };
 		286417B4C565457D583D610A /* enemy_jebusite_shaman_walk_0.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_jebusite_shaman_walk_0.png; path = enemy_jebusite_shaman_walk_0.png; sourceTree = "<group>"; };
+		290E246B850EA3AA2EB42E59 /* davi_jovem_walk_grounded_06.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = davi_jovem_walk_grounded_06.png; sourceTree = "<group>"; };
 		2A3B45D6287E3E38E8101B42 /* enemy_philistine_giant_walk_3.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_philistine_giant_walk_3.png; path = enemy_philistine_giant_walk_3.png; sourceTree = "<group>"; };
 		2A8776940E2F8FD1F2CAE309 /* music_throne_israel.m4a */ = {isa = PBXFileReference; includeInIndex = 1; path = music_throne_israel.m4a; sourceTree = "<group>"; };
 		2C7534B402ED49D19F8C36BF /* wolf.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = wolf.png; sourceTree = "<group>"; };
@@ -544,6 +553,7 @@
 		2E9F06B3C93F6CF5464AC7BF /* enemy_philistine_giant_walk_1.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_philistine_giant_walk_1.png; path = enemy_philistine_giant_walk_1.png; sourceTree = "<group>"; };
 		2EA063A600332923A84C7115 /* head_05.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = head_05.png; sourceTree = "<group>"; };
 		2F3E2382A6D7B5D92E0785E0 /* twohand_11.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = twohand_11.png; sourceTree = "<group>"; };
+		2FBEFE4AF8143EBE94547323 /* davi_jovem_walk_grounded_00.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = davi_jovem_walk_grounded_00.png; sourceTree = "<group>"; };
 		2FE38A6CFB20D65F9AA3F084 /* enemy_jebusite_slinger_walk_2.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_jebusite_slinger_walk_2.png; path = enemy_jebusite_slinger_walk_2.png; sourceTree = "<group>"; };
 		309D319DEBD8303834CE4BDA /* enemy_absalom_assassin_walk_0.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_absalom_assassin_walk_0.png; path = enemy_absalom_assassin_walk_0.png; sourceTree = "<group>"; };
 		327690E354AE36696E85044A /* icon_map_battle.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = icon_map_battle.png; sourceTree = "<group>"; };
@@ -559,6 +569,7 @@
 		3E7ED08E21D2277AAD466355 /* twohand_14.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = twohand_14.png; sourceTree = "<group>"; };
 		3F31B20BFE486A0F08B2A0F7 /* bg_saul_court.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = bg_saul_court.png; sourceTree = "<group>"; };
 		403CCBB5F566AB4BBC1FFED2 /* enemy_philistine_elite_walk_2.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_philistine_elite_walk_2.png; path = enemy_philistine_elite_walk_2.png; sourceTree = "<group>"; };
+		40CA88FE92EA85F63ACEF0B8 /* davi_jovem_walk_grounded_07.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = davi_jovem_walk_grounded_07.png; sourceTree = "<group>"; };
 		40CBE11354622A4A6D0587A1 /* weapon_sling_bronze.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = weapon_sling_bronze.png; sourceTree = "<group>"; };
 		4121094423A063104BCE88D6 /* enemy_jebusite_slinger_walk_1.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_jebusite_slinger_walk_1.png; path = enemy_jebusite_slinger_walk_1.png; sourceTree = "<group>"; };
 		41544F85678B09EC5D832A90 /* enemy_venomous_snake_walk_0.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_venomous_snake_walk_0.png; path = enemy_venomous_snake_walk_0.png; sourceTree = "<group>"; };
@@ -588,16 +599,19 @@
 		51A5B8BEC99C5E31C5038766 /* waist_belt_warrior.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = waist_belt_warrior.png; sourceTree = "<group>"; };
 		52BEB46BAF4586DF6234E386 /* bg_valley_elah.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = bg_valley_elah.png; sourceTree = "<group>"; };
 		52EDFAE9810825BBEEF6473A /* enemy_philistine_soldier_walk_0.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_philistine_soldier_walk_0.png; path = enemy_philistine_soldier_walk_0.png; sourceTree = "<group>"; };
+		53559079D2A14ED8746B06BC /* davi_jovem_walk_grounded_03.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = davi_jovem_walk_grounded_03.png; sourceTree = "<group>"; };
 		53BE42E6E2F42044FFC03038 /* body_02.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = body_02.png; sourceTree = "<group>"; };
 		542149E6CF77489845C83EE0 /* boss_commander_walk_3.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = boss_commander_walk_3.png; path = boss_commander_walk_3.png; sourceTree = "<group>"; };
 		542DCDF868B4077DB5FC7CB2 /* enemy_giant_spider.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_giant_spider.png; path = enemy_giant_spider.png; sourceTree = "<group>"; };
 		5461C9BEA91D9EB7098C2415 /* davi_jovem_walk_enhanced_05.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = davi_jovem_walk_enhanced_05.png; sourceTree = "<group>"; };
+		55247C1464AED8CF41CF2A2E /* davi_jovem_walk_grounded_02.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = davi_jovem_walk_grounded_02.png; sourceTree = "<group>"; };
 		55902CAB94511175365DA9C8 /* enemy_philistine_spear_walk_3.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_philistine_spear_walk_3.png; path = enemy_philistine_spear_walk_3.png; sourceTree = "<group>"; };
 		566E458A1A4437A7AE25A498 /* enemy_absalom_assassin.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_absalom_assassin.png; path = enemy_absalom_assassin.png; sourceTree = "<group>"; };
 		56B352541F5BEC3B89566569 /* enemy_philistine_shield_walk_0.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_philistine_shield_walk_0.png; path = enemy_philistine_shield_walk_0.png; sourceTree = "<group>"; };
 		56BD0572396AF7BFB21B636D /* enemy_saul_guard_walk_1.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_saul_guard_walk_1.png; path = enemy_saul_guard_walk_1.png; sourceTree = "<group>"; };
 		58170BC8B2A3649F21C4C06D /* boss_general_walk_1.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = boss_general_walk_1.png; path = boss_general_walk_1.png; sourceTree = "<group>"; };
 		587FB11AA600D0072B72E1B6 /* enemy_desert_stalker.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_desert_stalker.png; path = enemy_desert_stalker.png; sourceTree = "<group>"; };
+		5907BE41E0E11460AB82E7C6 /* davi_jovem_walk_grounded_04.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = davi_jovem_walk_grounded_04.png; sourceTree = "<group>"; };
 		59083434C6BA72E012074E45 /* twohand_staff_acacia.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = twohand_staff_acacia.png; sourceTree = "<group>"; };
 		5B2EDD07181262E7DFB4C85B /* shield_05.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = shield_05.png; sourceTree = "<group>"; };
 		5BD7CAED29EA0CA45BB8B75B /* enemy_philistine_bow.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_philistine_bow.png; path = enemy_philistine_bow.png; sourceTree = "<group>"; };
@@ -698,6 +712,7 @@
 		9DBBB689D6D3B520AFE39715 /* body_06.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = body_06.png; sourceTree = "<group>"; };
 		9E349FA5C108DAF2CE761CEF /* icon_shield.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = icon_shield.png; sourceTree = "<group>"; };
 		9E47E349CD4F1147470D01E6 /* boss_prince_walk_3.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = boss_prince_walk_3.png; path = boss_prince_walk_3.png; sourceTree = "<group>"; };
+		A0B623B0F306DAFB46CB74EA /* davi_jovem_walk_grounded_05.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = davi_jovem_walk_grounded_05.png; sourceTree = "<group>"; };
 		A1DC08C48ED4E6EC651C4902 /* enemy_saul_advisor_walk_2.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_saul_advisor_walk_2.png; path = enemy_saul_advisor_walk_2.png; sourceTree = "<group>"; };
 		A2BB9EFE4C4085ED9B3F1156 /* wolf_walk_2.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = wolf_walk_2.png; sourceTree = "<group>"; };
 		A31CD506ADFBEA8C1594278D /* enemy_absalom_knight_walk_3.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_absalom_knight_walk_3.png; path = enemy_absalom_knight_walk_3.png; sourceTree = "<group>"; };
@@ -852,6 +867,7 @@
 		EE13A0300254310E8AA1861E /* weapon_11.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = weapon_11.png; sourceTree = "<group>"; };
 		F00DBA1E0000000000000001 /* food_barley_bread.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = food_barley_bread.png; sourceTree = "<group>"; };
 		F0415C683C367FF29ACBEC4D /* bg_jerusalem_siege.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = bg_jerusalem_siege.png; sourceTree = "<group>"; };
+		F0FA4BF5BF9A382877D4BCE2 /* davi_jovem_walk_grounded_01.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = davi_jovem_walk_grounded_01.png; sourceTree = "<group>"; };
 		F1BC09E41E71FEEE315C936F /* twohand_09.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = twohand_09.png; sourceTree = "<group>"; };
 		F1EE9BD80C4D2532F6A07F62 /* enemy_philistine_archer_walk_1.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = enemy_philistine_archer_walk_1.png; path = enemy_philistine_archer_walk_1.png; sourceTree = "<group>"; };
 		F546266BBE4C8553C3EDE8D5 /* head_14.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = head_14.png; sourceTree = "<group>"; };
@@ -1501,6 +1517,14 @@
 				9220FF0D14FEA515D4F74D9F /* battle_skill_book_ftp.png */,
 				678352067921E68CE712D49F /* battle_skill_soccer_ball.png */,
 				60DC54BC91D83CEB3ADD2DE7 /* battle_skill_beach_umbrella.png */,
+				2FBEFE4AF8143EBE94547323 /* davi_jovem_walk_grounded_00.png */,
+				F0FA4BF5BF9A382877D4BCE2 /* davi_jovem_walk_grounded_01.png */,
+				55247C1464AED8CF41CF2A2E /* davi_jovem_walk_grounded_02.png */,
+				53559079D2A14ED8746B06BC /* davi_jovem_walk_grounded_03.png */,
+				5907BE41E0E11460AB82E7C6 /* davi_jovem_walk_grounded_04.png */,
+				A0B623B0F306DAFB46CB74EA /* davi_jovem_walk_grounded_05.png */,
+				290E246B850EA3AA2EB42E59 /* davi_jovem_walk_grounded_06.png */,
+				40CA88FE92EA85F63ACEF0B8 /* davi_jovem_walk_grounded_07.png */,
 			);
 			path = Resources/Textures;
 			sourceTree = "<group>";
@@ -2007,6 +2031,14 @@
 				4862A10EF2339D5AF69FB659 /* battle_skill_book_ftp.png in Resources */,
 				6371E5E8EF6220EDEFFCCBE6 /* battle_skill_soccer_ball.png in Resources */,
 				8C428CBAEB57632C06287FFF /* battle_skill_beach_umbrella.png in Resources */,
+				BF4B34524C2A65443499AE9B /* davi_jovem_walk_grounded_00.png in Resources */,
+				56065523CAAE177FFD0DE9CE /* davi_jovem_walk_grounded_01.png in Resources */,
+				BDD27FD743D90B6DF856B4DE /* davi_jovem_walk_grounded_02.png in Resources */,
+				1252DFE0AFED3569CCAA008E /* davi_jovem_walk_grounded_03.png in Resources */,
+				63ADAB786EDDA7A88D916739 /* davi_jovem_walk_grounded_04.png in Resources */,
+				E947615A056437CD10052851 /* davi_jovem_walk_grounded_05.png in Resources */,
+				D8B02D480117EDCE5DC92B54 /* davi_jovem_walk_grounded_06.png in Resources */,
+				917E5C160F042E740BBD5C8F /* davi_jovem_walk_grounded_07.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

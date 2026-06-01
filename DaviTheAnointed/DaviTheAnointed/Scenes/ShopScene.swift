@@ -9,7 +9,7 @@ class ShopScene: SKScene {
     private var foodFirstVisibleIndex = 0
 
     enum ShopTab {
-        case buy, food, sell, chests, characters
+        case buy, food, sell, characters
     }
 
     override func didMove(to view: SKView) {
@@ -25,8 +25,6 @@ class ShopScene: SKScene {
             currentTab = .sell
         } else if args.contains("--debug-shop-food") {
             currentTab = .food
-        } else if args.contains("--debug-shop-chests") {
-            currentTab = .chests
         } else if args.contains("--debug-shop-characters") {
             currentTab = .characters
         } else if args.contains("--debug-shop-buy") {
@@ -85,7 +83,6 @@ class ShopScene: SKScene {
             (loc.localize("general.buy"), .buy, "tab_buy"),
             (loc.localize("shop.food"), .food, "tab_food"),
             (loc.localize("general.sell"), .sell, "tab_sell"),
-            (loc.localize("shop.rewards"), .chests, "tab_chests"),
             (loc.localize("menu.characters"), .characters, "tab_characters"),
         ]
 
@@ -120,8 +117,6 @@ class ShopScene: SKScene {
             setupFoodTab(player: player, area: contentSize, center: contentPos)
         case .sell:
             setupSellTab(player: player, area: contentSize, center: contentPos)
-        case .chests:
-            setupRewardsTab(area: contentSize, center: contentPos)
         case .characters:
             setupCharactersTab(player: player, area: contentSize, center: contentPos)
         }
@@ -611,97 +606,6 @@ class ShopScene: SKScene {
         return node
     }
 
-    private func setupRewardsTab(area: CGSize, center: CGPoint) {
-        let cards: [(title: String, subtitle: String, icon: String, color: SKColor)] = [
-            (
-                loc.localize("shop.reward.battle.title"),
-                loc.localize("shop.reward.battle.desc"),
-                "menu_icon_journey",
-                SKColor(red: 0.95, green: 0.66, blue: 0.20, alpha: 1)
-            ),
-            (
-                loc.localize("shop.reward.items.title"),
-                loc.localize("shop.reward.items.desc"),
-                "menu_icon_inventory",
-                SKColor(red: 0.26, green: 0.58, blue: 0.95, alpha: 1)
-            ),
-            (
-                loc.localize("shop.reward.shop.title"),
-                loc.localize("shop.reward.shop.desc"),
-                "menu_icon_shop",
-                SKColor(red: 0.32, green: 0.78, blue: 0.46, alpha: 1)
-            ),
-        ]
-
-        let spacing: CGFloat = min(170, max(142, area.width / 3.3))
-        let startX = center.x - (CGFloat(cards.count - 1) * spacing) / 2
-
-        for (i, card) in cards.enumerated() {
-            let x = startX + CGFloat(i) * spacing
-            addChild(createRewardInfoCard(
-                title: card.title,
-                subtitle: card.subtitle,
-                iconName: card.icon,
-                color: card.color,
-                position: CGPoint(x: x, y: center.y + 4)
-            ))
-        }
-
-        let footer = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
-        footer.text = loc.localize("shop.reward.footer")
-        footer.fontSize = 12
-        footer.fontColor = SKColor(white: 0.86, alpha: 0.94)
-        footer.numberOfLines = 0
-        footer.preferredMaxLayoutWidth = min(area.width - 48, 520)
-        footer.horizontalAlignmentMode = .center
-        footer.verticalAlignmentMode = .center
-        footer.position = CGPoint(x: center.x, y: center.y - area.height / 2 + 30)
-        addChild(footer)
-    }
-
-    private func createRewardInfoCard(title: String, subtitle: String, iconName: String, color: SKColor, position: CGPoint) -> SKNode {
-        let node = SKNode()
-        node.position = position
-
-        let bg = SKShapeNode(rectOf: CGSize(width: 140, height: 180), cornerRadius: 12)
-        bg.fillColor = SKColor(white: 0.1, alpha: 0.9)
-        bg.strokeColor = color
-        bg.lineWidth = 3
-        node.addChild(bg)
-
-        let iconPlate = SKShapeNode(circleOfRadius: 40)
-        iconPlate.fillColor = color.withAlphaComponent(0.20)
-        iconPlate.strokeColor = color
-        iconPlate.lineWidth = 2
-        iconPlate.position = CGPoint(x: 0, y: 44)
-        node.addChild(iconPlate)
-
-        let icon = SKSpriteNode(imageNamed: iconName)
-        icon.size = CGSize(width: 64, height: 64)
-        icon.position = CGPoint(x: 0, y: 44)
-        node.addChild(icon)
-
-        let nameLbl = SKLabelNode(fontNamed: "AvenirNext-Bold")
-        nameLbl.text = title
-        nameLbl.fontSize = 14
-        nameLbl.fontColor = SKColor(red: 1, green: 0.87, blue: 0.44, alpha: 1)
-        nameLbl.position = CGPoint(x: 0, y: -18)
-        fit(label: nameLbl, maxWidth: 118, minimumSize: 10)
-        node.addChild(nameLbl)
-
-        let subtitleLbl = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
-        subtitleLbl.text = subtitle
-        subtitleLbl.fontSize = 10
-        subtitleLbl.fontColor = SKColor(white: 0.82, alpha: 0.9)
-        subtitleLbl.numberOfLines = 0
-        subtitleLbl.preferredMaxLayoutWidth = 112
-        subtitleLbl.horizontalAlignmentMode = .center
-        subtitleLbl.verticalAlignmentMode = .center
-        subtitleLbl.position = CGPoint(x: 0, y: -58)
-        node.addChild(subtitleLbl)
-        return node
-    }
-
     private func setupCharactersTab(player: PlayerData, area: CGSize, center: CGPoint) {
         let characters = PlayableCharacter.allCases
         let cardSize = CGSize(width: 88, height: 118)
@@ -901,10 +805,6 @@ class ShopScene: SKScene {
                 return
             case "tab_sell":
                 currentTab = .sell
-                setupUI()
-                return
-            case "tab_chests":
-                currentTab = .chests
                 setupUI()
                 return
             case "tab_characters":

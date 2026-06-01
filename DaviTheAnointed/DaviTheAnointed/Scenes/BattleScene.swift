@@ -305,8 +305,16 @@ class BattleScene: SKScene {
         }
         guard !frames.isEmpty else { return }
 
-        if frames.count == 1, anim == "idle", loop {
-            startRosterIdleMotion()
+        if frames.count == 1 {
+            switch anim {
+            case "idle" where loop:
+                startRosterIdleMotion()
+            case "attack":
+                runRosterAttackMotion()
+            default:
+                break
+            }
+            return
         }
 
         let animAction = SKAction.animate(with: frames, timePerFrame: fps)
@@ -325,6 +333,10 @@ class BattleScene: SKScene {
         playerNode.run(action, withKey: "playerAnim")
     }
 
+    private func usesSingleFramePlayerAnimation() -> Bool {
+        playerIdleFrames.count == 1 && playerWalkFrames.count == 1 && playerAttackFrames.count == 1
+    }
+
     private func startRosterIdleMotion() {
         let breatheUp = SKAction.group([
             SKAction.scaleX(to: 1.015, y: 0.992, duration: 0.95),
@@ -337,6 +349,51 @@ class BattleScene: SKScene {
         ])
         breatheDown.timingMode = .easeInEaseOut
         playerNode.run(SKAction.repeatForever(SKAction.sequence([breatheUp, breatheDown])), withKey: "playerIdleMotion")
+    }
+
+    private func runRosterAttackMotion() {
+        playerNode.removeAction(forKey: "playerAnim")
+        playerNode.removeAction(forKey: "playerIdleMotion")
+        playerNode.removeAction(forKey: "walkMotion")
+        playerNode.position.y = playerBaseY
+
+        let windUp = SKAction.group([
+            SKAction.moveBy(x: -8, y: 0, duration: 0.07),
+            SKAction.rotate(toAngle: -0.08, duration: 0.07, shortestUnitArc: true),
+            SKAction.scaleX(to: 0.96, y: 1.04, duration: 0.07)
+        ])
+        windUp.timingMode = .easeOut
+
+        let lunge = SKAction.group([
+            SKAction.moveBy(x: 36, y: 7, duration: 0.11),
+            SKAction.rotate(toAngle: 0.11, duration: 0.11, shortestUnitArc: true),
+            SKAction.scaleX(to: 1.06, y: 0.96, duration: 0.11)
+        ])
+        lunge.timingMode = .easeIn
+
+        let recoil = SKAction.group([
+            SKAction.moveBy(x: -28, y: -7, duration: 0.14),
+            SKAction.rotate(toAngle: -0.025, duration: 0.14, shortestUnitArc: true),
+            SKAction.scaleX(to: 0.99, y: 1.01, duration: 0.14)
+        ])
+        recoil.timingMode = .easeOut
+
+        let settle = SKAction.group([
+            SKAction.moveTo(y: playerBaseY, duration: 0.08),
+            SKAction.rotate(toAngle: 0, duration: 0.08, shortestUnitArc: true),
+            SKAction.scaleX(to: 1.0, y: 1.0, duration: 0.08)
+        ])
+
+        playerNode.run(SKAction.sequence([
+            windUp,
+            lunge,
+            recoil,
+            settle,
+            SKAction.run { [weak self] in
+                self?.currentPlayerAnim = ""
+                self?.playAnim("idle")
+            }
+        ]), withKey: "playerAnim")
     }
 
     private func setSpriteTexture(_ node: SKSpriteNode, textureName: String, targetHeight: CGFloat) {
@@ -431,20 +488,41 @@ class BattleScene: SKScene {
 
         playerNode.position.y = playerBaseY
 
-        let stepForward = SKAction.group([
-            SKAction.scaleX(to: 1.018, y: 0.992, duration: 0.12),
-            SKAction.rotate(toAngle: 0.018, duration: 0.12, shortestUnitArc: true)
-        ])
+        let stepForward: SKAction
+        let stepBack: SKAction
+        let settle: SKAction
+        if usesSingleFramePlayerAnimation() {
+            stepForward = SKAction.group([
+                SKAction.moveTo(y: playerBaseY + 5, duration: 0.12),
+                SKAction.scaleX(to: 1.045, y: 0.975, duration: 0.12),
+                SKAction.rotate(toAngle: 0.06, duration: 0.12, shortestUnitArc: true)
+            ])
+            stepBack = SKAction.group([
+                SKAction.moveTo(y: playerBaseY + 1, duration: 0.12),
+                SKAction.scaleX(to: 0.97, y: 1.035, duration: 0.12),
+                SKAction.rotate(toAngle: -0.052, duration: 0.12, shortestUnitArc: true)
+            ])
+            settle = SKAction.group([
+                SKAction.moveTo(y: playerBaseY, duration: 0.08),
+                SKAction.scaleX(to: 1.0, y: 1.0, duration: 0.08),
+                SKAction.rotate(toAngle: 0, duration: 0.08, shortestUnitArc: true)
+            ])
+        } else {
+            stepForward = SKAction.group([
+                SKAction.scaleX(to: 1.018, y: 0.992, duration: 0.12),
+                SKAction.rotate(toAngle: 0.018, duration: 0.12, shortestUnitArc: true)
+            ])
+            stepBack = SKAction.group([
+                SKAction.scaleX(to: 0.992, y: 1.006, duration: 0.12),
+                SKAction.rotate(toAngle: -0.014, duration: 0.12, shortestUnitArc: true)
+            ])
+            settle = SKAction.group([
+                SKAction.scaleX(to: 1.0, y: 1.0, duration: 0.08),
+                SKAction.rotate(toAngle: 0, duration: 0.08, shortestUnitArc: true)
+            ])
+        }
         stepForward.timingMode = .easeInEaseOut
-        let stepBack = SKAction.group([
-            SKAction.scaleX(to: 0.992, y: 1.006, duration: 0.12),
-            SKAction.rotate(toAngle: -0.014, duration: 0.12, shortestUnitArc: true)
-        ])
         stepBack.timingMode = .easeInEaseOut
-        let settle = SKAction.group([
-            SKAction.scaleX(to: 1.0, y: 1.0, duration: 0.08),
-            SKAction.rotate(toAngle: 0, duration: 0.08, shortestUnitArc: true)
-        ])
         settle.timingMode = .easeInEaseOut
         playerNode.run(SKAction.repeatForever(SKAction.sequence([stepForward, stepBack, settle])), withKey: "walkMotion")
 
@@ -1562,11 +1640,13 @@ class BattleScene: SKScene {
 
         // Player attack animation
         playAnim("attack", loop: false)
-        let attackAnim = SKAction.sequence([
-            SKAction.moveBy(x: 15, y: 0, duration: 0.05),
-            SKAction.moveBy(x: -15, y: 0, duration: 0.05),
-        ])
-        playerNode.run(attackAnim)
+        if !usesSingleFramePlayerAnimation() {
+            let attackAnim = SKAction.sequence([
+                SKAction.moveBy(x: 15, y: 0, duration: 0.05),
+                SKAction.moveBy(x: -15, y: 0, duration: 0.05),
+            ])
+            playerNode.run(attackAnim)
+        }
 
         // Enemy hit flash
         let flash = SKAction.sequence([
@@ -2362,10 +2442,12 @@ class BattleScene: SKScene {
 
             // Visual effect: simple lunge
             playAnim("attack", loop: false)
-            playerNode.run(SKAction.sequence([
-                SKAction.moveBy(x: 20, y: 0, duration: 0.1),
-                SKAction.moveBy(x: -20, y: 0, duration: 0.1)
-            ]))
+            if !usesSingleFramePlayerAnimation() {
+                playerNode.run(SKAction.sequence([
+                    SKAction.moveBy(x: 20, y: 0, duration: 0.1),
+                    SKAction.moveBy(x: -20, y: 0, duration: 0.1)
+                ]))
+            }
             showMeleeSkillEffect(visual)
 
             // Stun effect on enemy
@@ -2393,6 +2475,7 @@ class BattleScene: SKScene {
                 : skillToast(for: name))
 
             // Visual effect: projectile
+            playAnim("attack", loop: false)
             let projectile = SKSpriteNode(imageNamed: visual.rangedProjectile)
             projectile.size = visual.rangedSize
             projectile.position = CGPoint(x: playerNode.position.x + 18, y: playerNode.position.y + 22)

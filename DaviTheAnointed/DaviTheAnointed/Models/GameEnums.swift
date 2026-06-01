@@ -58,6 +58,7 @@ enum EquipmentSlot: String, Codable, CaseIterable {
     case head
     case body
     case feet
+    case waist
     case mainHand
     case offHand
     case twoHand
@@ -82,6 +83,19 @@ enum PlayableCharacter: String, Codable, CaseIterable {
     case debora
     case elias
     case gideao
+
+    var rosterTextureName: String {
+        switch self {
+        case .davi:
+            return "davijovem"
+        case .bigJ:
+            return "character_jv"
+        case .josue:
+            return "character_faithtech"
+        default:
+            return "davirei"
+        }
+    }
 
     var price: Int {
         switch self {
@@ -109,13 +123,20 @@ enum PlayableCharacter: String, Codable, CaseIterable {
 
     var passiveBonus: CharacterStats {
         switch self {
-        case .davi: return CharacterStats()
-        case .bigJ: return CharacterStats(critChance: 0.05)
-        case .sansao: return CharacterStats(damageMultiplier: 0.10)
-        case .josue: return CharacterStats(armor: 8)
-        case .debora: return CharacterStats(attackSpeedBonus: 0.10)
-        case .elias: return CharacterStats(lifeSteal: 0.08)
-        case .gideao: return CharacterStats(dodgeMelee: 0.12)
+        case .davi:
+            return CharacterStats(maxHP: 8, damageMin: 1, damageMax: 1, runSpeed: 4)
+        case .bigJ:
+            return CharacterStats(critChance: 0.08, critDamage: 0.20, attackSpeedBonus: 0.04)
+        case .sansao:
+            return CharacterStats(maxHP: 18, damageMin: 2, damageMax: 4, damageMultiplier: 0.08)
+        case .josue:
+            return CharacterStats(maxHP: 14, armor: 10, dodgeRanged: 0.04)
+        case .debora:
+            return CharacterStats(critChance: 0.04, runSpeed: 8, attackSpeedBonus: 0.12)
+        case .elias:
+            return CharacterStats(maxHP: 10, lifeSteal: 0.06, damageMultiplier: 0.05)
+        case .gideao:
+            return CharacterStats(critChance: 0.03, dodgeMelee: 0.10, dodgeRanged: 0.08)
         }
     }
 
@@ -127,7 +148,10 @@ enum PlayableCharacter: String, Codable, CaseIterable {
 // MARK: - Food Type
 enum FoodType: String, Codable, CaseIterable {
     case barleyBread
+    case waterSkin
     case grapes
+    case grapeJuice
+    case freshFigs
     case driedFigs
     case olives
     case honeyBread

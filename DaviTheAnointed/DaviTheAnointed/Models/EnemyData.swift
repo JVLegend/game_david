@@ -102,59 +102,59 @@ struct EnemyDatabase {
 
         // MARK: Map 1 Enemies
         enemies["grey_wolf"] = EnemyData(
-            id: "grey_wolf", nameKey: "enemy.grey_wolf", hp: 30, damageMin: 5, damageMax: 8,
+            id: "grey_wolf", nameKey: "enemy.grey_wolf", hp: 22, damageMin: 3, damageMax: 5,
             armor: 0, attackType: .melee, attackSpeed: 1.0,
             abilities: [EnemyAbility(nameKey: "ability.bite", descriptionKey: "ability.bite.desc",
                                      cooldown: 5, damageMultiplier: 1.2, effectType: .bleed, effectValue: 2, effectDuration: 3)],
             textureName: "lobocinzento", isBoss: false, isSubBoss: false)
 
         enemies["alpha_wolf"] = EnemyData(
-            id: "alpha_wolf", nameKey: "enemy.alpha_wolf", hp: 50, damageMin: 8, damageMax: 12,
-            armor: 2, attackType: .melee, attackSpeed: 1.0,
+            id: "alpha_wolf", nameKey: "enemy.alpha_wolf", hp: 36, damageMin: 5, damageMax: 7,
+            armor: 1, attackType: .melee, attackSpeed: 1.0,
             abilities: [EnemyAbility(nameKey: "ability.howl", descriptionKey: "ability.howl.desc",
                                      cooldown: 10, damageMultiplier: 0, effectType: .buffAllies, effectValue: 0.20, effectDuration: 5)],
             textureName: "lobocinzento", isBoss: false, isSubBoss: false)
 
         enemies["rabid_fox"] = EnemyData(
-            id: "rabid_fox", nameKey: "enemy.rabid_fox", hp: 25, damageMin: 4, damageMax: 7,
+            id: "rabid_fox", nameKey: "enemy.rabid_fox", hp: 24, damageMin: 4, damageMax: 6,
             armor: 0, attackType: .melee, attackSpeed: 1.3,
             abilities: [], textureName: "enemy_rabid_fox", isBoss: false, isSubBoss: false)
 
         enemies["hungry_jackal"] = EnemyData(
-            id: "hungry_jackal", nameKey: "enemy.hungry_jackal", hp: 35, damageMin: 6, damageMax: 9,
+            id: "hungry_jackal", nameKey: "enemy.hungry_jackal", hp: 28, damageMin: 5, damageMax: 7,
             armor: 0, attackType: .melee, attackSpeed: 1.5,
             abilities: [], textureName: "enemy_hungry_jackal", isBoss: false, isSubBoss: false)
 
         enemies["wild_boar"] = EnemyData(
-            id: "wild_boar", nameKey: "enemy.wild_boar", hp: 60, damageMin: 10, damageMax: 14,
-            armor: 3, attackType: .melee, attackSpeed: 0.8,
+            id: "wild_boar", nameKey: "enemy.wild_boar", hp: 44, damageMin: 7, damageMax: 10,
+            armor: 2, attackType: .melee, attackSpeed: 0.8,
             abilities: [EnemyAbility(nameKey: "ability.charge", descriptionKey: "ability.charge.desc",
                                      cooldown: 8, damageMultiplier: 1.5, effectType: .stun, effectValue: 1, effectDuration: 1)],
             textureName: "enemy_wild_boar", isBoss: false, isSubBoss: false)
 
         enemies["venomous_snake"] = EnemyData(
-            id: "venomous_snake", nameKey: "enemy.venomous_snake", hp: 20, damageMin: 3, damageMax: 5,
+            id: "venomous_snake", nameKey: "enemy.venomous_snake", hp: 22, damageMin: 3, damageMax: 5,
             armor: 0, attackType: .ranged, attackSpeed: 1.2,
             abilities: [EnemyAbility(nameKey: "ability.venom", descriptionKey: "ability.venom.desc",
                                      cooldown: 6, damageMultiplier: 1.0, effectType: .poison, effectValue: 3, effectDuration: 3)],
             textureName: "enemy_venomous_snake", isBoss: false, isSubBoss: false)
 
         enemies["hunting_eagle"] = EnemyData(
-            id: "hunting_eagle", nameKey: "enemy.hunting_eagle", hp: 25, damageMin: 7, damageMax: 10,
+            id: "hunting_eagle", nameKey: "enemy.hunting_eagle", hp: 30, damageMin: 6, damageMax: 8,
             armor: 0, attackType: .ranged, attackSpeed: 1.0,
             abilities: [EnemyAbility(nameKey: "ability.dive", descriptionKey: "ability.dive.desc",
                                      cooldown: 7, damageMultiplier: 1.8, effectType: .ignoreArmor, effectValue: 1, effectDuration: 0)],
             textureName: "enemy_hunting_eagle", isBoss: false, isSubBoss: false)
 
         enemies["giant_scorpion"] = EnemyData(
-            id: "giant_scorpion", nameKey: "enemy.giant_scorpion", hp: 40, damageMin: 6, damageMax: 9,
+            id: "giant_scorpion", nameKey: "enemy.giant_scorpion", hp: 38, damageMin: 6, damageMax: 8,
             armor: 2, attackType: .melee, attackSpeed: 0.9,
             abilities: [EnemyAbility(nameKey: "ability.sting", descriptionKey: "ability.sting.desc",
                                      cooldown: 6, damageMultiplier: 1.3, effectType: .poison, effectValue: 2, effectDuration: 4)],
             textureName: "enemy_giant_scorpion", isBoss: false, isSubBoss: false)
 
         enemies["pack_hyena"] = EnemyData(
-            id: "pack_hyena", nameKey: "enemy.pack_hyena", hp: 35, damageMin: 5, damageMax: 8,
+            id: "pack_hyena", nameKey: "enemy.pack_hyena", hp: 34, damageMin: 5, damageMax: 7,
             armor: 0, attackType: .melee, attackSpeed: 1.1,
             abilities: [EnemyAbility(nameKey: "ability.summon_pup", descriptionKey: "ability.summon_pup.desc",
                                      cooldown: 12, damageMultiplier: 0, effectType: .summon, effectValue: 1, effectDuration: 0)],
@@ -167,72 +167,72 @@ struct EnemyDatabase {
 
         // MARK: Map 2 Enemies
         enemies["bear_cub"] = EnemyData(
-            id: "bear_cub", nameKey: "enemy.bear_cub", hp: 40, damageMin: 6, damageMax: 9,
-            armor: 1, attackType: .melee, attackSpeed: 1.0,
+            id: "bear_cub", nameKey: "enemy.bear_cub", hp: 52, damageMin: 7, damageMax: 10,
+            armor: 2, attackType: .melee, attackSpeed: 1.0,
             abilities: [], textureName: "enemy_bear_cub", isBoss: false, isSubBoss: false)
 
         enemies["philistine_scout_spear"] = EnemyData(
-            id: "philistine_scout_spear", nameKey: "enemy.philistine_scout_spear", hp: 50, damageMin: 8, damageMax: 12,
-            armor: 3, attackType: .melee, attackSpeed: 0.9,
+            id: "philistine_scout_spear", nameKey: "enemy.philistine_scout_spear", hp: 58, damageMin: 8, damageMax: 12,
+            armor: 4, attackType: .melee, attackSpeed: 0.9,
             abilities: [], textureName: "enemy_philistine_spear", isBoss: false, isSubBoss: false)
 
         enemies["philistine_scout_bow"] = EnemyData(
-            id: "philistine_scout_bow", nameKey: "enemy.philistine_scout_bow", hp: 35, damageMin: 6, damageMax: 10,
-            armor: 1, attackType: .ranged, attackSpeed: 1.1,
+            id: "philistine_scout_bow", nameKey: "enemy.philistine_scout_bow", hp: 48, damageMin: 8, damageMax: 12,
+            armor: 2, attackType: .ranged, attackSpeed: 1.1,
             abilities: [], textureName: "enemy_philistine_bow", isBoss: false, isSubBoss: false)
 
         enemies["philistine_scout_shield"] = EnemyData(
-            id: "philistine_scout_shield", nameKey: "enemy.philistine_scout_shield", hp: 70, damageMin: 5, damageMax: 8,
-            armor: 8, attackType: .melee, attackSpeed: 0.7,
+            id: "philistine_scout_shield", nameKey: "enemy.philistine_scout_shield", hp: 86, damageMin: 7, damageMax: 10,
+            armor: 10, attackType: .melee, attackSpeed: 0.7,
             abilities: [EnemyAbility(nameKey: "ability.block", descriptionKey: "ability.block.desc",
                                      cooldown: 8, damageMultiplier: 0, effectType: .block, effectValue: 10, effectDuration: 3)],
             textureName: "enemy_philistine_shield", isBoss: false, isSubBoss: false)
 
         enemies["philistine_soldier"] = EnemyData(
-            id: "philistine_soldier", nameKey: "enemy.philistine_soldier", hp: 60, damageMin: 10, damageMax: 14,
-            armor: 5, attackType: .melee, attackSpeed: 0.9,
+            id: "philistine_soldier", nameKey: "enemy.philistine_soldier", hp: 78, damageMin: 11, damageMax: 16,
+            armor: 7, attackType: .melee, attackSpeed: 0.9,
             abilities: [], textureName: "enemy_philistine_soldier", isBoss: false, isSubBoss: false)
 
         enemies["philistine_archer"] = EnemyData(
-            id: "philistine_archer", nameKey: "enemy.philistine_archer", hp: 40, damageMin: 8, damageMax: 12,
-            armor: 2, attackType: .ranged, attackSpeed: 1.0,
+            id: "philistine_archer", nameKey: "enemy.philistine_archer", hp: 60, damageMin: 10, damageMax: 15,
+            armor: 4, attackType: .ranged, attackSpeed: 1.0,
             abilities: [EnemyAbility(nameKey: "ability.fire_arrow", descriptionKey: "ability.fire_arrow.desc",
                                      cooldown: 7, damageMultiplier: 1.3, effectType: .bleed, effectValue: 3, effectDuration: 2)],
             textureName: "enemy_philistine_archer", isBoss: false, isSubBoss: false)
 
         enemies["philistine_elite"] = EnemyData(
-            id: "philistine_elite", nameKey: "enemy.philistine_elite", hp: 80, damageMin: 12, damageMax: 18,
-            armor: 7, attackType: .melee, attackSpeed: 0.8,
+            id: "philistine_elite", nameKey: "enemy.philistine_elite", hp: 95, damageMin: 13, damageMax: 19,
+            armor: 10, attackType: .melee, attackSpeed: 0.8,
             abilities: [EnemyAbility(nameKey: "ability.counter", descriptionKey: "ability.counter.desc",
                                      cooldown: 0, damageMultiplier: 0.2, effectType: .reflect, effectValue: 0.20, effectDuration: 0)],
             textureName: "enemy_philistine_elite", isBoss: false, isSubBoss: false)
 
         enemies["philistine_healer"] = EnemyData(
-            id: "philistine_healer", nameKey: "enemy.philistine_healer", hp: 45, damageMin: 4, damageMax: 6,
-            armor: 2, attackType: .ranged, attackSpeed: 1.0,
+            id: "philistine_healer", nameKey: "enemy.philistine_healer", hp: 62, damageMin: 7, damageMax: 10,
+            armor: 5, attackType: .ranged, attackSpeed: 1.0,
             abilities: [EnemyAbility(nameKey: "ability.heal_allies", descriptionKey: "ability.heal_allies.desc",
                                      cooldown: 5, damageMultiplier: 0, effectType: .heal, effectValue: 15, effectDuration: 0)],
             textureName: "enemy_philistine_healer", isBoss: false, isSubBoss: false)
 
         // MARK: Map 3 Enemies
         enemies["saul_guard"] = EnemyData(
-            id: "saul_guard", nameKey: "enemy.saul_guard", hp: 90, damageMin: 12, damageMax: 18,
-            armor: 6, attackType: .melee, attackSpeed: 0.9,
+            id: "saul_guard", nameKey: "enemy.saul_guard", hp: 140, damageMin: 18, damageMax: 28,
+            armor: 12, attackType: .melee, attackSpeed: 0.9,
             abilities: [], textureName: "enemy_saul_guard", isBoss: false, isSubBoss: false)
 
         enemies["saul_archer"] = EnemyData(
-            id: "saul_archer", nameKey: "enemy.saul_archer", hp: 60, damageMin: 10, damageMax: 15,
-            armor: 3, attackType: .ranged, attackSpeed: 1.1,
+            id: "saul_archer", nameKey: "enemy.saul_archer", hp: 105, damageMin: 16, damageMax: 24,
+            armor: 8, attackType: .ranged, attackSpeed: 1.1,
             abilities: [], textureName: "enemy_saul_archer", isBoss: false, isSubBoss: false)
 
         enemies["saul_spearman"] = EnemyData(
-            id: "saul_spearman", nameKey: "enemy.saul_spearman", hp: 110, damageMin: 15, damageMax: 22,
-            armor: 8, attackType: .melee, attackSpeed: 0.8,
+            id: "saul_spearman", nameKey: "enemy.saul_spearman", hp: 170, damageMin: 22, damageMax: 34,
+            armor: 16, attackType: .melee, attackSpeed: 0.8,
             abilities: [], textureName: "enemy_saul_spearman", isBoss: false, isSubBoss: false)
 
         enemies["saul_advisor"] = EnemyData(
-            id: "saul_advisor", nameKey: "enemy.saul_advisor", hp: 75, damageMin: 8, damageMax: 12,
-            armor: 4, attackType: .ranged, attackSpeed: 1.0,
+            id: "saul_advisor", nameKey: "enemy.saul_advisor", hp: 120, damageMin: 14, damageMax: 20,
+            armor: 10, attackType: .ranged, attackSpeed: 1.0,
             abilities: [EnemyAbility(nameKey: "ability.heal_allies", descriptionKey: "ability.heal_allies.desc",
                                      cooldown: 8, damageMultiplier: 0, effectType: .heal, effectValue: 25, effectDuration: 0)],
             textureName: "enemy_saul_advisor", isBoss: false, isSubBoss: false)
@@ -344,8 +344,8 @@ struct EnemyDatabase {
 
         // Lion Boss (Map 1)
         let lionEnemy = EnemyData(
-            id: "lion_boss", nameKey: "enemy.lion_boss", hp: 250, damageMin: 15, damageMax: 25,
-            armor: 10, attackType: .melee, attackSpeed: 1.0,
+            id: "lion_boss", nameKey: "enemy.lion_boss", hp: 140, damageMin: 9, damageMax: 13,
+            armor: 5, attackType: .melee, attackSpeed: 1.0,
             abilities: [EnemyAbility(nameKey: "ability.paw_swipe", descriptionKey: "ability.paw_swipe.desc",
                                      cooldown: 4, damageMultiplier: 1.3, effectType: .none, effectValue: 0, effectDuration: 0)],
             textureName: "leao", isBoss: true, isSubBoss: false)
@@ -363,12 +363,12 @@ struct EnemyDatabase {
                 ], statMultiplier: 1.5)
             ],
             guaranteedDropId: "body_04", // Lion Skin
-            goldReward: 300, xpReward: 100, rubyReward: 0)
+            goldReward: 260, xpReward: 120, rubyReward: 0)
 
         // Bear Sub-Boss (Map 2, Battle 1)
         let bearEnemy = EnemyData(
-            id: "brown_bear", nameKey: "enemy.brown_bear", hp: 180, damageMin: 12, damageMax: 20,
-            armor: 5, attackType: .melee, attackSpeed: 0.8,
+            id: "brown_bear", nameKey: "enemy.brown_bear", hp: 155, damageMin: 13, damageMax: 19,
+            armor: 8, attackType: .melee, attackSpeed: 0.8,
             abilities: [
                 EnemyAbility(nameKey: "ability.bear_hug", descriptionKey: "ability.bear_hug.desc",
                              cooldown: 10, damageMultiplier: 0.5, effectType: .grab, effectValue: 5, effectDuration: 3),
@@ -383,8 +383,8 @@ struct EnemyDatabase {
 
         // Goliath Boss (Map 2)
         let goliathEnemy = EnemyData(
-            id: "goliath", nameKey: "enemy.goliath", hp: 500, damageMin: 25, damageMax: 40,
-            armor: 20, attackType: .melee, attackSpeed: 0.6,
+            id: "goliath", nameKey: "enemy.goliath", hp: 360, damageMin: 20, damageMax: 30,
+            armor: 16, attackType: .melee, attackSpeed: 0.6,
             abilities: [EnemyAbility(nameKey: "ability.spear_throw", descriptionKey: "ability.spear_throw.desc",
                                      cooldown: 6, damageMultiplier: 2.0, effectType: .none, effectValue: 0, effectDuration: 0)],
             textureName: "boss_goliath", isBoss: true, isSubBoss: false)
@@ -406,12 +406,12 @@ struct EnemyDatabase {
                 ], statMultiplier: 1.3)
             ],
             guaranteedDropId: "twohand_06", // Goliath's Sword
-            goldReward: 500, xpReward: 200, rubyReward: 5)
+            goldReward: 620, xpReward: 260, rubyReward: 5)
 
         // Saul Mad Boss (Map 3)
         let saulEnemy = EnemyData(
-            id: "saul_mad", nameKey: "enemy.saul_mad", hp: 800, damageMin: 35, damageMax: 55,
-            armor: 25, attackType: .melee, attackSpeed: 0.9,
+            id: "saul_mad", nameKey: "enemy.saul_mad", hp: 900, damageMin: 34, damageMax: 52,
+            armor: 28, attackType: .melee, attackSpeed: 0.9,
             abilities: [EnemyAbility(nameKey: "ability.javelin_throw", descriptionKey: "ability.javelin_throw.desc",
                                      cooldown: 6, damageMultiplier: 1.5, effectType: .none, effectValue: 0, effectDuration: 0)],
             textureName: "boss_saul", isBoss: true, isSubBoss: false)
@@ -426,7 +426,7 @@ struct EnemyDatabase {
                 ], statMultiplier: 1.4)
             ],
             guaranteedDropId: "head_08", // Coroa de Bronze
-            goldReward: 800, xpReward: 400, rubyReward: 5)
+            goldReward: 1000, xpReward: 520, rubyReward: 5)
 
         // Saul's General (Map 4)
         let generalEnemy = EnemyData(
@@ -518,13 +518,13 @@ struct EnemyDatabase {
         let map1 = MapDefinition(id: 1, nameKey: "map.bethlehem_fields", backgroundTexture: "bg_bethlehem", battles: [
             BattleDefinition(mapId: 1, battleId: 1, nameKey: "battle.wolf_pack",
                              enemies: ["grey_wolf", "grey_wolf", "alpha_wolf"],
-                             goldReward: 50, xpReward: 20, possibleDropIds: ["feet_02"], isBossBattle: false),
+                             goldReward: 80, xpReward: 25, possibleDropIds: ["head_01", "shield_01", "twohand_01"], isBossBattle: false),
             BattleDefinition(mapId: 1, battleId: 2, nameKey: "battle.night_invaders",
                              enemies: ["rabid_fox", "hungry_jackal", "wild_boar", "venomous_snake"],
-                             goldReward: 80, xpReward: 30, possibleDropIds: ["head_02"], isBossBattle: false),
+                             goldReward: 110, xpReward: 35, possibleDropIds: ["head_02", "body_02", "weapon_02", "gloves_01"], isBossBattle: false),
             BattleDefinition(mapId: 1, battleId: 3, nameKey: "battle.mountain_trail",
                              enemies: ["hunting_eagle", "giant_scorpion", "pack_hyena", "pack_hyena"],
-                             goldReward: 100, xpReward: 40, possibleDropIds: ["weapon_02"], isBossBattle: false),
+                             goldReward: 140, xpReward: 45, possibleDropIds: ["weapon_03", "body_03", "twohand_02"], isBossBattle: false),
             BattleDefinition(mapId: 1, battleId: 4, nameKey: "battle.lion_boss",
                              enemies: ["lion_boss"],
                              goldReward: 300, xpReward: 100, possibleDropIds: ["body_04"], isBossBattle: true),
@@ -533,13 +533,13 @@ struct EnemyDatabase {
         let map2 = MapDefinition(id: 2, nameKey: "map.valley_of_elah", backgroundTexture: "bg_valley_elah", battles: [
             BattleDefinition(mapId: 2, battleId: 1, nameKey: "battle.mountain_bear",
                              enemies: ["bear_cub", "bear_cub", "brown_bear"],
-                             goldReward: 200, xpReward: 60, possibleDropIds: [], isBossBattle: false),
+                             goldReward: 160, xpReward: 70, possibleDropIds: ["shield_03", "weapon_04", "body_05"], isBossBattle: false),
             BattleDefinition(mapId: 2, battleId: 2, nameKey: "battle.philistine_scouts",
                              enemies: ["philistine_scout_spear", "philistine_scout_bow", "philistine_scout_shield", "philistine_scout_spear"],
-                             goldReward: 150, xpReward: 50, possibleDropIds: ["head_05"], isBossBattle: false),
+                             goldReward: 220, xpReward: 90, possibleDropIds: ["head_05", "shield_04", "twohand_04", "gloves_02"], isBossBattle: false),
             BattleDefinition(mapId: 2, battleId: 3, nameKey: "battle.advance_guard",
                              enemies: ["philistine_soldier", "philistine_archer", "philistine_elite", "philistine_healer"],
-                             goldReward: 200, xpReward: 70, possibleDropIds: ["weapon_06"], isBossBattle: false),
+                             goldReward: 280, xpReward: 110, possibleDropIds: ["weapon_06", "body_06", "shield_05"], isBossBattle: false),
             BattleDefinition(mapId: 2, battleId: 4, nameKey: "battle.goliath_boss",
                              enemies: ["goliath"],
                              goldReward: 500, xpReward: 200, possibleDropIds: ["twohand_06"], isBossBattle: true),
@@ -548,13 +548,13 @@ struct EnemyDatabase {
         let map3 = MapDefinition(id: 3, nameKey: "map.saul_court", backgroundTexture: "bg_saul_court", battles: [
             BattleDefinition(mapId: 3, battleId: 1, nameKey: "battle.royal_hall",
                              enemies: ["saul_guard", "saul_guard", "saul_archer"],
-                             goldReward: 250, xpReward: 100, possibleDropIds: ["ring_02"], isBossBattle: false),
+                             goldReward: 320, xpReward: 150, possibleDropIds: ["weapon_07", "body_07", "shield_06"], isBossBattle: false),
             BattleDefinition(mapId: 3, battleId: 2, nameKey: "battle.conspiracy",
                              enemies: ["saul_guard", "saul_spearman", "saul_advisor"],
-                             goldReward: 300, xpReward: 150, possibleDropIds: ["head_06"], isBossBattle: false),
+                             goldReward: 420, xpReward: 190, possibleDropIds: ["head_06", "weapon_08", "shield_07", "gloves_03"], isBossBattle: false),
             BattleDefinition(mapId: 3, battleId: 3, nameKey: "battle.betrayal",
                              enemies: ["saul_spearman", "saul_spearman", "saul_advisor", "saul_guard"],
-                             goldReward: 400, xpReward: 200, possibleDropIds: ["weapon_07"], isBossBattle: false),
+                             goldReward: 560, xpReward: 240, possibleDropIds: ["head_08", "body_08", "twohand_07"], isBossBattle: false),
             BattleDefinition(mapId: 3, battleId: 4, nameKey: "battle.saul_boss",
                              enemies: ["saul_mad"],
                              goldReward: 800, xpReward: 400, possibleDropIds: ["head_08"], isBossBattle: true),

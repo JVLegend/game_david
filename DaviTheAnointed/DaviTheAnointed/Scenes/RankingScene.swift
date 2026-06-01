@@ -7,7 +7,7 @@ class RankingScene: SKScene {
     private var loadingLabel: SKLabelNode?
     
     override func didMove(to view: SKView) {
-        backgroundColor = SKColor(red: 0.12, green: 0.08, blue: 0.06, alpha: 1)
+        backgroundColor = SKColor(red: 0.05, green: 0.05, blue: 0.05, alpha: 1)
         setupUI()
         loadData()
     }
@@ -15,10 +15,19 @@ class RankingScene: SKScene {
     private func setupUI() {
         removeAllChildren()
         
-        let safeL: CGFloat = 60
+        // Background
+        let bg = SKSpriteNode(imageNamed: "background_menu")
+        bg.size = size
+        bg.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        bg.zPosition = -10
+        bg.alpha = 0.5
+        addChild(bg)
+
+        let safeArea = view?.safeAreaInsets ?? .zero
+        let safeL = max(40, safeArea.left)
         
         // Back button
-        let backBtn = createButton(text: "← \(loc.localize("general.back"))", position: CGPoint(x: safeL + 50, y: size.height - 22), name: "btn_back")
+        let backBtn = createButton(text: "← \(loc.localize("general.back"))", position: CGPoint(x: safeL + 60, y: size.height - 40), name: "btn_back")
         addChild(backBtn)
         
         // Title
@@ -74,6 +83,18 @@ class RankingScene: SKScene {
     }
     
     private func displayRanking() {
+        if rankingData.isEmpty {
+            let emptyLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+            emptyLabel.text = "Ranking indisponível. Entre com Google ou Apple para sincronizar sua pontuação."
+            emptyLabel.fontSize = 13
+            emptyLabel.fontColor = SKColor(white: 1, alpha: 0.85)
+            emptyLabel.position = CGPoint(x: size.width / 2, y: size.height / 2)
+            emptyLabel.preferredMaxLayoutWidth = size.width * 0.72
+            emptyLabel.numberOfLines = 0
+            addChild(emptyLabel)
+            return
+        }
+
         let startY = size.height - 100
         let spacing: CGFloat = 25
         
@@ -144,7 +165,7 @@ class RankingScene: SKScene {
         
         if node.name == "btn_back" || node.parent?.name == "btn_back" {
             let scene = MainMenuScene(size: self.size)
-            scene.scaleMode = .aspectFill
+            scene.scaleMode = .resizeFill
             self.view?.presentScene(scene, transition: SKTransition.fade(withDuration: 0.3))
         }
     }

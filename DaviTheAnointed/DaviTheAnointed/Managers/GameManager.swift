@@ -80,8 +80,14 @@ final class GameManager {
 
     // MARK: - Inventory
     func addItemToInventory(_ itemId: String) {
+        guard !ownsItem(itemId) else { return }
         mutate { p in p.inventory.append(itemId) }
         save()
+    }
+
+    func ownsItem(_ itemId: String) -> Bool {
+        guard let player = playerData else { return false }
+        return player.inventory.contains(itemId) || player.equippedItems.values.contains(itemId)
     }
 
     func removeItemFromInventory(_ itemId: String) {
@@ -91,6 +97,32 @@ final class GameManager {
             }
         }
         save()
+    }
+
+    @discardableResult
+    func sellInventoryItem(_ itemId: String) -> Int? {
+        guard let item = EquipmentDatabase.shared.item(withId: itemId),
+              let player = playerData,
+              player.inventory.contains(itemId) else { return nil }
+
+        let sellValue = max(1, item.price / 2)
+        mutate { p in
+            if let idx = p.inventory.firstIndex(of: itemId) {
+                p.inventory.remove(at: idx)
+                p.gold += sellValue
+            }
+        }
+        save()
+        return sellValue
+    }
+
+    func normalizeInventory() {
+        mutate { p in
+            var seen = Set(p.equippedItems.values)
+            p.inventory = p.inventory.filter { itemId in
+                seen.insert(itemId).inserted
+            }
+        }
     }
 
     // MARK: - Equipment
@@ -131,6 +163,7 @@ final class GameManager {
         }
 
         mutate { p in p.powerScore = self.powerScore }
+        normalizeInventory()
         save()
         return previousItemId
     }
@@ -226,16 +259,32 @@ final class GameManager {
         save()
     }
 
+    func recordBattleDefeat(goldEarned: Int, xpEarned: Int, enemiesKilled: Int) {
+        guard goldEarned > 0 || xpEarned > 0 || enemiesKilled > 0 else { return }
+
+        mutate { p in
+            p.gold += goldEarned
+            p.totalGoldEarned += goldEarned
+            p.totalEnemiesKilled += enemiesKilled
+            _ = p.addExperience(xpEarned)
+        }
+
+        let ps = powerScore
+        mutate { p in p.powerScore = ps }
+        save()
+    }
+
     // MARK: - Persistence (MOCKED for Local Test)
     func save() {
         mutate { p in p.lastSaved = Date() }
         guard let data = playerData else { return }
 
-        // Save locally only
         if let encoded = try? JSONEncoder().encode(data) {
             UserDefaults.standard.set(encoded, forKey: "player_data_\(data.userId)")
         }
-        print("[MOCK] Player data saved locally ✓")
+
+        CloudGameService.shared.savePlayer(data)
+        CloudGameService.shared.updateLeaderboard(player: data)
     }
 
     func loadLocal(userId: String) -> PlayerData? {
@@ -247,6 +296,7 @@ final class GameManager {
     func initializePlayer(userId: String, displayName: String, language: GameLanguage) {
         if let existing = loadLocal(userId: userId) {
             playerData = existing
+            normalizeInventory()
         } else {
             var newPlayer = PlayerData.newPlayer(userId: userId, displayName: displayName, language: language)
             newPlayer.inventory.append("weapon_01")
@@ -262,9 +312,33 @@ final class GameManager {
         }
         save()
     }
+
+    func initializePlayerFromAuth(userId: String, displayName: String, language: GameLanguage, completion: @escaping () -> Void) {
+        CloudGameService.shared.loadPlayer(userId: userId) { [weak self] cloudPlayer in
+            guard let self else { return }
+
+            if let cloudPlayer {
+                self.playerData = cloudPlayer
+                self.normalizeInventory()
+                self.save()
+                DispatchQueue.main.async { completion() }
+                return
+            }
+
+            self.initializePlayer(userId: userId, displayName: displayName, language: language)
+            DispatchQueue.main.async { completion() }
+        }
+    }
     
     // Fallback for completion handlers
     func loadFromFirestore(userId: String, completion: @escaping (Bool) -> Void) {
-        completion(false)
+        CloudGameService.shared.loadPlayer(userId: userId) { [weak self] player in
+            if let player {
+                self?.playerData = player
+                completion(true)
+            } else {
+                completion(false)
+            }
+        }
     }
 }

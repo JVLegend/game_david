@@ -3,6 +3,7 @@ import SpriteKit
 class LanguageSelectionScene: SKScene {
 
     override func didMove(to view: SKView) {
+        AudioManager.shared.playMenuMusic()
         backgroundColor = SKColor(red: 0.1, green: 0.1, blue: 0.1, alpha: 1)
         setupUI()
     }
@@ -87,7 +88,7 @@ class LanguageSelectionScene: SKScene {
 
     private func transitionToLogin() {
         let loginScene = LoginScene(size: self.size)
-        loginScene.scaleMode = .aspectFill
+        loginScene.scaleMode = .resizeFill
         let transition = SKTransition.fade(withDuration: 0.5)
         self.view?.presentScene(loginScene, transition: transition)
     }

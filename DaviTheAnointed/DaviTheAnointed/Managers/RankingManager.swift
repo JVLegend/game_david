@@ -13,16 +13,27 @@ final class RankingManager {
     private init() {}
     
     func fetchTopPlayers(completion: @escaping ([RankingEntry]) -> Void) {
-        // Mocked global ranking
-        let mockData = [
-            RankingEntry(userId: "1", displayName: "Davi", powerScore: 5000, level: 50),
-            RankingEntry(userId: "2", displayName: "Golias", powerScore: 4500, level: 45),
-            RankingEntry(userId: "3", displayName: "Saul", powerScore: 4000, level: 40)
-        ]
-        completion(mockData)
+        CloudGameService.shared.fetchTopPlayers { results in
+            if !results.isEmpty {
+                completion(results)
+                return
+            }
+
+            var localResults: [RankingEntry] = []
+            if let player = GameManager.shared.playerData {
+                localResults.append(RankingEntry(
+                    userId: player.userId,
+                    displayName: player.displayName,
+                    powerScore: player.powerScore,
+                    level: player.level
+                ))
+            }
+
+            completion(localResults)
+        }
     }
     
     func updatePlayerScore(player: PlayerData) {
-        print("[MOCK] Ranking update skipped in dev mode.")
+        CloudGameService.shared.updateLeaderboard(player: player)
     }
 }

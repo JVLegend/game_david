@@ -33,7 +33,7 @@ struct PlayerData: Codable {
             language: language,
             level: 1,
             experience: 0,
-            gold: 100,
+            gold: 140,
             rubies: 0,
             activeCharacter: .davi,
             unlockedCharacters: [.davi],

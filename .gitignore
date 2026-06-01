@@ -37,5 +37,18 @@ Podfile.lock
 *.o
 *.d
 
+# Local release/build artifacts
+.asc/
+
+# Local agent/tool configuration
+.claude/
+DaviTheAnointed/.agents/
+DaviTheAnointed/.blitz/
+DaviTheAnointed/.claude/
+DaviTheAnointed/.codex/
+DaviTheAnointed/.mcp.json
+DaviTheAnointed/CLAUDE.md
+DaviTheAnointed/opencode.json
+
 # Sprites (large files tracked separately)
 # sprites/ - keep tracked for now

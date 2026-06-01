@@ -3,6 +3,8 @@ import SpriteKit
 class OverworldScene: SKScene {
 
     private let loc = LocalizationManager.shared
+    private var availableBattleNames = Set<String>()
+    private var selectedMapId: Int = 0
 
     override func didMove(to view: SKView) {
         backgroundColor = SKColor(red: 0.1, green: 0.2, blue: 0.1, alpha: 1)
@@ -10,12 +12,19 @@ class OverworldScene: SKScene {
     }
 
     private func setupUI() {
+        removeAllChildren()
+        availableBattleNames.removeAll()
         guard let player = GameManager.shared.playerData else { return }
-        let currentMap = player.highestMapCompleted + 1
-        let mapDef = EnemyDatabase.shared.map(withId: min(currentMap, 2))
+        let highestAccessibleMap = highestAccessibleMapId(for: player)
+        if selectedMapId == 0 || selectedMapId > highestAccessibleMap {
+            selectedMapId = highestAccessibleMap
+        }
+        selectedMapId = max(1, selectedMapId)
+        AudioManager.shared.playMapMusic(mapId: selectedMapId)
+        let mapDef = EnemyDatabase.shared.map(withId: selectedMapId)
 
         // Background
-        let bg = SKSpriteNode(imageNamed: "background_forest")
+        let bg = SKSpriteNode(imageNamed: mapDef?.backgroundTexture ?? "background_forest")
         bg.size = size
         bg.position = CGPoint(x: size.width / 2, y: size.height / 2)
         bg.zPosition = -10
@@ -28,11 +37,49 @@ class OverworldScene: SKScene {
 
         // Map Title
         let title = SKLabelNode(fontNamed: "AvenirNext-Bold")
-        title.text = mapDef?.localizedName ?? "Map \(currentMap)"
+        title.text = mapDef?.localizedName ?? "Map \(selectedMapId)"
         title.fontSize = 28
         title.fontColor = .white
         title.position = CGPoint(x: size.width / 2, y: size.height - 50)
+
+        let titleShadow = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        titleShadow.text = title.text
+        titleShadow.fontSize = title.fontSize
+        titleShadow.fontColor = .black
+        titleShadow.position = CGPoint(x: 2, y: -2)
+        titleShadow.zPosition = -1
+        titleShadow.alpha = 0.7
+        title.addChild(titleShadow)
         addChild(title)
+
+        let mapNavY = size.height - 88
+        if selectedMapId > 1 {
+            let prevBtn = createButton(
+                text: "← \(loc.localize("map.stage")) \(selectedMapId - 1)",
+                position: CGPoint(x: size.width / 2 - 155, y: mapNavY),
+                name: "btn_map_prev",
+                size: CGSize(width: 142, height: 36)
+            )
+            addChild(prevBtn)
+        }
+
+        let mapIndexLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        mapIndexLabel.text = "\(loc.localize("map.stage")) \(selectedMapId)"
+        mapIndexLabel.fontSize = 14
+        mapIndexLabel.fontColor = SKColor(red: 1, green: 0.86, blue: 0.42, alpha: 1)
+        mapIndexLabel.verticalAlignmentMode = .center
+        mapIndexLabel.position = CGPoint(x: size.width / 2, y: mapNavY)
+        addChild(mapIndexLabel)
+
+        if selectedMapId < highestAccessibleMap {
+            let nextBtn = createButton(
+                text: "\(loc.localize("map.stage")) \(selectedMapId + 1) →",
+                position: CGPoint(x: size.width / 2 + 155, y: mapNavY),
+                name: "btn_map_next",
+                size: CGSize(width: 142, height: 36)
+            )
+            addChild(nextBtn)
+        }
 
         // Gold display
         let goldLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
@@ -41,10 +88,20 @@ class OverworldScene: SKScene {
         goldLabel.fontColor = SKColor(red: 1, green: 0.85, blue: 0.2, alpha: 1)
         goldLabel.horizontalAlignmentMode = .left
         goldLabel.position = CGPoint(x: safeL + 30, y: size.height - 50)
+
+        let goldShadow = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        goldShadow.text = goldLabel.text
+        goldShadow.fontSize = goldLabel.fontSize
+        goldShadow.fontColor = .black
+        goldShadow.horizontalAlignmentMode = .left
+        goldShadow.position = CGPoint(x: 1.5, y: -1.5)
+        goldShadow.zPosition = -1
+        goldShadow.alpha = 0.6
+        goldLabel.addChild(goldShadow)
         addChild(goldLabel)
-        
-        let goldIcon = SKSpriteNode(imageNamed: "icon_gold")
-        goldIcon.size = CGSize(width: 22, height: 22)
+
+        let goldIcon = SKSpriteNode(imageNamed: "menu_icon_gold")
+        goldIcon.size = CGSize(width: 26, height: 26)
         goldIcon.position = CGPoint(x: safeL + 15, y: size.height - 44)
         addChild(goldIcon)
 
@@ -95,6 +152,14 @@ class OverworldScene: SKScene {
         }
     }
 
+    private func highestAccessibleMapId(for player: PlayerData) -> Int {
+        var candidate = max(1, player.highestMapCompleted + 1)
+        while candidate > 1 && EnemyDatabase.shared.map(withId: candidate) == nil {
+            candidate -= 1
+        }
+        return max(1, candidate)
+    }
+
     private func isBattleAvailable(_ battle: BattleDefinition, in map: MapDefinition, player: PlayerData) -> Bool {
         if battle.battleId == 1 { return true }
         let prevBattle = battle.battleId - 1
@@ -113,6 +178,9 @@ class OverworldScene: SKScene {
         if !isAvailable {
             marker.color = .black
             marker.colorBlendFactor = 0.6
+            marker.alpha = 0.65
+        } else if let name = container.name {
+            availableBattleNames.insert(name)
         }
         marker.name = container.name
         container.addChild(marker)
@@ -121,7 +189,7 @@ class OverworldScene: SKScene {
         let numLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
         numLabel.text = battle.isBossBattle ? "BOSS" : "\(battle.battleId)"
         numLabel.fontSize = battle.isBossBattle ? 14 : 18
-        numLabel.fontColor = .white
+        numLabel.fontColor = isAvailable ? .white : SKColor(white: 0.75, alpha: 1)
         numLabel.verticalAlignmentMode = .center
         numLabel.name = container.name
         container.addChild(numLabel)
@@ -130,9 +198,18 @@ class OverworldScene: SKScene {
         let nameLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
         nameLabel.text = battle.localizedName
         nameLabel.fontSize = 12
-        nameLabel.fontColor = .white
+        nameLabel.fontColor = isAvailable ? .white : SKColor(white: 0.65, alpha: 1)
         nameLabel.position = CGPoint(x: 0, y: -sizeVal / 2 - 18)
         container.addChild(nameLabel)
+
+        if !isAvailable {
+            let lock = SKLabelNode(fontNamed: "AvenirNext-Bold")
+            lock.text = "LOCK"
+            lock.fontSize = 10
+            lock.fontColor = SKColor(red: 1, green: 0.75, blue: 0.3, alpha: 1)
+            lock.position = CGPoint(x: 0, y: -sizeVal / 2 - 4)
+            container.addChild(lock)
+        }
 
         // Stars
         if stars > 0 {
@@ -149,22 +226,29 @@ class OverworldScene: SKScene {
         return container
     }
 
-    private func createButton(text: String, position: CGPoint, name: String) -> SKNode {
+    private func createButton(text: String, position: CGPoint, name: String, size: CGSize = CGSize(width: 120, height: 40)) -> SKNode {
         let button = SKSpriteNode(imageNamed: "button_texture")
-        button.size = CGSize(width: 120, height: 40)
+        button.size = size
         button.position = position
         button.name = name
 
         let label = SKLabelNode(fontNamed: "AvenirNext-Bold")
         label.text = text
-        label.fontSize = 14
+        label.fontSize = min(14, size.height * 0.38)
         label.fontColor = .white
         label.verticalAlignmentMode = .center
         label.zPosition = 1
         label.name = name
+        fit(label: label, maxWidth: size.width - 16, minimumSize: 10)
         button.addChild(label)
 
         return button
+    }
+
+    private func fit(label: SKLabelNode, maxWidth: CGFloat, minimumSize: CGFloat) {
+        while label.frame.width > maxWidth && label.fontSize > minimumSize {
+            label.fontSize -= 1
+        }
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -176,6 +260,11 @@ class OverworldScene: SKScene {
             guard let name = node.name else { continue }
 
             if name.hasPrefix("battle_") {
+                guard availableBattleNames.contains(name) else {
+                    showLockedBattleHint()
+                    return
+                }
+
                 let parts = name.split(separator: "_")
                 if parts.count == 3, let mapId = Int(parts[1]), let battleId = Int(parts[2]) {
                     startBattle(mapId: mapId, battleId: battleId)
@@ -184,22 +273,53 @@ class OverworldScene: SKScene {
             }
 
             switch name {
+            case "btn_map_prev":
+                selectedMapId = max(1, selectedMapId - 1)
+                setupUI()
+                return
+            case "btn_map_next":
+                if let player = GameManager.shared.playerData {
+                    selectedMapId = min(highestAccessibleMapId(for: player), selectedMapId + 1)
+                    setupUI()
+                }
+                return
             case "btn_back":
                 let scene = MainMenuScene(size: self.size)
-                scene.scaleMode = .aspectFill
+                scene.scaleMode = .resizeFill
                 self.view?.presentScene(scene, transition: SKTransition.fade(withDuration: 0.3))
             case "btn_shop":
                 let scene = ShopScene(size: self.size)
-                scene.scaleMode = .aspectFill
+                scene.scaleMode = .resizeFill
                 self.view?.presentScene(scene, transition: SKTransition.fade(withDuration: 0.3))
             case "btn_inventory":
                 let scene = InventoryScene(size: self.size)
-                scene.scaleMode = .aspectFill
+                scene.scaleMode = .resizeFill
                 self.view?.presentScene(scene, transition: SKTransition.fade(withDuration: 0.3))
             default:
                 break
             }
         }
+    }
+
+    private func showLockedBattleHint() {
+        childNode(withName: "locked_battle_hint")?.removeFromParent()
+
+        let hint = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        hint.name = "locked_battle_hint"
+        hint.text = "Complete a batalha anterior"
+        hint.fontSize = 16
+        hint.fontColor = SKColor(red: 1, green: 0.8, blue: 0.3, alpha: 1)
+        hint.position = CGPoint(x: size.width / 2, y: size.height * 0.25)
+        hint.zPosition = 50
+        addChild(hint)
+
+        hint.setScale(0.9)
+        hint.run(SKAction.sequence([
+            SKAction.scale(to: 1.0, duration: 0.08),
+            SKAction.wait(forDuration: 0.85),
+            SKAction.fadeOut(withDuration: 0.25),
+            SKAction.removeFromParent()
+        ]))
     }
 
     private func startBattle(mapId: Int, battleId: Int) {
@@ -211,7 +331,7 @@ class OverworldScene: SKScene {
         guard isBattleAvailable(battleDef, in: map, player: player) else { return }
 
         let battleScene = BattleScene(size: self.size)
-        battleScene.scaleMode = .aspectFill
+        battleScene.scaleMode = .resizeFill
         battleScene.mapId = mapId
         battleScene.battleId = battleId
         self.view?.presentScene(battleScene, transition: SKTransition.fade(withDuration: 0.5))

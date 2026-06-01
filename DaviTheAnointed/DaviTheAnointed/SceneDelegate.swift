@@ -14,6 +14,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window.rootViewController = gameVC
         window.makeKeyAndVisible()
         self.window = window
+
+        if #available(iOS 16.0, *) {
+            gameVC.setNeedsUpdateOfSupportedInterfaceOrientations()
+            windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: .landscape)) { error in
+                #if DEBUG
+                print("[UI] Unable to force landscape geometry: \(error.localizedDescription)")
+                #endif
+            }
+        }
+    }
+
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        guard let url = URLContexts.first?.url else { return }
+        _ = AuthManager.shared.handleOpenURL(url)
     }
 
     func sceneWillResignActive(_ scene: UIScene) {

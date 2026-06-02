@@ -319,19 +319,47 @@ final class GameManager {
     }
 
     func initializePlayerFromAuth(userId: String, displayName: String, language: GameLanguage, completion: @escaping () -> Void) {
+        var didFinish = false
+
+        func finishOnce(_ block: @escaping () -> Void) {
+            DispatchQueue.main.async {
+                guard !didFinish else { return }
+                didFinish = true
+                block()
+                completion()
+            }
+        }
+
+        let timeout = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            finishOnce {
+                if let existing = self.loadLocal(userId: userId) {
+                    self.playerData = existing
+                    self.normalizeInventory()
+                    self.save()
+                } else {
+                    self.initializePlayer(userId: userId, displayName: displayName, language: language)
+                }
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4.0, execute: timeout)
+
         CloudGameService.shared.loadPlayer(userId: userId) { [weak self] cloudPlayer in
             guard let self else { return }
+            timeout.cancel()
 
             if let cloudPlayer {
-                self.playerData = cloudPlayer
-                self.normalizeInventory()
-                self.save()
-                DispatchQueue.main.async { completion() }
+                finishOnce {
+                    self.playerData = cloudPlayer
+                    self.normalizeInventory()
+                    self.save()
+                }
                 return
             }
 
-            self.initializePlayer(userId: userId, displayName: displayName, language: language)
-            DispatchQueue.main.async { completion() }
+            finishOnce {
+                self.initializePlayer(userId: userId, displayName: displayName, language: language)
+            }
         }
     }
     

@@ -106,41 +106,7 @@ class BattleScene: SKScene {
 
     private func loadPlayerTextures() {
         let character = GameManager.shared.playerData?.activeCharacter ?? .davi
-        guard character == .davi else {
-            loadRosterPlayerTexture(for: character)
-            return
-        }
-
-        // Row 0 (00-05): idle
-        let prefix = "davi_jovem"
-        playerIdleFrames = (0...5).map { SKTexture(imageNamed: "\(prefix)_\(String(format: "%02d", $0))") }
-        // Pixel walk: wider leg poses from the newer Davi sprite set.
-        let pixelWalk = (0...7).map { SKTexture(imageNamed: "\(prefix)_walk_pixel_\(String(format: "%02d", $0))") }
-        if pixelWalk.allSatisfy({ $0.size().width > 0 }) {
-            playerWalkFrames = pixelWalk
-            return
-        }
-
-        // Grounded walk: same foot baseline across frames, so Davi walks instead of bouncing.
-        let groundedWalk = (0...7).map { SKTexture(imageNamed: "\(prefix)_walk_grounded_\(String(format: "%02d", $0))") }
-        if groundedWalk.allSatisfy({ $0.size().width > 0 }) {
-            playerWalkFrames = groundedWalk
-        } else {
-            // Walk enhanced: longer cycle with stronger leg/hip movement. Falls back to the original row if needed.
-            let enhancedWalk = (0...7).map { SKTexture(imageNamed: "\(prefix)_walk_enhanced_\(String(format: "%02d", $0))") }
-            playerWalkFrames = enhancedWalk.allSatisfy { $0.size().width > 0 }
-                ? enhancedWalk
-                : (6...11).map { SKTexture(imageNamed: "\(prefix)_\(String(format: "%02d", $0))") }
-        }
-        // Row 2 (12-17): attack
-        playerAttackFrames = (12...17).map { SKTexture(imageNamed: "\(prefix)_\(String(format: "%02d", $0))") }
-
-        // Configura texture inicial
-        if let first = playerIdleFrames.first {
-            playerNode.texture = first
-            playerNode.size = CGSize(width: first.size().width / first.size().height * playerHeight,
-                                     height: playerHeight)
-        }
+        loadRosterPlayerTexture(for: character)
     }
 
     private func loadRosterPlayerTexture(for character: PlayableCharacter) {

@@ -579,17 +579,90 @@ class BattleScene: SKScene {
                 meleeSize: CGSize(width: 54, height: 54)
             )
         default:
+            let rangedItem = equippedRangedEquipment()
+            let meleeItem = equippedMeleeEquipment()
             return SkillVisuals(
-                rangedLabel: loc.language == .portuguese ? "PEDRA" : "STONE",
-                rangedIcon: "battle_skill_stone",
+                rangedLabel: rangedItem.map { actionLabel(for: $0) } ?? (loc.language == .portuguese ? "PEDRA" : "STONE"),
+                rangedIcon: rangedItem?.textureName ?? "battle_skill_stone",
                 rangedProjectile: "battle_skill_stone",
-                rangedSize: CGSize(width: 24, height: 24),
-                meleeLabel: loc.language == .portuguese ? "CAJADO" : "STAFF",
-                meleeIcon: "battle_skill_staff",
-                meleeEffect: "battle_skill_staff",
-                meleeSize: CGSize(width: 46, height: 46)
+                rangedSize: rangedItem.map { skillIconSize(for: $0, isRanged: true) } ?? CGSize(width: 24, height: 24),
+                meleeLabel: meleeItem.map { actionLabel(for: $0) } ?? (loc.language == .portuguese ? "CAJADO" : "STAFF"),
+                meleeIcon: meleeItem?.textureName ?? "battle_skill_staff",
+                meleeEffect: meleeItem?.textureName ?? "battle_skill_staff",
+                meleeSize: meleeItem.map { skillIconSize(for: $0, isRanged: false) } ?? CGSize(width: 46, height: 46)
             )
         }
+    }
+
+    private func equippedEquipment(in slot: EquipmentSlot) -> Equipment? {
+        guard let itemId = GameManager.shared.playerData?.equippedItems[slot] else { return nil }
+        return EquipmentDatabase.shared.item(withId: itemId)
+    }
+
+    private func equippedRangedEquipment() -> Equipment? {
+        let candidates = [equippedEquipment(in: .mainHand), equippedEquipment(in: .twoHand)].compactMap { $0 }
+        return candidates.first(where: isRangedEquipment)
+    }
+
+    private func equippedMeleeEquipment() -> Equipment? {
+        let candidates = [equippedEquipment(in: .twoHand), equippedEquipment(in: .mainHand)].compactMap { $0 }
+        return candidates.first { !isSlingEquipment($0) }
+    }
+
+    private func isRangedEquipment(_ item: Equipment) -> Bool {
+        isSlingEquipment(item) || item.nameKey.contains("bow")
+    }
+
+    private func isSlingEquipment(_ item: Equipment) -> Bool {
+        item.id.contains("sling") || item.nameKey.contains("sling") || item.textureName.contains("sling")
+    }
+
+    private func isStaffEquipment(_ item: Equipment) -> Bool {
+        item.nameKey.contains("staff") || item.id.contains("staff")
+    }
+
+    private func actionLabel(for item: Equipment) -> String {
+        if isSlingEquipment(item) {
+            return loc.language == .portuguese ? "FUNDA" : "SLING"
+        }
+        if isStaffEquipment(item) {
+            return loc.language == .portuguese ? "CAJADO" : "STAFF"
+        }
+        if item.nameKey.contains("bow") {
+            return loc.language == .portuguese ? "ARCO" : "BOW"
+        }
+        if item.nameKey.contains("sword") || item.nameKey.contains("blade") || item.nameKey.contains("dagger") || item.nameKey.contains("knife") {
+            return loc.language == .portuguese ? "ESPADA" : "BLADE"
+        }
+        if item.nameKey.contains("spear") || item.nameKey.contains("lance") || item.nameKey.contains("halberd") {
+            return loc.language == .portuguese ? "LANÇA" : "SPEAR"
+        }
+        if item.nameKey.contains("axe") {
+            return loc.language == .portuguese ? "MACHADO" : "AXE"
+        }
+        if item.nameKey.contains("mace") || item.nameKey.contains("club") {
+            return loc.language == .portuguese ? "MAÇA" : "MACE"
+        }
+        return compactActionLabel(from: item.localizedName)
+    }
+
+    private func compactActionLabel(from name: String) -> String {
+        let firstWord = name.components(separatedBy: " ").first ?? name
+        let upper = firstWord.uppercased()
+        return upper.count > 8 ? String(upper.prefix(8)) : upper
+    }
+
+    private func skillIconSize(for item: Equipment, isRanged: Bool) -> CGSize {
+        if isSlingEquipment(item) {
+            return CGSize(width: 42, height: 42)
+        }
+        if isStaffEquipment(item) {
+            return CGSize(width: 48, height: 48)
+        }
+        if item.nameKey.contains("bow") {
+            return CGSize(width: 52, height: 40)
+        }
+        return isRanged ? CGSize(width: 36, height: 36) : CGSize(width: 50, height: 50)
     }
 
     override func didMove(to view: SKView) {
@@ -1180,7 +1253,7 @@ class BattleScene: SKScene {
 
             let label = SKLabelNode(fontNamed: "AvenirNext-Bold")
             label.text = skill.2
-            label.fontSize = 13
+            label.fontSize = skill.2.count > 7 ? 11 : 13
             label.fontColor = SKColor(red: 1, green: 0.86, blue: 0.45, alpha: 1)
             label.horizontalAlignmentMode = .center
             label.verticalAlignmentMode = .center
@@ -2612,6 +2685,9 @@ class BattleScene: SKScene {
             case .bigJ:
                 return loc.language == .portuguese ? "Chute certeiro" : "Clean kick"
             default:
+                if let item = equippedRangedEquipment() {
+                    return loc.language == .portuguese ? "Arremesso com \(item.localizedName)" : "\(item.localizedName) throw"
+                }
                 return loc.language == .portuguese ? "Pedrada certeira" : "Clean stone hit"
             }
         }
@@ -2622,6 +2698,9 @@ class BattleScene: SKScene {
         case .bigJ:
             return loc.language == .portuguese ? "Guarda-sol" : "Beach umbrella"
         default:
+            if let item = equippedMeleeEquipment() {
+                return loc.language == .portuguese ? "Golpe com \(item.localizedName)" : "\(item.localizedName) strike"
+            }
             return loc.language == .portuguese ? "Golpe do cajado" : "Staff strike"
         }
     }

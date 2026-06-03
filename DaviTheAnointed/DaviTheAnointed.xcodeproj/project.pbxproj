@@ -317,6 +317,7 @@
 		C39252884E37CA270A740865 /* music_philistine_land.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 9565293D0CE3300B1E3A341C /* music_philistine_land.m4a */; };
 		C465920794DCFF46E4FE1C1E /* boss_absalom_walk_2.png in Resources */ = {isa = PBXBuildFile; fileRef = E8E1C27F1C8AC4040286AFA9 /* boss_absalom_walk_2.png */; };
 		C5E657BC65A633C984835BE0 /* leao.png in Resources */ = {isa = PBXBuildFile; fileRef = DD3493A60A2CC0B8E1BC7F1F /* leao.png */; };
+		B0551100B0551100B0551102 /* boss_lion.png in Resources */ = {isa = PBXBuildFile; fileRef = B0551100B0551100B0551101 /* boss_lion.png */; };
 		C88F1926605C3619BA2BCE76 /* boss_goliath_walk_3.png in Resources */ = {isa = PBXBuildFile; fileRef = B275F0F925B67958F0D820E8 /* boss_goliath_walk_3.png */; };
 		C8D42B0998E0D182A5BE30A1 /* enemy_philistine_archer_walk_0.png in Resources */ = {isa = PBXBuildFile; fileRef = FA40D3720607C8CD0BC2C3C0 /* enemy_philistine_archer_walk_0.png */; };
 		C9B18705F72496C816B9D00E /* shield_08.png in Resources */ = {isa = PBXBuildFile; fileRef = 453D4652D679051BF860BFEF /* shield_08.png */; };
@@ -844,6 +845,7 @@
 		DCB18F58FA06B989C0FE596C /* enemy_hungry_jackal_walk_0.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = enemy_hungry_jackal_walk_0.png; sourceTree = "<group>"; };
 		DCF20D445F992CC0E6F87A00 /* body_09.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = body_09.png; sourceTree = "<group>"; };
 		DD3493A60A2CC0B8E1BC7F1F /* leao.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = leao.png; sourceTree = "<group>"; };
+		B0551100B0551100B0551101 /* boss_lion.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = boss_lion.png; sourceTree = "<group>"; };
 		DD7562F2D6900D0F647EE96F /* boss_general_walk_2.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = boss_general_walk_2.png; path = boss_general_walk_2.png; sourceTree = "<group>"; };
 		DD7AD906703644008F61F489 /* enemy_bear_cub_walk_2.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = enemy_bear_cub_walk_2.png; sourceTree = "<group>"; };
 		DD8FCD0DC92D1117EB1817D4 /* boss_bear.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = boss_bear.png; sourceTree = "<group>"; };
@@ -1178,6 +1180,7 @@
 				CHARJVFILE0001 /* character_jv.png */,
 				CHARFTFILE0001 /* character_faithtech.png */,
 				DD3493A60A2CC0B8E1BC7F1F /* leao.png */,
+				B0551100B0551100B0551101 /* boss_lion.png */,
 				E57CB6A7FA1037B2482BBCD9 /* pergaminho.png */,
 				DAB50382C382CED33949E56D /* lobocinzento.png */,
 				C2C928429BCD59A83B622F17 /* icon_sling.png */,
@@ -1682,6 +1685,7 @@
 				CHARJVBUILD0001 /* character_jv.png in Resources */,
 				CHARFTBUILD0001 /* character_faithtech.png in Resources */,
 				C5E657BC65A633C984835BE0 /* leao.png in Resources */,
+				B0551100B0551100B0551102 /* boss_lion.png in Resources */,
 				39623FA93830B5D4D50A56C4 /* pergaminho.png in Resources */,
 				16FBC8589CEB3C0D7287A6A0 /* lobocinzento.png in Resources */,
 				D0CEC5EAE8EB104C6B1E0D4E /* icon_sling.png in Resources */,

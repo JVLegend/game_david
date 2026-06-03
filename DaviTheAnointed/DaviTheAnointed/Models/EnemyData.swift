@@ -348,7 +348,7 @@ struct EnemyDatabase {
             armor: 5, attackType: .melee, attackSpeed: 1.0,
             abilities: [EnemyAbility(nameKey: "ability.paw_swipe", descriptionKey: "ability.paw_swipe.desc",
                                      cooldown: 4, damageMultiplier: 1.3, effectType: .none, effectValue: 0, effectDuration: 0)],
-            textureName: "leao", isBoss: true, isSubBoss: false)
+            textureName: "boss_lion", isBoss: true, isSubBoss: false)
 
         bosses["lion_boss"] = BossData(
             enemy: lionEnemy,

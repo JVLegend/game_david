@@ -88,6 +88,27 @@ class BattleScene: SKScene {
         let ring: SKShapeNode
     }
 
+    private enum WeaponFamily {
+        case staff
+        case sling
+        case bow
+        case blade
+        case spear
+        case axe
+        case mace
+        case basic
+    }
+
+    private struct WeaponCombatProfile {
+        let family: WeaponFamily
+        let damageMultiplier: Double
+        let critChanceBonus: Double
+        let critDamageBonus: Double
+        let armorPierce: Int
+        let stunChance: Double
+        let stunDuration: TimeInterval
+    }
+
     // Bonus Cards
     private var bonusCardEffects: [() -> Void] = []
     private var isShowingCards: Bool = false
@@ -609,6 +630,10 @@ class BattleScene: SKScene {
         return candidates.first { !isSlingEquipment($0) }
     }
 
+    private func equippedPrimaryWeapon() -> Equipment? {
+        equippedEquipment(in: .twoHand) ?? equippedEquipment(in: .mainHand)
+    }
+
     private func isRangedEquipment(_ item: Equipment) -> Bool {
         isSlingEquipment(item) || item.nameKey.contains("bow")
     }
@@ -621,29 +646,58 @@ class BattleScene: SKScene {
         item.nameKey.contains("staff") || item.id.contains("staff")
     }
 
+    private func weaponFamily(for item: Equipment?) -> WeaponFamily {
+        guard let item else { return .basic }
+        if isSlingEquipment(item) { return .sling }
+        if isStaffEquipment(item) { return .staff }
+        if item.nameKey.contains("bow") { return .bow }
+        if item.nameKey.contains("sword") || item.nameKey.contains("blade") || item.nameKey.contains("dagger") || item.nameKey.contains("knife") { return .blade }
+        if item.nameKey.contains("spear") || item.nameKey.contains("lance") || item.nameKey.contains("halberd") { return .spear }
+        if item.nameKey.contains("axe") { return .axe }
+        if item.nameKey.contains("mace") || item.nameKey.contains("club") { return .mace }
+        return .basic
+    }
+
+    private func combatProfile(for item: Equipment?) -> WeaponCombatProfile {
+        switch weaponFamily(for: item) {
+        case .staff:
+            return WeaponCombatProfile(family: .staff, damageMultiplier: 1.02, critChanceBonus: 0.00, critDamageBonus: 0.00, armorPierce: 0, stunChance: 0.10, stunDuration: 0.75)
+        case .sling:
+            return WeaponCombatProfile(family: .sling, damageMultiplier: 0.94, critChanceBonus: 0.08, critDamageBonus: 0.10, armorPierce: 4, stunChance: 0.08, stunDuration: 0.45)
+        case .bow:
+            return WeaponCombatProfile(family: .bow, damageMultiplier: 0.98, critChanceBonus: 0.06, critDamageBonus: 0.06, armorPierce: 8, stunChance: 0.03, stunDuration: 0.35)
+        case .blade:
+            return WeaponCombatProfile(family: .blade, damageMultiplier: 1.08, critChanceBonus: 0.04, critDamageBonus: 0.10, armorPierce: 2, stunChance: 0.00, stunDuration: 0)
+        case .spear:
+            return WeaponCombatProfile(family: .spear, damageMultiplier: 1.02, critChanceBonus: 0.02, critDamageBonus: 0.06, armorPierce: 14, stunChance: 0.03, stunDuration: 0.45)
+        case .axe:
+            return WeaponCombatProfile(family: .axe, damageMultiplier: 1.20, critChanceBonus: -0.02, critDamageBonus: 0.18, armorPierce: 6, stunChance: 0.02, stunDuration: 0.35)
+        case .mace:
+            return WeaponCombatProfile(family: .mace, damageMultiplier: 1.12, critChanceBonus: 0.00, critDamageBonus: 0.08, armorPierce: 10, stunChance: 0.12, stunDuration: 0.65)
+        case .basic:
+            return WeaponCombatProfile(family: .basic, damageMultiplier: 1.0, critChanceBonus: 0.00, critDamageBonus: 0.00, armorPierce: 0, stunChance: 0.00, stunDuration: 0)
+        }
+    }
+
     private func actionLabel(for item: Equipment) -> String {
-        if isSlingEquipment(item) {
+        switch weaponFamily(for: item) {
+        case .sling:
             return loc.language == .portuguese ? "FUNDA" : "SLING"
-        }
-        if isStaffEquipment(item) {
+        case .staff:
             return loc.language == .portuguese ? "CAJADO" : "STAFF"
-        }
-        if item.nameKey.contains("bow") {
+        case .bow:
             return loc.language == .portuguese ? "ARCO" : "BOW"
-        }
-        if item.nameKey.contains("sword") || item.nameKey.contains("blade") || item.nameKey.contains("dagger") || item.nameKey.contains("knife") {
+        case .blade:
             return loc.language == .portuguese ? "ESPADA" : "BLADE"
-        }
-        if item.nameKey.contains("spear") || item.nameKey.contains("lance") || item.nameKey.contains("halberd") {
+        case .spear:
             return loc.language == .portuguese ? "LANÇA" : "SPEAR"
-        }
-        if item.nameKey.contains("axe") {
+        case .axe:
             return loc.language == .portuguese ? "MACHADO" : "AXE"
-        }
-        if item.nameKey.contains("mace") || item.nameKey.contains("club") {
+        case .mace:
             return loc.language == .portuguese ? "MAÇA" : "MACE"
+        case .basic:
+            return compactActionLabel(from: item.localizedName)
         }
-        return compactActionLabel(from: item.localizedName)
     }
 
     private func compactActionLabel(from name: String) -> String {
@@ -1694,11 +1748,21 @@ class BattleScene: SKScene {
     }
 
     private func performPlayerAttack(enemy: EnemyData) {
-        let rawDamage = playerStats.rollDamage()
-        let armoredDamage = applyEnemyArmor(rawDamage, against: enemy)
-        let (isCrit, finalDamage) = playerStats.rollCrit(baseDamage: armoredDamage)
+        let weapon = equippedPrimaryWeapon()
+        let profile = combatProfile(for: weapon)
+        let rawDamage = Int(Double(playerStats.rollDamage()) * profile.damageMultiplier)
+        let armoredDamage = applyEnemyArmor(rawDamage, against: enemy, armorPierce: profile.armorPierce)
+        let critChance = min(0.75, max(0, playerStats.critChance + profile.critChanceBonus))
+        let isCrit = Double.random(in: 0...1) < critChance
+        let finalDamage = isCrit
+            ? Int(Double(armoredDamage) * (playerStats.critDamage + profile.critDamageBonus))
+            : armoredDamage
 
         enemyCurrentHP -= finalDamage
+        let stunned = profile.stunChance > 0 && Double.random(in: 0...1) < profile.stunChance
+        if stunned {
+            enemyStunnedTimer = max(enemyStunnedTimer, profile.stunDuration)
+        }
 
         // Life steal
         if playerStats.lifeSteal > 0 {
@@ -1709,7 +1773,12 @@ class BattleScene: SKScene {
 
         // Show damage number
         showDamageNumber(finalDamage, isCrit: isCrit, at: enemyNode.position, isEnemy: true)
-        shakeCamera(strength: isCrit ? 9 : 4)
+        showWeaponImpact(profile: profile, at: enemyNode.position, isCrit: isCrit)
+        if stunned {
+            showCombatToast(loc.language == .portuguese ? "Atordoado pela arma" : "Weapon stun")
+            pulseEnemy(color: SKColor(red: 1.0, green: 0.86, blue: 0.22, alpha: 1))
+        }
+        shakeCamera(strength: isCrit ? 10 : impactShake(for: profile.family))
 
         // Player attack animation
         playAnim("attack", loop: false)
@@ -1721,12 +1790,7 @@ class BattleScene: SKScene {
             playerNode.run(attackAnim)
         }
 
-        // Enemy hit flash
-        let flash = SKAction.sequence([
-            SKAction.colorize(with: .white, colorBlendFactor: 1.0, duration: 0.05),
-            SKAction.colorize(withColorBlendFactor: 0, duration: 0.1),
-        ])
-        enemyNode.run(flash)
+        flashEnemyHit(profile: profile, isCrit: isCrit)
 
         updateEnemyHPBar()
 
@@ -1735,11 +1799,134 @@ class BattleScene: SKScene {
         }
     }
 
-    private func applyEnemyArmor(_ rawDamage: Int, against enemy: EnemyData) -> Int {
-        let effectiveArmor = max(0, enemy.armor + enemyArmorBonus)
+    private func applyEnemyArmor(_ rawDamage: Int, against enemy: EnemyData, armorPierce: Int = 0) -> Int {
+        let effectiveArmor = max(0, enemy.armor + enemyArmorBonus - armorPierce)
         guard effectiveArmor > 0 else { return rawDamage }
         let reduction = Double(effectiveArmor) / (Double(effectiveArmor) + 100.0)
         return max(1, Int(Double(rawDamage) * (1.0 - reduction)))
+    }
+
+    private func impactShake(for family: WeaponFamily) -> CGFloat {
+        switch family {
+        case .axe, .mace:
+            return 7
+        case .spear, .staff:
+            return 5
+        case .sling, .bow:
+            return 4
+        case .blade:
+            return 6
+        case .basic:
+            return 4
+        }
+    }
+
+    private func flashEnemyHit(profile: WeaponCombatProfile, isCrit: Bool) {
+        let color: SKColor
+        switch profile.family {
+        case .staff, .mace:
+            color = SKColor(red: 1.0, green: 0.86, blue: 0.20, alpha: 1)
+        case .sling, .bow:
+            color = SKColor(red: 0.82, green: 0.94, blue: 1.0, alpha: 1)
+        case .spear:
+            color = SKColor(red: 0.70, green: 1.0, blue: 0.74, alpha: 1)
+        case .axe, .blade:
+            color = .white
+        case .basic:
+            color = .white
+        }
+
+        enemyNode.run(SKAction.sequence([
+            SKAction.colorize(with: color, colorBlendFactor: isCrit ? 1.0 : 0.72, duration: 0.05),
+            SKAction.colorize(withColorBlendFactor: 0, duration: 0.12),
+        ]))
+    }
+
+    private func showWeaponImpact(profile: WeaponCombatProfile, at position: CGPoint, isCrit: Bool) {
+        switch profile.family {
+        case .blade:
+            showSlashImpact(at: position, isCrit: isCrit)
+        case .spear:
+            showThrustImpact(at: position, isCrit: isCrit)
+        case .axe, .mace, .staff:
+            showCrushImpact(at: position, color: profile.family == .staff ? SKColor(red: 1.0, green: 0.82, blue: 0.24, alpha: 1) : .white, isCrit: isCrit)
+        case .sling, .bow:
+            showPierceImpact(at: position, isCrit: isCrit)
+        case .basic:
+            showCrushImpact(at: position, color: .white, isCrit: isCrit)
+        }
+    }
+
+    private func showSlashImpact(at position: CGPoint, isCrit: Bool) {
+        for i in 0..<2 {
+            let slash = SKShapeNode(rectOf: CGSize(width: isCrit ? 58 : 44, height: 5), cornerRadius: 2)
+            slash.fillColor = SKColor(red: 1.0, green: 0.92, blue: 0.66, alpha: 0.92)
+            slash.strokeColor = .clear
+            slash.position = CGPoint(x: position.x + CGFloat(i * 10 - 5), y: position.y + 28 + CGFloat(i * 10))
+            slash.zRotation = -0.55 + CGFloat(i) * 0.24
+            slash.zPosition = 80
+            addChild(slash)
+            slash.run(SKAction.sequence([
+                SKAction.group([
+                    SKAction.moveBy(x: 20, y: 10, duration: 0.16),
+                    SKAction.fadeOut(withDuration: 0.16),
+                    SKAction.scale(to: 1.45, duration: 0.16)
+                ]),
+                SKAction.removeFromParent()
+            ]))
+        }
+    }
+
+    private func showThrustImpact(at position: CGPoint, isCrit: Bool) {
+        let line = SKShapeNode(rectOf: CGSize(width: isCrit ? 66 : 52, height: 4), cornerRadius: 2)
+        line.fillColor = SKColor(red: 0.74, green: 1.0, blue: 0.76, alpha: 0.9)
+        line.strokeColor = .clear
+        line.position = CGPoint(x: position.x - 12, y: position.y + 30)
+        line.zRotation = 0.06
+        line.zPosition = 80
+        addChild(line)
+        line.run(SKAction.sequence([
+            SKAction.group([
+                SKAction.moveBy(x: 30, y: 0, duration: 0.14),
+                SKAction.fadeOut(withDuration: 0.14),
+                SKAction.scaleX(to: 1.7, duration: 0.14)
+            ]),
+            SKAction.removeFromParent()
+        ]))
+    }
+
+    private func showCrushImpact(at position: CGPoint, color: SKColor, isCrit: Bool) {
+        let ring = SKShapeNode(circleOfRadius: isCrit ? 28 : 20)
+        ring.fillColor = .clear
+        ring.strokeColor = color
+        ring.lineWidth = isCrit ? 5 : 3
+        ring.position = CGPoint(x: position.x, y: position.y + 28)
+        ring.zPosition = 80
+        addChild(ring)
+        ring.run(SKAction.sequence([
+            SKAction.group([
+                SKAction.scale(to: 1.8, duration: 0.18),
+                SKAction.fadeOut(withDuration: 0.18)
+            ]),
+            SKAction.removeFromParent()
+        ]))
+    }
+
+    private func showPierceImpact(at position: CGPoint, isCrit: Bool) {
+        let burst = SKShapeNode(circleOfRadius: isCrit ? 8 : 6)
+        burst.fillColor = SKColor(red: 0.80, green: 0.95, blue: 1.0, alpha: 0.95)
+        burst.strokeColor = .white
+        burst.lineWidth = 2
+        burst.position = CGPoint(x: position.x + 2, y: position.y + 30)
+        burst.zPosition = 80
+        addChild(burst)
+        burst.run(SKAction.sequence([
+            SKAction.group([
+                SKAction.scale(to: isCrit ? 3.0 : 2.2, duration: 0.16),
+                SKAction.fadeOut(withDuration: 0.16)
+            ]),
+            SKAction.removeFromParent()
+        ]))
     }
 
     private func performEnemyAttack(enemy: EnemyData) {
@@ -2535,10 +2722,14 @@ class BattleScene: SKScene {
         skillLastUsed[name] = now
 
         if name == "Golpe do Cajado" {
-            let damage = applyEnemyArmor(Int(Double(playerStats.rollDamage()) * meleeSkillMultiplier()), against: enemy)
+            let profile = combatProfile(for: equippedMeleeEquipment())
+            let rawDamage = Int(Double(playerStats.rollDamage()) * meleeSkillMultiplier())
+            let damage = applyEnemyArmor(rawDamage, against: enemy, armorPierce: profile.armorPierce)
             enemyCurrentHP -= damage
-            enemyStunnedTimer = meleeStunDuration()
+            enemyStunnedTimer = max(enemyStunnedTimer, meleeStunDuration())
             showDamageNumber(damage, isCrit: false, at: enemyNode.position, isEnemy: true)
+            showWeaponImpact(profile: profile, at: enemyNode.position, isCrit: false)
+            flashEnemyHit(profile: profile, isCrit: false)
             showCombatToast("\(skillToast(for: name)) • \(loc.language == .portuguese ? "Atordoado" : "Stunned")")
 
             // Visual effect: simple lunge
@@ -2558,7 +2749,9 @@ class BattleScene: SKScene {
                 SKAction.colorize(withColorBlendFactor: 0, duration: 0.1)
             ]))
         } else if name == "Pedrada" {
-            let damage = applyEnemyArmor(Int(Double(playerStats.rollDamage()) * rangedSkillMultiplier()), against: enemy)
+            let profile = combatProfile(for: equippedRangedEquipment())
+            let rawDamage = Int(Double(playerStats.rollDamage()) * rangedSkillMultiplier())
+            let damage = applyEnemyArmor(rawDamage, against: enemy, armorPierce: profile.armorPierce)
             enemyCurrentHP -= damage
             var stunned = false
             if Double.random(in: 0...1) < rangedStunChance() {
@@ -2571,6 +2764,8 @@ class BattleScene: SKScene {
                 ]))
             }
             showDamageNumber(damage, isCrit: false, at: enemyNode.position, isEnemy: true)
+            showWeaponImpact(profile: profile, at: enemyNode.position, isCrit: false)
+            flashEnemyHit(profile: profile, isCrit: false)
             showCombatToast(stunned
                 ? "\(skillToast(for: name)) • \(loc.language == .portuguese ? "Atordoado" : "Stunned")"
                 : skillToast(for: name))
@@ -2641,6 +2836,8 @@ class BattleScene: SKScene {
 
     private func rangedSkillMultiplier() -> Double {
         var multiplier = 2.0
+        let profile = combatProfile(for: equippedRangedEquipment())
+        multiplier += max(0, profile.damageMultiplier - 1.0)
         if hasEquippedItem(where: { $0 == "weapon_sling_01" }) { multiplier += 0.25 }
         if hasEquippedItem(where: { $0 == "weapon_sling_02" }) { multiplier += 0.45 }
         if hasEquippedItem(where: { $0.hasPrefix("gloves_") }) { multiplier += 0.15 }
@@ -2653,14 +2850,17 @@ class BattleScene: SKScene {
 
     private func rangedStunChance() -> Double {
         var chance = 0.20
+        chance += combatProfile(for: equippedRangedEquipment()).stunChance
         if hasEquippedItem(where: { $0 == "weapon_sling_01" }) { chance += 0.04 }
         if hasEquippedItem(where: { $0 == "weapon_sling_02" }) { chance += 0.08 }
         if hasEquippedItem(where: { $0 == "gloves_02" || $0 == "gloves_03" }) { chance += 0.06 }
-        return min(0.42, chance)
+        return min(0.50, chance)
     }
 
     private func meleeSkillMultiplier() -> Double {
         var multiplier = 1.5
+        let profile = combatProfile(for: equippedMeleeEquipment())
+        multiplier += max(0, profile.damageMultiplier - 1.0)
         if hasEquippedItem(where: { $0 == "weapon_staff_01" || $0 == "twohand_staff_01" }) { multiplier += 0.18 }
         if hasEquippedItem(where: { $0 == "weapon_staff_02" || $0 == "twohand_staff_02" }) { multiplier += 0.32 }
 
@@ -2671,6 +2871,7 @@ class BattleScene: SKScene {
 
     private func meleeStunDuration() -> TimeInterval {
         var duration: TimeInterval = 1.0
+        duration += combatProfile(for: equippedMeleeEquipment()).stunDuration
         if hasEquippedItem(where: { $0 == "weapon_staff_01" || $0 == "twohand_staff_01" }) { duration += 0.25 }
         if hasEquippedItem(where: { $0 == "weapon_staff_02" || $0 == "twohand_staff_02" }) { duration += 0.45 }
         return duration

@@ -342,7 +342,7 @@ class OverworldScene: SKScene {
         dim.name = "battle_preview_overlay"
         root.addChild(dim)
 
-        let panelSize = CGSize(width: min(460, size.width * 0.76), height: min(286, size.height * 0.78))
+        let panelSize = CGSize(width: min(480, size.width * 0.78), height: min(324, size.height * 0.84))
         let panel = SKShapeNode(rectOf: panelSize, cornerRadius: 14)
         panel.position = CGPoint(x: size.width / 2, y: size.height / 2)
         panel.fillColor = SKColor(red: 0.09, green: 0.065, blue: 0.035, alpha: 0.98)
@@ -363,8 +363,13 @@ class OverworldScene: SKScene {
             : (loc.language == .portuguese ? "Primeira vitória libera progresso" : "First win unlocks progress")
 
         let info = makePreviewLabel(text: "\(difficulty)  •  \(status)", size: 13, color: SKColor(white: 0.92, alpha: 1))
-        info.position = CGPoint(x: 0, y: panelSize.height * 0.25)
+        info.position = CGPoint(x: 0, y: panelSize.height * 0.26)
         panel.addChild(info)
+
+        let powerInfo = previewPowerInfo(for: battle, enemies: enemyData, player: player)
+        let power = makePreviewLabel(text: powerInfo, size: 12, color: SKColor(red: 0.96, green: 0.80, blue: 0.36, alpha: 1), weight: "AvenirNext-Bold")
+        power.position = CGPoint(x: 0, y: panelSize.height * 0.16)
+        panel.addChild(power)
 
         let enemies = makePreviewLabel(
             text: (loc.language == .portuguese ? "Inimigos: " : "Enemies: ") + enemyNames,
@@ -373,7 +378,7 @@ class OverworldScene: SKScene {
         )
         enemies.numberOfLines = 2
         enemies.preferredMaxLayoutWidth = panelSize.width - 54
-        enemies.position = CGPoint(x: 0, y: panelSize.height * 0.10)
+        enemies.position = CGPoint(x: 0, y: panelSize.height * 0.05)
         panel.addChild(enemies)
 
         let rewards = makePreviewLabel(
@@ -382,7 +387,7 @@ class OverworldScene: SKScene {
             color: SKColor(red: 1, green: 0.85, blue: 0.28, alpha: 1),
             weight: "AvenirNext-Bold"
         )
-        rewards.position = CGPoint(x: 0, y: -panelSize.height * 0.05)
+        rewards.position = CGPoint(x: 0, y: -panelSize.height * 0.09)
         panel.addChild(rewards)
 
         let dropNames = battle.possibleDropIds.compactMap { EquipmentDatabase.shared.item(withId: $0)?.localizedName }
@@ -392,12 +397,18 @@ class OverworldScene: SKScene {
         let drops = makePreviewLabel(text: dropText, size: 11, color: SKColor(red: 0.70, green: 0.94, blue: 1, alpha: 1))
         drops.numberOfLines = 2
         drops.preferredMaxLayoutWidth = panelSize.width - 60
-        drops.position = CGPoint(x: 0, y: -panelSize.height * 0.19)
+        drops.position = CGPoint(x: 0, y: -panelSize.height * 0.22)
         panel.addChild(drops)
+
+        let tip = makePreviewLabel(text: previewLoadoutTip(for: battle, enemies: enemyData, player: player), size: 11, color: SKColor(red: 0.78, green: 0.94, blue: 0.72, alpha: 1))
+        tip.numberOfLines = 2
+        tip.preferredMaxLayoutWidth = panelSize.width - 72
+        tip.position = CGPoint(x: 0, y: -panelSize.height * 0.31)
+        panel.addChild(tip)
 
         let start = createButton(
             text: loc.language == .portuguese ? "Iniciar" : "Start",
-            position: CGPoint(x: panelSize.width * 0.23, y: -panelSize.height * 0.37),
+            position: CGPoint(x: panelSize.width * 0.23, y: -panelSize.height * 0.42),
             name: "btn_preview_start",
             size: CGSize(width: 118, height: 38)
         )
@@ -406,7 +417,7 @@ class OverworldScene: SKScene {
         if battleId > 1 && player.starsForBattle(mapId: mapId, battleId: battleId - 1) > 0 {
             let repeatPrev = createButton(
                 text: loc.language == .portuguese ? "Repetir anterior" : "Repeat prev",
-                position: CGPoint(x: -panelSize.width * 0.23, y: -panelSize.height * 0.37),
+                position: CGPoint(x: -panelSize.width * 0.23, y: -panelSize.height * 0.42),
                 name: "btn_preview_repeat_prev",
                 size: CGSize(width: 136, height: 38)
             )
@@ -414,7 +425,7 @@ class OverworldScene: SKScene {
         } else {
             let close = createButton(
                 text: loc.localize("general.close"),
-                position: CGPoint(x: -panelSize.width * 0.23, y: -panelSize.height * 0.37),
+                position: CGPoint(x: -panelSize.width * 0.23, y: -panelSize.height * 0.42),
                 name: "btn_preview_close",
                 size: CGSize(width: 110, height: 38)
             )
@@ -433,11 +444,7 @@ class OverworldScene: SKScene {
     }
 
     private func previewDifficulty(for battle: BattleDefinition, enemies: [EnemyData], player: PlayerData) -> String {
-        let totalHP = enemies.reduce(0) { $0 + $1.hp }
-        let averageDamage = enemies.reduce(0) { $0 + (($1.damageMin + $1.damageMax) / 2) }
-        let pressure = totalHP + averageDamage * 8 + (battle.isBossBattle ? 80 : 0)
-        let playerPower = max(80, player.powerScore + player.level * 18)
-        let ratio = Double(pressure) / Double(playerPower)
+        let ratio = previewPressureRatio(for: battle, enemies: enemies, player: player)
 
         if ratio < 0.75 {
             return loc.language == .portuguese ? "Dificuldade: favorável" : "Difficulty: favorable"
@@ -446,6 +453,46 @@ class OverworldScene: SKScene {
         } else {
             return loc.language == .portuguese ? "Dificuldade: perigosa" : "Difficulty: dangerous"
         }
+    }
+
+    private func previewPressureRatio(for battle: BattleDefinition, enemies: [EnemyData], player: PlayerData) -> Double {
+        let totalHP = enemies.reduce(0) { $0 + $1.hp }
+        let averageDamage = enemies.reduce(0) { $0 + (($1.damageMin + $1.damageMax) / 2) }
+        let pressure = totalHP + averageDamage * 8 + (battle.isBossBattle ? 80 : 0)
+        let playerPower = max(80, player.powerScore + player.level * 18)
+        return Double(pressure) / Double(playerPower)
+    }
+
+    private func previewRecommendedPower(for battle: BattleDefinition, enemies: [EnemyData]) -> Int {
+        let totalHP = enemies.reduce(0) { $0 + $1.hp }
+        let averageDamage = enemies.reduce(0) { $0 + (($1.damageMin + $1.damageMax) / 2) }
+        return max(90, Int(Double(totalHP + averageDamage * 8 + (battle.isBossBattle ? 80 : 0)) * 0.92))
+    }
+
+    private func previewPowerInfo(for battle: BattleDefinition, enemies: [EnemyData], player: PlayerData) -> String {
+        let current = max(80, player.powerScore + player.level * 18)
+        let recommended = previewRecommendedPower(for: battle, enemies: enemies)
+        if loc.language == .portuguese {
+            return "Poder \(current) / recomendado \(recommended)"
+        }
+        return "Power \(current) / recommended \(recommended)"
+    }
+
+    private func previewLoadoutTip(for battle: BattleDefinition, enemies: [EnemyData], player: PlayerData) -> String {
+        let ratio = previewPressureRatio(for: battle, enemies: enemies, player: player)
+        if ratio > 1.15 {
+            return loc.language == .portuguese
+                ? "Dica: repita fases, compre arma/comida e equipe itens melhores."
+                : "Tip: replay stages, buy food/weapons, and equip stronger gear."
+        }
+        if battle.isBossBattle {
+            return loc.language == .portuguese
+                ? "Dica: entre com comida e guarde pedra/arma para interromper o chefe."
+                : "Tip: bring food and save stone/weapon skills to interrupt the boss."
+        }
+        return loc.language == .portuguese
+            ? "Dica: fundas critam mais; cajados e maças ajudam a atordoar."
+            : "Tip: slings crit more; staffs and maces help stun enemies."
     }
 
     private func showLockedBattleHint() {

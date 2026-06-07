@@ -109,6 +109,14 @@ class BattleScene: SKScene {
         let stunDuration: TimeInterval
     }
 
+    private struct BonusCardOption {
+        let build: String
+        let title: String
+        let description: String
+        let accent: SKColor
+        let effect: () -> Void
+    }
+
     // Bonus Cards
     private var bonusCardEffects: [() -> Void] = []
     private var isShowingCards: Bool = false
@@ -1619,43 +1627,95 @@ class BattleScene: SKScene {
         switch enemy.id {
         case "lion_boss":
             triggerBossPhase("lion_roar_70", when: hpRatio <= 0.70) {
-                bossRoar(textPT: "Rugido do leão", textEN: "Lion roar", playerDelay: 1.2)
+                self.telegraphBossAttack(
+                    textPT: "Leão prepara rugido",
+                    textEN: "Lion prepares a roar",
+                    color: SKColor(red: 1.0, green: 0.80, blue: 0.18, alpha: 1)
+                ) { [weak self] in
+                    self?.bossRoar(textPT: "Rugido do leão", textEN: "Lion roar", playerDelay: 1.2)
+                }
             }
             triggerBossPhase("lion_leap_40", when: hpRatio <= 0.40) {
-                bossBurstDamage(multiplier: 1.35, textPT: "Salto feroz", textEN: "Fierce leap", stun: 0.8)
+                self.telegraphBossAttack(
+                    textPT: "Leão prepara salto",
+                    textEN: "Lion prepares a leap",
+                    color: SKColor(red: 1.0, green: 0.33, blue: 0.14, alpha: 1)
+                ) { [weak self] in
+                    self?.bossBurstDamage(multiplier: 1.35, textPT: "Salto feroz", textEN: "Fierce leap", stun: 0.8)
+                }
             }
         case "brown_bear":
             triggerBossPhase("bear_grab_50", when: hpRatio <= 0.50) {
-                bossBurstDamage(multiplier: 1.20, textPT: "Abraço do urso", textEN: "Bear grab", stun: 0.7)
+                self.telegraphBossAttack(
+                    textPT: "Urso avança",
+                    textEN: "Bear charges",
+                    color: SKColor(red: 1.0, green: 0.48, blue: 0.18, alpha: 1)
+                ) { [weak self] in
+                    self?.bossBurstDamage(multiplier: 1.20, textPT: "Abraço do urso", textEN: "Bear grab", stun: 0.7)
+                }
             }
         case "goliath":
             triggerBossPhase("goliath_shield_65", when: hpRatio <= 0.65) {
-                enemyArmorBonus = 28
-                enemyArmorBonusTimer = 5.0
-                showBossPhaseToast(loc.language == .portuguese ? "Escudo de gigante" : "Giant shield")
-                pulseEnemy(color: SKColor(red: 0.45, green: 0.75, blue: 1.0, alpha: 1))
+                self.telegraphBossAttack(
+                    textPT: "Golias levanta escudo",
+                    textEN: "Goliath raises shield",
+                    color: SKColor(red: 0.45, green: 0.75, blue: 1.0, alpha: 1)
+                ) { [weak self] in
+                    guard let self else { return }
+                    self.enemyArmorBonus = 28
+                    self.enemyArmorBonusTimer = 5.0
+                    self.showBossPhaseToast(self.loc.language == .portuguese ? "Escudo de gigante" : "Giant shield")
+                    self.pulseEnemy(color: SKColor(red: 0.45, green: 0.75, blue: 1.0, alpha: 1))
+                }
             }
             triggerBossPhase("goliath_stomp_40", when: hpRatio <= 0.40) {
-                bossBurstDamage(multiplier: 1.55, textPT: "Pisada sísmica", textEN: "Stomping shock", stun: 1.0)
+                self.telegraphBossAttack(
+                    textPT: "Golias ergue o pé",
+                    textEN: "Goliath lifts his foot",
+                    color: SKColor(red: 1.0, green: 0.34, blue: 0.12, alpha: 1)
+                ) { [weak self] in
+                    self?.bossBurstDamage(multiplier: 1.55, textPT: "Pisada sísmica", textEN: "Stomping shock", stun: 1.0)
+                }
             }
             triggerBossPhase("goliath_fury_25", when: hpRatio <= 0.25) {
-                enemyDamageMultiplier = 1.35
-                enemyDamageMultiplierTimer = 10.0
-                showBossPhaseToast(loc.language == .portuguese ? "Fúria de Golias" : "Goliath's fury")
-                pulseEnemy(color: SKColor(red: 1.0, green: 0.28, blue: 0.12, alpha: 1))
+                self.telegraphBossAttack(
+                    textPT: "Golias entra em fúria",
+                    textEN: "Goliath becomes furious",
+                    color: SKColor(red: 1.0, green: 0.28, blue: 0.12, alpha: 1)
+                ) { [weak self] in
+                    guard let self else { return }
+                    self.enemyDamageMultiplier = 1.35
+                    self.enemyDamageMultiplierTimer = 10.0
+                    self.showBossPhaseToast(self.loc.language == .portuguese ? "Fúria de Golias" : "Goliath's fury")
+                    self.pulseEnemy(color: SKColor(red: 1.0, green: 0.28, blue: 0.12, alpha: 1))
+                }
             }
         case "saul_mad":
             triggerBossPhase("saul_fury_50", when: hpRatio <= 0.50) {
-                enemyDamageMultiplier = 1.30
-                enemyDamageMultiplierTimer = 9.0
-                bossRoar(textPT: "Fúria de Saul", textEN: "Saul's fury", playerDelay: 0.8)
+                self.telegraphBossAttack(
+                    textPT: "Saul perde o controle",
+                    textEN: "Saul loses control",
+                    color: SKColor(red: 0.95, green: 0.22, blue: 0.18, alpha: 1)
+                ) { [weak self] in
+                    guard let self else { return }
+                    self.enemyDamageMultiplier = 1.30
+                    self.enemyDamageMultiplierTimer = 9.0
+                    self.bossRoar(textPT: "Fúria de Saul", textEN: "Saul's fury", playerDelay: 0.8)
+                }
             }
         default:
             triggerBossPhase("\(enemy.id)_resolve_50", when: hpRatio <= 0.50) {
-                enemyDamageMultiplier = 1.18
-                enemyDamageMultiplierTimer = 7.0
-                showBossPhaseToast(loc.language == .portuguese ? "Chefe enfurecido" : "Boss enraged")
-                pulseEnemy(color: SKColor(red: 1.0, green: 0.5, blue: 0.18, alpha: 1))
+                self.telegraphBossAttack(
+                    textPT: "Chefe prepara ataque",
+                    textEN: "Boss prepares attack",
+                    color: SKColor(red: 1.0, green: 0.5, blue: 0.18, alpha: 1)
+                ) { [weak self] in
+                    guard let self else { return }
+                    self.enemyDamageMultiplier = 1.18
+                    self.enemyDamageMultiplierTimer = 7.0
+                    self.showBossPhaseToast(self.loc.language == .portuguese ? "Chefe enfurecido" : "Boss enraged")
+                    self.pulseEnemy(color: SKColor(red: 1.0, green: 0.5, blue: 0.18, alpha: 1))
+                }
             }
         }
     }
@@ -1674,6 +1734,7 @@ class BattleScene: SKScene {
     }
 
     private func bossBurstDamage(multiplier: Double, textPT: String, textEN: String, stun: TimeInterval) {
+        guard battleState == .fighting else { return }
         let enemy = currentEnemy
         let base = enemy.map { Int.random(in: $0.damageMin...$0.damageMax) } ?? 8
         let damage = playerStats.applyArmor(rawDamage: Int(Double(base) * multiplier))
@@ -1691,6 +1752,60 @@ class BattleScene: SKScene {
 
     private func showBossPhaseToast(_ text: String) {
         showCombatToast("! \(text)")
+    }
+
+    private func telegraphBossAttack(
+        textPT: String,
+        textEN: String,
+        color: SKColor,
+        delay: TimeInterval = 0.70,
+        action: @escaping () -> Void
+    ) {
+        let text = loc.language == .portuguese ? textPT : textEN
+        hudLayer.childNode(withName: "boss_warning")?.removeFromParent()
+
+        let bannerSize = CGSize(width: min(size.width * 0.56, 360), height: 38)
+        let banner = SKShapeNode(rectOf: bannerSize, cornerRadius: 9)
+        banner.name = "boss_warning"
+        banner.fillColor = SKColor(red: 0.08, green: 0.045, blue: 0.03, alpha: 0.94)
+        banner.strokeColor = color
+        banner.lineWidth = 2
+        banner.position = CGPoint(x: 0, y: size.height / 2 - 76)
+        banner.zPosition = 96
+        hudLayer.addChild(banner)
+
+        let label = SKLabelNode(fontNamed: "AvenirNext-Heavy")
+        label.text = "! \(text)"
+        label.fontSize = 15
+        label.fontColor = SKColor(red: 1.0, green: 0.90, blue: 0.36, alpha: 1)
+        label.verticalAlignmentMode = .center
+        label.numberOfLines = 1
+        label.preferredMaxLayoutWidth = bannerSize.width - 26
+        banner.addChild(label)
+        while label.frame.width > bannerSize.width - 26 && label.fontSize > 11 {
+            label.fontSize -= 0.5
+        }
+
+        let blink = SKAction.sequence([
+            SKAction.fadeAlpha(to: 0.72, duration: 0.10),
+            SKAction.fadeAlpha(to: 1.0, duration: 0.10)
+        ])
+        banner.run(SKAction.sequence([
+            SKAction.repeat(blink, count: 3),
+            SKAction.fadeOut(withDuration: 0.18),
+            SKAction.removeFromParent()
+        ]))
+
+        enemyNode.run(SKAction.sequence([
+            SKAction.colorize(with: color, colorBlendFactor: 0.68, duration: 0.10),
+            SKAction.wait(forDuration: delay),
+            SKAction.colorize(withColorBlendFactor: 0, duration: 0.12),
+            SKAction.run { [weak self] in
+                guard self?.battleState == .fighting else { return }
+                action()
+            }
+        ]), withKey: "bossTelegraph")
+        shakeCamera(strength: 5)
     }
 
     private func pulseEnemy(color: SKColor) {
@@ -2101,29 +2216,7 @@ class BattleScene: SKScene {
         title.zPosition = 3
         overlay.addChild(title)
 
-        struct BonusCardOption {
-            let title: String
-            let description: String
-            let effect: () -> Void
-        }
-
-        let allOptions: [BonusCardOption] = [
-            BonusCardOption(title: loc.localize("battle.blessing.strength"), description: loc.localize("battle.blessing.strength.desc"), effect: {
-                GameManager.shared.addRunBonus(CharacterStats(damageMultiplier: 0.15))
-            }),
-            BonusCardOption(title: loc.localize("battle.blessing.faith_shield"), description: loc.localize("battle.blessing.faith_shield.desc"), effect: {
-                GameManager.shared.addRunBonus(CharacterStats(armor: 10))
-            }),
-            BonusCardOption(title: loc.localize("battle.blessing.swift_hands"), description: loc.localize("battle.blessing.swift_hands.desc"), effect: {
-                GameManager.shared.addRunBonus(CharacterStats(attackSpeedBonus: 0.15))
-            }),
-            BonusCardOption(title: loc.localize("battle.blessing.bronze_skin"), description: loc.localize("battle.blessing.bronze_skin.desc"), effect: {
-                GameManager.shared.addRunBonus(CharacterStats(maxHP: 20))
-            }),
-            BonusCardOption(title: loc.localize("battle.blessing.eagle_eye"), description: loc.localize("battle.blessing.eagle_eye.desc"), effect: {
-                GameManager.shared.addRunBonus(CharacterStats(critChance: 0.10))
-            })
-        ]
+        let allOptions = blessingBuildOptions()
 
         let selected = Array(allOptions.shuffled().prefix(3))
         bonusCardEffects = []
@@ -2140,6 +2233,22 @@ class BattleScene: SKScene {
             cardNode.zPosition = 1
             overlay.addChild(cardNode)
 
+            let build = SKLabelNode(fontNamed: "AvenirNext-Heavy")
+            build.text = card.build.uppercased()
+            build.fontSize = 9.5
+            build.fontColor = card.accent
+            build.numberOfLines = 1
+            build.preferredMaxLayoutWidth = cardW - 52
+            build.horizontalAlignmentMode = .center
+            build.verticalAlignmentMode = .center
+            build.position = CGPoint(x: 0, y: cardH * 0.31)
+            build.zPosition = 2
+            build.name = cardNode.name
+            cardNode.addChild(build)
+            while build.frame.width > cardW - 52 && build.fontSize > 7.5 {
+                build.fontSize -= 0.5
+            }
+
             let t = SKLabelNode(fontNamed: "AvenirNext-Bold")
             let rawTitle = card.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? loc.localize("battle.blessing.fallback") : card.title
             t.text = wrappedCardTitle(rawTitle)
@@ -2150,29 +2259,95 @@ class BattleScene: SKScene {
             t.preferredMaxLayoutWidth = cardW - 42
             t.horizontalAlignmentMode = .center
             t.verticalAlignmentMode = .center
-            t.position = CGPoint(x: 0, y: cardH * 0.18)
+            t.position = CGPoint(x: 0, y: cardH * 0.14)
             t.zPosition = 2
             t.name = cardNode.name
             cardNode.addChild(t)
 
             let d = SKLabelNode(fontNamed: "AvenirNext-Medium")
             d.text = card.description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? loc.localize("battle.blessing.desc_fallback") : card.description
-            d.fontSize = 14
+            d.fontSize = 12.5
             d.fontColor = SKColor(red: 0.24, green: 0.18, blue: 0.12, alpha: 1)
-            d.numberOfLines = 2
+            d.numberOfLines = 3
             d.preferredMaxLayoutWidth = cardW - 44
+            d.lineBreakMode = .byWordWrapping
             d.horizontalAlignmentMode = .center
             d.verticalAlignmentMode = .center
-            d.position = CGPoint(x: 0, y: -cardH * 0.15)
+            d.position = CGPoint(x: 0, y: -cardH * 0.13)
             d.zPosition = 2
             d.name = cardNode.name
             cardNode.addChild(d)
+            while d.frame.width > cardW - 44 && d.fontSize > 10 {
+                d.fontSize -= 0.5
+            }
 
             bonusCardEffects.append(card.effect)
         }
 
         overlay.userData = NSMutableDictionary()
         overlay.userData?["stars"] = stars
+    }
+
+    private func blessingBuildOptions() -> [BonusCardOption] {
+        let isPT = loc.language == .portuguese
+        return [
+            BonusCardOption(
+                build: isPT ? "Build agressiva" : "Aggressive build",
+                title: isPT ? "Bênção de Força" : "Strength Blessing",
+                description: isPT ? "+12% dano em todas as armas." : "+12% damage with every weapon.",
+                accent: SKColor(red: 0.70, green: 0.13, blue: 0.06, alpha: 1),
+                effect: { GameManager.shared.addRunBonus(CharacterStats(damageMultiplier: 0.12)) }
+            ),
+            BonusCardOption(
+                build: isPT ? "Build de pastor" : "Shepherd build",
+                title: isPT ? "Mãos Firmes" : "Steady Hands",
+                description: isPT ? "+8% velocidade e +4 armadura." : "+8% speed and +4 armor.",
+                accent: SKColor(red: 0.38, green: 0.26, blue: 0.10, alpha: 1),
+                effect: { GameManager.shared.addRunBonus(CharacterStats(armor: 4, attackSpeedBonus: 0.08)) }
+            ),
+            BonusCardOption(
+                build: isPT ? "Build de funda" : "Slinger build",
+                title: isPT ? "Olho de Águia" : "Eagle Eye",
+                description: isPT ? "+8% crítico e +12% dano crítico." : "+8% crit and +12% crit damage.",
+                accent: SKColor(red: 0.10, green: 0.37, blue: 0.66, alpha: 1),
+                effect: { GameManager.shared.addRunBonus(CharacterStats(critChance: 0.08, critDamage: 0.12)) }
+            ),
+            BonusCardOption(
+                build: isPT ? "Build tanque" : "Tank build",
+                title: isPT ? "Escudo de Fé" : "Shield of Faith",
+                description: isPT ? "+18 HP máximo e +6 armadura." : "+18 max HP and +6 armor.",
+                accent: SKColor(red: 0.24, green: 0.48, blue: 0.80, alpha: 1),
+                effect: { GameManager.shared.addRunBonus(CharacterStats(maxHP: 18, armor: 6)) }
+            ),
+            BonusCardOption(
+                build: isPT ? "Build resistente" : "Resilient build",
+                title: isPT ? "Pele de Bronze" : "Bronze Skin",
+                description: isPT ? "+26 HP máximo para lutas longas." : "+26 max HP for longer fights.",
+                accent: SKColor(red: 0.58, green: 0.34, blue: 0.10, alpha: 1),
+                effect: { GameManager.shared.addRunBonus(CharacterStats(maxHP: 26)) }
+            ),
+            BonusCardOption(
+                build: isPT ? "Build veloz" : "Swift build",
+                title: isPT ? "Passos Ligeiros" : "Swift Steps",
+                description: isPT ? "+13% velocidade e +3% esquiva." : "+13% speed and +3% dodge.",
+                accent: SKColor(red: 0.18, green: 0.54, blue: 0.28, alpha: 1),
+                effect: { GameManager.shared.addRunBonus(CharacterStats(dodgeMelee: 0.03, dodgeRanged: 0.03, attackSpeedBonus: 0.13)) }
+            ),
+            BonusCardOption(
+                build: isPT ? "Build sustain" : "Sustain build",
+                title: isPT ? "Fôlego Renovado" : "Renewed Breath",
+                description: isPT ? "+10 HP e 4% roubo de vida." : "+10 HP and 4% lifesteal.",
+                accent: SKColor(red: 0.56, green: 0.16, blue: 0.46, alpha: 1),
+                effect: { GameManager.shared.addRunBonus(CharacterStats(maxHP: 10, lifeSteal: 0.04)) }
+            ),
+            BonusCardOption(
+                build: isPT ? "Build precisa" : "Precision build",
+                title: isPT ? "Pedra Certeira" : "True Stone",
+                description: isPT ? "+5% dano e +6% crítico." : "+5% damage and +6% crit.",
+                accent: SKColor(red: 0.30, green: 0.30, blue: 0.34, alpha: 1),
+                effect: { GameManager.shared.addRunBonus(CharacterStats(critChance: 0.06, damageMultiplier: 0.05)) }
+            )
+        ]
     }
 
     private func wrappedCardTitle(_ title: String) -> String {
@@ -2251,8 +2426,8 @@ class BattleScene: SKScene {
 
     private func showEndOverlay(victory: Bool, stars: Int) {
         let overlaySize = CGSize(
-            width: min(size.width * 0.72, 390),
-            height: min(size.height * 0.72, max(226, size.height * 0.58))
+            width: min(size.width * 0.74, 430),
+            height: min(size.height * 0.86, 328)
         )
         let overlay = SKShapeNode(rectOf: overlaySize, cornerRadius: 14)
         overlay.fillColor = SKColor(red: 0.08, green: 0.07, blue: 0.055, alpha: 0.96)
@@ -2277,8 +2452,20 @@ class BattleScene: SKScene {
         titleLabel.text = victory ? loc.localize("hud.victory") : loc.localize("hud.defeat")
         titleLabel.fontSize = 30
         titleLabel.fontColor = victory ? SKColor(red: 1, green: 0.85, blue: 0.2, alpha: 1) : SKColor(red: 1, green: 0.3, blue: 0.3, alpha: 1)
-        titleLabel.position = CGPoint(x: 0, y: overlaySize.height * 0.28)
+        titleLabel.position = CGPoint(x: 0, y: overlaySize.height / 2 - 54)
         overlay.addChild(titleLabel)
+
+        let summaryLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        summaryLabel.text = battleResultSummary(victory: victory, stars: stars)
+        summaryLabel.fontSize = 12.5
+        summaryLabel.fontColor = SKColor(red: 1.0, green: 0.93, blue: 0.72, alpha: 1)
+        summaryLabel.numberOfLines = 2
+        summaryLabel.preferredMaxLayoutWidth = overlaySize.width - 56
+        summaryLabel.lineBreakMode = .byWordWrapping
+        summaryLabel.horizontalAlignmentMode = .center
+        summaryLabel.verticalAlignmentMode = .center
+        summaryLabel.position = CGPoint(x: 0, y: overlaySize.height / 2 - 88)
+        overlay.addChild(summaryLabel)
 
         if victory {
             // Stars
@@ -2287,7 +2474,7 @@ class BattleScene: SKScene {
             starsLabel.text = starsText
             starsLabel.fontSize = 28
             starsLabel.fontColor = SKColor(red: 1, green: 0.85, blue: 0.2, alpha: 1)
-            starsLabel.position = CGPoint(x: 0, y: overlaySize.height * 0.12)
+            starsLabel.position = CGPoint(x: 0, y: overlaySize.height / 2 - 124)
             overlay.addChild(starsLabel)
 
             // Rewards
@@ -2295,12 +2482,14 @@ class BattleScene: SKScene {
             rewardLabel.text = "+\(goldEarned) \(loc.localize("hud.gold"))  |  +\(xpEarned) XP"
             rewardLabel.fontSize = 16
             rewardLabel.fontColor = .white
-            rewardLabel.position = CGPoint(x: 0, y: -overlaySize.height * 0.02)
+            rewardLabel.position = CGPoint(x: 0, y: overlaySize.height / 2 - 154)
             overlay.addChild(rewardLabel)
+
+            addPowerLabel(to: overlay, overlaySize: overlaySize, y: overlaySize.height / 2 - 177)
 
             if !droppedItemNames.isEmpty {
                 let itemLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
-                itemLabel.text = "Item: \(droppedItemNames.prefix(2).joined(separator: ", "))"
+                itemLabel.text = (loc.language == .portuguese ? "Novo item: " : "New item: ") + droppedItemNames.prefix(2).joined(separator: ", ")
                 itemLabel.fontSize = 12
                 itemLabel.fontColor = SKColor(red: 0.75, green: 0.95, blue: 1.0, alpha: 1)
                 itemLabel.numberOfLines = 2
@@ -2308,7 +2497,7 @@ class BattleScene: SKScene {
                 itemLabel.lineBreakMode = .byWordWrapping
                 itemLabel.horizontalAlignmentMode = .center
                 itemLabel.verticalAlignmentMode = .center
-                itemLabel.position = CGPoint(x: 0, y: -overlaySize.height * 0.15)
+                itemLabel.position = CGPoint(x: 0, y: overlaySize.height / 2 - 204)
                 while itemLabel.frame.width > overlaySize.width - 56 && itemLabel.fontSize > 9 {
                     itemLabel.fontSize -= 0.5
                 }
@@ -2324,47 +2513,47 @@ class BattleScene: SKScene {
                     dropHint.preferredMaxLayoutWidth = overlaySize.width - 56
                     dropHint.horizontalAlignmentMode = .center
                     dropHint.verticalAlignmentMode = .center
-                    dropHint.position = CGPoint(x: 0, y: -overlaySize.height * 0.15)
+                    dropHint.position = CGPoint(x: 0, y: overlaySize.height / 2 - 204)
                     overlay.addChild(dropHint)
                 }
             }
-            addMissionRewardLabel(to: overlay, overlaySize: overlaySize, y: -overlaySize.height * 0.25)
+            addMissionRewardLabel(to: overlay, overlaySize: overlaySize, y: overlaySize.height / 2 - 231)
         } else {
             let hintLabel = SKLabelNode(fontNamed: "AvenirNext-Medium")
             hintLabel.text = loc.localize("battle.defeat_hint")
             hintLabel.fontSize = 15
             hintLabel.fontColor = SKColor(white: 0.9, alpha: 1)
-            hintLabel.position = CGPoint(x: 0, y: overlaySize.height * 0.08)
+            hintLabel.position = CGPoint(x: 0, y: overlaySize.height / 2 - 124)
             overlay.addChild(hintLabel)
 
             let rewardLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
             rewardLabel.text = "\(loc.localize("battle.partial_reward")) +\(goldEarned) \(loc.localize("hud.gold"))  |  +\(xpEarned) XP"
             rewardLabel.fontSize = 14
             rewardLabel.fontColor = SKColor(red: 1, green: 0.84, blue: 0.32, alpha: 1)
-            rewardLabel.position = CGPoint(x: 0, y: -overlaySize.height * 0.07)
+            rewardLabel.position = CGPoint(x: 0, y: overlaySize.height / 2 - 154)
             while rewardLabel.frame.width > overlaySize.width - 36 && rewardLabel.fontSize > 10 {
                 rewardLabel.fontSize -= 1
             }
             overlay.addChild(rewardLabel)
-            addMissionRewardLabel(to: overlay, overlaySize: overlaySize, y: -overlaySize.height * 0.20)
+
+            addPowerLabel(to: overlay, overlaySize: overlaySize, y: overlaySize.height / 2 - 181)
+            addMissionRewardLabel(to: overlay, overlaySize: overlaySize, y: overlaySize.height / 2 - 211)
         }
 
         let nextTip = SKLabelNode(fontNamed: "AvenirNext-Medium")
-        nextTip.text = victory
-            ? (loc.language == .portuguese ? "Próximo: escolha uma bênção, equipe drops ou avance no mapa." : "Next: pick a blessing, equip drops, or advance on the map.")
-            : (loc.language == .portuguese ? "Você manteve ouro/XP. Repita a fase ou compre equipamento." : "You kept gold/XP. Replay the stage or buy gear.")
+        nextTip.text = battleResultNextStep(victory: victory, stars: stars)
         nextTip.fontSize = 10.5
         nextTip.fontColor = SKColor(white: 1, alpha: 0.70)
         nextTip.numberOfLines = 2
         nextTip.preferredMaxLayoutWidth = overlaySize.width - 58
         nextTip.horizontalAlignmentMode = .center
         nextTip.verticalAlignmentMode = .center
-        nextTip.position = CGPoint(x: 0, y: -overlaySize.height / 2 + 86)
+        nextTip.position = CGPoint(x: 0, y: -overlaySize.height / 2 + 79)
         overlay.addChild(nextTip)
 
         // Continue button
         let continueBtn = SKNode()
-        continueBtn.position = CGPoint(x: 0, y: -overlaySize.height / 2 + 38)
+        continueBtn.position = CGPoint(x: 0, y: -overlaySize.height / 2 + 36)
         continueBtn.name = "btn_continue_overlay"
 
         let btnShadow = SKShapeNode(rectOf: CGSize(width: 172, height: 46), cornerRadius: 9)
@@ -2394,6 +2583,53 @@ class BattleScene: SKScene {
         continueBtn.addChild(btnLabel)
 
         overlay.addChild(continueBtn)
+    }
+
+    private func battleResultSummary(victory: Bool, stars: Int) -> String {
+        let isPT = loc.language == .portuguese
+        if victory {
+            switch stars {
+            case 3:
+                return isPT ? "Vitória perfeita: vida alta e nenhuma comida usada." : "Perfect win: high HP and no food used."
+            case 2:
+                return isPT ? "Boa vitória: tente guardar comida para buscar 3 estrelas." : "Strong win: save food next time to chase 3 stars."
+            default:
+                return isPT ? "Vitória sofrida: equipe melhorias antes do próximo desafio." : "Close win: equip upgrades before the next challenge."
+            }
+        }
+
+        return isPT
+            ? "Mesmo derrotado, você manteve ouro e XP para fortalecer o personagem."
+            : "Even in defeat, you kept gold and XP to strengthen your character."
+    }
+
+    private func battleResultNextStep(victory: Bool, stars: Int) -> String {
+        let isPT = loc.language == .portuguese
+        if victory {
+            if currentBattleDef?.isBossBattle == true {
+                return isPT ? "Próximo: avance de mapa, ou volte para farmar estrelas e drops." : "Next: move to the next map, or replay for stars and drops."
+            }
+            if stars < 3 {
+                return isPT ? "Próximo: escolha uma bênção e repita para buscar 3 estrelas." : "Next: choose a blessing and replay to chase 3 stars."
+            }
+            return isPT ? "Próximo: escolha uma bênção, equipe drops ou avance no mapa." : "Next: pick a blessing, equip drops, or advance on the map."
+        }
+
+        return isPT
+            ? "Próximo: compre comida/equipamento, ajuste sua build e tente de novo."
+            : "Next: buy food or gear, tune your build, and try again."
+    }
+
+    private func addPowerLabel(to overlay: SKNode, overlaySize: CGSize, y: CGFloat) {
+        let label = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        let prefix = loc.language == .portuguese ? "Poder atual" : "Current power"
+        label.text = "\(prefix): \(GameManager.shared.powerScore)"
+        label.fontSize = 11.5
+        label.fontColor = SKColor(red: 1.0, green: 0.77, blue: 0.30, alpha: 0.95)
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.position = CGPoint(x: 0, y: y)
+        overlay.addChild(label)
     }
 
     private func addMissionRewardLabel(to overlay: SKNode, overlaySize: CGSize, y: CGFloat) {

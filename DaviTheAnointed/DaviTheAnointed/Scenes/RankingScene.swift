@@ -38,6 +38,12 @@ class RankingScene: SKScene {
     private var rankingData: [RankingEntry] = []
     private var loadingLabel: SKLabelNode?
     private var selectedMetric: RankingMetric = .power
+    private var rankingRowsContainer = SKNode()
+    private var scrollOffset: CGFloat = 0
+    private var maxScrollOffset: CGFloat = 0
+    private var lastTouchY: CGFloat?
+    private var didDragRanking = false
+    private let rowSpacing: CGFloat = 30
     
     override func didMove(to view: SKView) {
         backgroundColor = SKColor(red: 0.05, green: 0.05, blue: 0.05, alpha: 1)
@@ -105,6 +111,11 @@ class RankingScene: SKScene {
         scoreHeader.horizontalAlignmentMode = .right
         scoreHeader.position = CGPoint(x: size.width * 0.8, y: headerY)
         addChild(scoreHeader)
+
+        rankingRowsContainer = SKNode()
+        rankingRowsContainer.name = "ranking_rows_container"
+        rankingRowsContainer.zPosition = 2
+        addChild(rankingRowsContainer)
         
         // Loading indicator
         let loading = SKLabelNode(fontNamed: "AvenirNext-Medium")
@@ -126,7 +137,12 @@ class RankingScene: SKScene {
     }
     
     private func displayRanking() {
-        children.filter { $0.name == "ranking_row" || $0.name == "empty_ranking" || $0.name == "score_header" }.forEach { node in
+        rankingRowsContainer.removeAllChildren()
+        scrollOffset = 0
+        maxScrollOffset = 0
+        rankingRowsContainer.position.y = 0
+
+        children.filter { $0.name == "empty_ranking" || $0.name == "score_header" || $0.name == "ranking_scroll_hint" }.forEach { node in
             if node.name == "score_header", let label = node as? SKLabelNode {
                 label.text = selectedMetric.title(language: loc.language).uppercased()
             } else if node.name != "score_header" {
@@ -149,16 +165,20 @@ class RankingScene: SKScene {
 
         let sortedData = rankingData.sorted { selectedMetric.score(for: $0) > selectedMetric.score(for: $1) }
         let startY = size.height - 140
-        let spacing: CGFloat = 25
+        let bottomY = max(34, (view?.safeAreaInsets.bottom ?? 0) + 26)
+        let visibleHeight = max(80, startY - bottomY)
+        let contentHeight = CGFloat(sortedData.count) * rowSpacing
+        maxScrollOffset = max(0, contentHeight - visibleHeight + 8)
         
-        for (index, entry) in sortedData.prefix(12).enumerated() {
-            let y = startY - CGFloat(index) * spacing
+        for (index, entry) in sortedData.enumerated() {
+            let y = startY - CGFloat(index) * rowSpacing
             let row = SKNode()
             row.name = "ranking_row"
-            addChild(row)
+            row.userData = ["baseY": y]
+            rankingRowsContainer.addChild(row)
             
             // Background row
-            let rowBg = SKShapeNode(rectOf: CGSize(width: size.width * 0.7, height: 22), cornerRadius: 4)
+            let rowBg = SKShapeNode(rectOf: CGSize(width: size.width * 0.72, height: 27), cornerRadius: 5)
             rowBg.position = CGPoint(x: size.width / 2, y: y + 4)
             rowBg.fillColor = index % 2 == 0 ? SKColor(white: 1, alpha: 0.05) : .clear
             rowBg.strokeColor = .clear
@@ -197,6 +217,31 @@ class RankingScene: SKScene {
             subLbl.horizontalAlignmentMode = .left
             subLbl.position = CGPoint(x: size.width * 0.3, y: y - 10)
             row.addChild(subLbl)
+        }
+
+        if maxScrollOffset > 0 {
+            let hint = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+            hint.name = "ranking_scroll_hint"
+            hint.text = loc.language == .portuguese ? "Arraste para ver mais" : "Drag to see more"
+            hint.fontSize = 10
+            hint.fontColor = SKColor(white: 1, alpha: 0.55)
+            hint.position = CGPoint(x: size.width / 2, y: bottomY - 12)
+            addChild(hint)
+        }
+
+        updateRankingScroll()
+    }
+
+    private func updateRankingScroll() {
+        scrollOffset = min(max(0, scrollOffset), maxScrollOffset)
+        rankingRowsContainer.position.y = scrollOffset
+
+        let topY = size.height - 124
+        let bottomY = max(30, (view?.safeAreaInsets.bottom ?? 0) + 20)
+        for row in rankingRowsContainer.children where row.name == "ranking_row" {
+            let baseY = row.userData?["baseY"] as? CGFloat ?? row.position.y
+            let visibleY = baseY + scrollOffset
+            row.isHidden = visibleY > topY || visibleY < bottomY
         }
     }
 
@@ -249,6 +294,8 @@ class RankingScene: SKScene {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
+        lastTouchY = location.y
+        didDragRanking = false
         let node = atPoint(location)
         
         let name = node.name ?? node.parent?.name
@@ -265,5 +312,30 @@ class RankingScene: SKScene {
                 displayRanking()
             }
         }
+    }
+
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first,
+              maxScrollOffset > 0,
+              let lastTouchY else { return }
+
+        let location = touch.location(in: self)
+        let deltaY = location.y - lastTouchY
+        if abs(deltaY) > 1 {
+            didDragRanking = true
+        }
+        scrollOffset -= deltaY
+        self.lastTouchY = location.y
+        updateRankingScroll()
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        lastTouchY = nil
+        didDragRanking = false
+    }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        lastTouchY = nil
+        didDragRanking = false
     }
 }

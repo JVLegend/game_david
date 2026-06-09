@@ -1225,9 +1225,28 @@ class BattleScene: SKScene {
         guard let selector = hudLayer.childNode(withName: "//food_selector") else { return }
         guard !foodSlots.isEmpty else {
             selector.alpha = 0.35
-            (selector.childNode(withName: "food_selected_icon") as? SKSpriteNode)?.texture = nil
-            (selector.childNode(withName: "food_selected_heal") as? SKLabelNode)?.text = "NO FOOD"
-            (selector.childNode(withName: "food_selected_name") as? SKLabelNode)?.text = ""
+            if let icon = selector.childNode(withName: "food_selected_icon") as? SKSpriteNode {
+                icon.texture = nil
+                icon.size = .zero
+            }
+            if let healLabel = selector.childNode(withName: "food_selected_heal") as? SKLabelNode {
+                healLabel.text = loc.language == .portuguese ? "Sem comida" : "No food"
+                healLabel.fontSize = loc.language == .portuguese ? 11 : 12
+                healLabel.horizontalAlignmentMode = .center
+                healLabel.position = CGPoint(x: 0, y: 7)
+                while healLabel.frame.width > 86 && healLabel.fontSize > 9 {
+                    healLabel.fontSize -= 0.5
+                }
+            }
+            if let nameLabel = selector.childNode(withName: "food_selected_name") as? SKLabelNode {
+                nameLabel.text = loc.language == .portuguese ? "Compre na loja" : "Buy in shop"
+                nameLabel.fontSize = 8.5
+                nameLabel.horizontalAlignmentMode = .center
+                nameLabel.position = CGPoint(x: 0, y: -12)
+                while nameLabel.frame.width > 86 && nameLabel.fontSize > 7 {
+                    nameLabel.fontSize -= 0.5
+                }
+            }
             (selector.childNode(withName: "food_selected_count") as? SKLabelNode)?.text = ""
             selector.childNode(withName: "food_prev")?.isHidden = true
             selector.childNode(withName: "food_next")?.isHidden = true
@@ -1242,9 +1261,20 @@ class BattleScene: SKScene {
         if let icon = selector.childNode(withName: "food_selected_icon") as? SKSpriteNode {
             icon.texture = SKTexture(imageNamed: food.textureName)
             icon.size = food.type == .barleyBread ? CGSize(width: 46, height: 46) : CGSize(width: 34, height: 34)
+            icon.position = CGPoint(x: -36, y: 2)
         }
-        (selector.childNode(withName: "food_selected_heal") as? SKLabelNode)?.text = "+\(food.healAmount) HP"
-        (selector.childNode(withName: "food_selected_name") as? SKLabelNode)?.text = shortFoodName(food)
+        if let healLabel = selector.childNode(withName: "food_selected_heal") as? SKLabelNode {
+            healLabel.text = "+\(food.healAmount) HP"
+            healLabel.fontSize = 13
+            healLabel.horizontalAlignmentMode = .left
+            healLabel.position = CGPoint(x: -4, y: 13)
+        }
+        if let nameLabel = selector.childNode(withName: "food_selected_name") as? SKLabelNode {
+            nameLabel.text = shortFoodName(food)
+            nameLabel.fontSize = 9
+            nameLabel.horizontalAlignmentMode = .left
+            nameLabel.position = CGPoint(x: -4, y: -7)
+        }
         (selector.childNode(withName: "food_selected_count") as? SKLabelNode)?.text = "x\(count)"
 
         let hasChoices = foodSlots.count > 1
@@ -2235,49 +2265,53 @@ class BattleScene: SKScene {
 
             let build = SKLabelNode(fontNamed: "AvenirNext-Heavy")
             build.text = card.build.uppercased()
-            build.fontSize = 9.5
+            build.fontSize = 9
             build.fontColor = card.accent
             build.numberOfLines = 1
-            build.preferredMaxLayoutWidth = cardW - 52
+            build.preferredMaxLayoutWidth = cardW - 62
             build.horizontalAlignmentMode = .center
             build.verticalAlignmentMode = .center
-            build.position = CGPoint(x: 0, y: cardH * 0.31)
+            build.position = CGPoint(x: 0, y: cardH * 0.28)
             build.zPosition = 2
             build.name = cardNode.name
             cardNode.addChild(build)
-            while build.frame.width > cardW - 52 && build.fontSize > 7.5 {
+            while build.frame.width > cardW - 62 && build.fontSize > 7.5 {
                 build.fontSize -= 0.5
             }
 
             let t = SKLabelNode(fontNamed: "AvenirNext-Bold")
             let rawTitle = card.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? loc.localize("battle.blessing.fallback") : card.title
             t.text = wrappedCardTitle(rawTitle)
-            t.fontSize = 15
+            t.fontSize = 14
             t.fontColor = SKColor(red: 0.12, green: 0.06, blue: 0.015, alpha: 1)
             t.numberOfLines = 2
             t.lineBreakMode = .byWordWrapping
-            t.preferredMaxLayoutWidth = cardW - 42
+            t.preferredMaxLayoutWidth = cardW - 58
             t.horizontalAlignmentMode = .center
             t.verticalAlignmentMode = .center
-            t.position = CGPoint(x: 0, y: cardH * 0.14)
+            t.position = CGPoint(x: 0, y: cardH * 0.105)
             t.zPosition = 2
             t.name = cardNode.name
             cardNode.addChild(t)
+            while (t.frame.width > cardW - 58 || t.frame.height > 38) && t.fontSize > 11 {
+                t.fontSize -= 0.5
+            }
 
             let d = SKLabelNode(fontNamed: "AvenirNext-Medium")
-            d.text = card.description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? loc.localize("battle.blessing.desc_fallback") : card.description
-            d.fontSize = 12.5
+            let rawDescription = card.description.trimmingCharacters(in: .whitespacesAndNewlines)
+            d.text = wrappedBonusDescription(rawDescription.isEmpty ? loc.localize("battle.blessing.desc_fallback") : rawDescription)
+            d.fontSize = 11.2
             d.fontColor = SKColor(red: 0.24, green: 0.18, blue: 0.12, alpha: 1)
-            d.numberOfLines = 3
-            d.preferredMaxLayoutWidth = cardW - 44
+            d.numberOfLines = 4
+            d.preferredMaxLayoutWidth = cardW - 64
             d.lineBreakMode = .byWordWrapping
             d.horizontalAlignmentMode = .center
             d.verticalAlignmentMode = .center
-            d.position = CGPoint(x: 0, y: -cardH * 0.13)
+            d.position = CGPoint(x: 0, y: -cardH * 0.14)
             d.zPosition = 2
             d.name = cardNode.name
             cardNode.addChild(d)
-            while d.frame.width > cardW - 44 && d.fontSize > 10 {
+            while (d.frame.width > cardW - 64 || d.frame.height > 58) && d.fontSize > 8.8 {
                 d.fontSize -= 0.5
             }
 
@@ -2370,6 +2404,20 @@ class BattleScene: SKScene {
         }
 
         return words[..<bestSplit].joined(separator: " ") + "\n" + words[bestSplit...].joined(separator: " ")
+    }
+
+    private func wrappedBonusDescription(_ description: String) -> String {
+        var text = description
+        let separators = [
+            (" e +", "\n+"),
+            (" and +", "\n+"),
+            (" e 4%", "\n4%"),
+            (" and 4%", "\n4%")
+        ]
+        for separator in separators where text.contains(separator.0) {
+            text = text.replacingOccurrences(of: separator.0, with: separator.1)
+        }
+        return text
     }
 
     private func applyBonusCard(index: Int) {
